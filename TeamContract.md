@@ -55,12 +55,6 @@ e) Work Quality
 
 ---
 
-## Decision Making
-
-    Decisions will be made by unanimous vote. If consensus is not reached, we will decide by majority vote.
-
----
-
 ## Conflict resolution
 
 If conflict arises:
