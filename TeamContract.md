@@ -84,10 +84,10 @@ By signing below, we acknowledge that we have read, discussed, and agreed to the
 
 Team Member Signatures:
 
-Theodore Atance
-Raymond Ye
-Kenshin Newk-Fon Hey Tow
-Guanlin Chen
-Prabeer Singh Sohal
-Dean John Blackwell
-Zihao Wang
+Theodore Atance,
+Raymond Ye,
+Kenshin Newk-Fon Hey Tow,
+Guanlin Chen,
+Prabeer Singh Sohal,
+Dean John Blackwell,
+Zihao Wang,
