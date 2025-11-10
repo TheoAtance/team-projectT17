@@ -22,7 +22,7 @@ public class Restaurant {
         this.id = checkNonEmpty(id, "id");
         this.name = checkNonEmpty(id, "name");
         this.address = checkNonEmpty(address, "address");
-        this.rating = rating;
+        this.rating = checkValidRating(rating, "rating");
         this.type = type;
     }
 
@@ -90,7 +90,12 @@ public class Restaurant {
         return content;
     }
 
-
+    public double checkValidRating(double content, String varName){
+        if(content > 5 || content < 0){
+            throw new IllegalArgumentException(varName + "is not within the range 0 - 5");
+        }
+        return content;
+    }
 
     public String checkValidType(String content, String varName){
         return ""; // to be implemented when a set of types is determined
