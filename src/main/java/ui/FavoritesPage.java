@@ -70,20 +70,21 @@ public class FavoritesPage extends JFrame {
                 RestaurantPanel panel = new RestaurantPanel(restaurant);
                 panel.setFavorite(true);
 
-                // Add click handler to remove from favorites
-                panel.addMouseListener(new java.awt.event.MouseAdapter() {
-                    public void mouseClicked(java.awt.event.MouseEvent e) {
-                        // Check if heart icon was clicked (top-right area)
-                        if (e.getX() > panel.getWidth() - 60 && e.getY() < 60) {
-                            int result = JOptionPane.showConfirmDialog(
-                                    FavoritesPage.this,
-                                    "Remove " + restaurant.getName() + " from favorites?",
-                                    "Remove Favorite",
-                                    JOptionPane.YES_NO_OPTION
-                            );
-                            if (result == JOptionPane.YES_OPTION) {
-                                removeFavorite(restaurant);
-                            }
+                // UPDATED: Use the new heart click listener instead of mouse listener
+                panel.setHeartClickListener((clickedRestaurant, newFavoriteState) -> {
+                    if (!newFavoriteState) {
+                        // User wants to remove from favorites (heart was un-filled)
+                        int result = JOptionPane.showConfirmDialog(
+                                FavoritesPage.this,
+                                "Remove " + clickedRestaurant.getName() + " from favorites?",
+                                "Remove Favorite",
+                                JOptionPane.YES_NO_OPTION
+                        );
+                        if (result == JOptionPane.YES_OPTION) {
+                            removeFavorite(clickedRestaurant);
+                        } else {
+                            // Revert the heart state if user cancels
+                            panel.setFavorite(true);
                         }
                     }
                 });

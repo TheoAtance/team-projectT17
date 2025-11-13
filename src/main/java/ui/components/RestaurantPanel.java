@@ -3,6 +3,7 @@ package ui.components;
 import entity.Restaurant;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.Path2D;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 
@@ -14,10 +15,16 @@ public class RestaurantPanel extends JPanel {
     private static final int CARD_HEIGHT = 200;
     private static final int IMAGE_HEIGHT = 140;
     private static final int CORNER_RADIUS = 16;
+    private static final int HEART_SIZE = 30;
 
     private final Restaurant restaurant;
     private BufferedImage restaurantImage;
     private boolean isFavorite = false;
+    private HeartClickListener heartClickListener;
+
+    public interface HeartClickListener {
+        void onHeartClicked(Restaurant restaurant, boolean newFavoriteState);
+    }
 
     public RestaurantPanel(Restaurant restaurant) {
         this.restaurant = restaurant;
@@ -39,10 +46,28 @@ public class RestaurantPanel extends JPanel {
         // Add click listener for the panel
         addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent e) {
-                // Handle card click - could open details view
-                System.out.println("Clicked on: " + restaurant.getName());
+                // Check if heart was clicked
+                int heartX = CARD_WIDTH - 45;
+                int heartY = 15;
+
+                if (e.getX() >= heartX && e.getX() <= heartX + HEART_SIZE &&
+                        e.getY() >= heartY && e.getY() <= heartY + HEART_SIZE) {
+                    // Heart was clicked - toggle favorite state
+                    toggleFavorite();
+                    if (heartClickListener != null) {
+                        heartClickListener.onHeartClicked(restaurant, isFavorite);
+                    }
+                } else {
+                    // Handle card click - could open details view
+                    System.out.println("Clicked on: " + restaurant.getName());
+                }
             }
         });
+    }
+
+    private void toggleFavorite() {
+        isFavorite = !isFavorite;
+        repaint();
     }
 
     @Override
@@ -91,7 +116,7 @@ public class RestaurantPanel extends JPanel {
             drawBadge(g2, discountText, 15, badgeY, new Color(236, 72, 153));
         }
 
-        // Draw heart icon (favorite button)
+        // Draw heart icon (favorite button) - SIMPLIFIED: Clean heart icon
         drawHeartIcon(g2, CARD_WIDTH - 45, 15, isFavorite);
 
         // Draw bottom section with restaurant info
@@ -101,12 +126,26 @@ public class RestaurantPanel extends JPanel {
         // Restaurant name
         g2.setColor(Color.BLACK);
         g2.setFont(new Font("Arial", Font.BOLD, 18));
-        g2.drawString(restaurant.getName(), 15, IMAGE_HEIGHT + 28);
+        String restaurantName = restaurant.getName();
+        FontMetrics nameMetrics = g2.getFontMetrics();
+        int maxNameWidth = CARD_WIDTH - 30;
+
+        if (nameMetrics.stringWidth(restaurantName) > maxNameWidth) {
+            restaurantName = truncateText(restaurantName, nameMetrics, maxNameWidth);
+        }
+        g2.drawString(restaurantName, 15, IMAGE_HEIGHT + 28);
 
         // Cuisine type
         g2.setColor(new Color(156, 163, 175));
         g2.setFont(new Font("Arial", Font.PLAIN, 14));
-        g2.drawString(restaurant.getType(), 15, IMAGE_HEIGHT + 48);
+        String cuisineType = restaurant.getType();
+        FontMetrics cuisineMetrics = g2.getFontMetrics();
+        int maxCuisineWidth = CARD_WIDTH - 30;
+
+        if (cuisineMetrics.stringWidth(cuisineType) > maxCuisineWidth) {
+            cuisineType = truncateText(cuisineType, cuisineMetrics, maxCuisineWidth);
+        }
+        g2.drawString(cuisineType, 15, IMAGE_HEIGHT + 48);
 
         // Rating star and value
         if (restaurant.getRating() > 0) {
@@ -131,6 +170,34 @@ public class RestaurantPanel extends JPanel {
         g2.dispose();
     }
 
+    /**
+     * Helper method to truncate text that's too long with ellipsis
+     */
+    private String truncateText(String text, FontMetrics metrics, int maxWidth) {
+        if (metrics.stringWidth(text) <= maxWidth) {
+            return text;
+        }
+
+        String ellipsis = "...";
+        int ellipsisWidth = metrics.stringWidth(ellipsis);
+
+        int low = 0;
+        int high = text.length();
+
+        while (low < high) {
+            int mid = (low + high) / 2;
+            String candidate = text.substring(0, mid) + ellipsis;
+
+            if (metrics.stringWidth(candidate) < maxWidth) {
+                low = mid + 1;
+            } else {
+                high = mid;
+            }
+        }
+
+        return text.substring(0, low - 1) + ellipsis;
+    }
+
     private void drawBadge(Graphics2D g2, String text, int x, int y, Color color) {
         g2.setColor(color);
         FontMetrics fm = g2.getFontMetrics(new Font("Arial", Font.BOLD, 12));
@@ -146,17 +213,54 @@ public class RestaurantPanel extends JPanel {
     }
 
     private void drawHeartIcon(Graphics2D g2, int x, int y, boolean filled) {
-        int size = 30;
-        g2.setColor(filled ? new Color(236, 72, 153) : Color.WHITE);
-        g2.fillOval(x, y, size, size);
+        // SIMPLIFIED: Clean, recognizable heart icon
+        if (filled) {
+            // Filled heart (pink background, white heart)
+            g2.setColor(new Color(236, 72, 153));
+            g2.fillOval(x, y, HEART_SIZE, HEART_SIZE);
 
-        // Draw heart shape
-        g2.setColor(filled ? Color.WHITE : new Color(236, 72, 153));
-        int hx = x + size / 2;
-        int hy = y + size / 2;
-        int[] xPoints = {hx, hx - 4, hx - 6, hx - 4, hx, hx + 4, hx + 6, hx + 4};
-        int[] yPoints = {hy + 4, hy + 4, hy, hy - 4, hy - 2, hy - 4, hy, hy + 4};
-        g2.fillPolygon(xPoints, yPoints, 8);
+            // Draw white heart shape
+            g2.setColor(Color.WHITE);
+            drawSimpleHeart(g2, x + HEART_SIZE/2, y + HEART_SIZE/2, HEART_SIZE * 0.4);
+        } else {
+            // Outline heart (white background, pink outline, pink heart)
+            g2.setColor(Color.WHITE);
+            g2.fillOval(x, y, HEART_SIZE, HEART_SIZE);
+
+            // Draw pink border
+            g2.setColor(new Color(200, 200, 200));
+            g2.setStroke(new BasicStroke(2));
+            g2.drawOval(x, y, HEART_SIZE, HEART_SIZE);
+
+            // Draw pink heart shape
+            g2.setColor(new Color(236, 72, 153));
+            drawSimpleHeart(g2, x + HEART_SIZE/2, y + HEART_SIZE/2, HEART_SIZE * 0.4);
+        }
+    }
+
+    /**
+     * Draws a simple, clean heart shape that's easily recognizable
+     */
+    private void drawSimpleHeart(Graphics2D g2, double centerX, double centerY, double size) {
+        Path2D heart = new Path2D.Double();
+
+        // Top left curve
+        heart.moveTo(centerX, centerY - size * 0.3);
+        heart.curveTo(
+                centerX - size * 0.5, centerY - size * 0.8,
+                centerX - size, centerY - size * 0.2,
+                centerX, centerY + size * 0.4
+        );
+
+        // Top right curve
+        heart.curveTo(
+                centerX + size, centerY - size * 0.2,
+                centerX + size * 0.5, centerY - size * 0.8,
+                centerX, centerY - size * 0.3
+        );
+
+        heart.closePath();
+        g2.fill(heart);
     }
 
     private void drawStar(Graphics2D g2, int x, int y, Color color) {
@@ -198,6 +302,10 @@ public class RestaurantPanel extends JPanel {
         return restaurant;
     }
 
+    public void setHeartClickListener(HeartClickListener listener) {
+        this.heartClickListener = listener;
+    }
+
     // Demo main method
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
@@ -213,9 +321,18 @@ public class RestaurantPanel extends JPanel {
             Restaurant r3 = new Restaurant("3", "Sushi Master", "789 Pine Rd",
                     "Japanese", 4.8, false, 0);
 
-            frame.add(new RestaurantPanel(r1));
-            frame.add(new RestaurantPanel(r2));
-            frame.add(new RestaurantPanel(r3));
+            RestaurantPanel panel1 = new RestaurantPanel(r1);
+            RestaurantPanel panel2 = new RestaurantPanel(r2);
+            RestaurantPanel panel3 = new RestaurantPanel(r3);
+
+            // Test heart functionality
+            panel1.setHeartClickListener((restaurant, newState) -> {
+                System.out.println(restaurant.getName() + " favorite: " + newState);
+            });
+
+            frame.add(panel1);
+            frame.add(panel2);
+            frame.add(panel3);
 
             frame.pack();
             frame.setLocationRelativeTo(null);
