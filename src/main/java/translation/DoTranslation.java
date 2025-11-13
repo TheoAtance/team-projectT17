@@ -5,13 +5,12 @@ import entity.Review;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/** Utilities for translating content */
+/** Translating content */
 public final class DoTranslation {
     private DoTranslation() {}
-
     /**
-     * Translate the content of reviews into targetLang.
-     * Returns translated strings in the SAME order as the input list.
+     * Translate the content of reviews into targetLanguage.
+     * Returns translated strings in the same order as the input list.
      * ........................................................................
      * Language Supported
      * Source languages (auto-detectable):

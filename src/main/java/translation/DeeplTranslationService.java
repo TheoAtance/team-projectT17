@@ -4,6 +4,12 @@ import com.deepl.api.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * - Translates a list of strings using DeepL and returns results in the same order.
+ * - Auto-detects the source language for each string.
+ * - Optional HTML mode preserves tags (e.g., <b>, <i>) during translation.
+ *
+ **/
 public final class DeeplTranslationService implements TranslationService {
     private final Translator translator;
     private final boolean htmlMode;

@@ -2,6 +2,7 @@ package translation;
 
 import java.util.List;
 
+
 public interface TranslationService {
     List<TranslatedText> translateTexts(List<String> texts, String targetLanguage) throws Exception;
 
