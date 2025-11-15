@@ -79,7 +79,8 @@ public class RestaurantDataImporter{
                     .addHeader("X-Goog-FieldMask",
                             "places.name," +
                                     "places.displayName," +
-                                    "places.types," +
+                                    "places.primaryTypeDisplayName," +
+                                    "places.primaryType," +
                                     "places.nationalPhoneNumber," +
                                     "places.websiteUri," +
                                     "places.formattedAddress," +
