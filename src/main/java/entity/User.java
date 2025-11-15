@@ -18,32 +18,41 @@ public class User {
 
     private List<String> favoriteRestaurantIds;
 
-    private List<String> reviewIds;
-
     /**
      * Constructor used for creating a NEW User during registration.
      * Initializes lists as empty.
+     * @param uid the Unique identifier provided by Firebase Authentication.
+     * @param email Email address used for authentication (Firebase Auth).
+     * @param nickname The user's nickname
+     * @throws IllegalArgumentException if the uid, email and/or nickname is null or empty.
      */
     public User(String uid, String email, String nickname) {
+        if ("".equals(uid) || uid == null) {
+            throw new IllegalArgumentException("Uid cannot be null or empty");
+        }
+        if ("".equals(email) || email == null) {
+            throw new IllegalArgumentException("Email cannot be null or empty");
+        }
+        if ("".equals(nickname) || nickname == null) {
+            throw new IllegalArgumentException("Nickname cannot be null or empty");
+        }
         this.uid = uid;
         this.email = email;
         this.nickname = nickname;
         this.language = "en"; // Default language
         this.favoriteRestaurantIds = new ArrayList<>();
-        this.reviewIds = new ArrayList<>();
     }
 
     /**
      * Constructor used for loading an EXISTING User from Firebase Firestore.
      */
     public User(String uid, String email, String nickname, String language,
-                List<String> favoriteRestaurantIds, List<String> reviewIds) {
+                List<String> favoriteRestaurantIds) {
         this.uid = uid;
         this.email = email;
         this.nickname = nickname;
         this.language = language;
         this.favoriteRestaurantIds = favoriteRestaurantIds;
-        this.reviewIds = reviewIds;
     }
 
     // Getters
@@ -68,9 +77,6 @@ public class User {
         return favoriteRestaurantIds;
     }
 
-    public List<String> getReviewIds() {
-        return reviewIds;
-    }
 
     // Setters
 
@@ -95,15 +101,4 @@ public class User {
     public void removeFavoriteRestaurantId(String restaurantId) {
         this.favoriteRestaurantIds.remove(restaurantId);
     }
-
-    public void addReviewId(String reviewId) {
-        if (!this.reviewIds.contains(reviewId)) {
-            this.reviewIds.add(reviewId);
-        }
-    }
-
-    public void removeReviewId(String reviewId) {
-        this.reviewIds.remove(reviewId);
-    }
 }
-
