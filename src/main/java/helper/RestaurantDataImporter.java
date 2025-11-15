@@ -34,7 +34,7 @@ public class RestaurantDataImporter{
         }
     }
 
-    private static int test = 0;
+    // private static int test = 0;
 
     public static void main(String[] arg) throws Exception {
 
@@ -124,7 +124,7 @@ public class RestaurantDataImporter{
                     for(int i = 0; i < places.length(); i++){
                         JSONObject curPlace = places.getJSONObject(i);
                         String curId = curPlace.getString("name");
-                        test ++;
+                        //test ++;
                         if(!placeById.containsKey(curId)){
                             placeById.put(curId, curPlace);
                         }
@@ -148,11 +148,11 @@ public class RestaurantDataImporter{
 
 
 
-        for(int i = 0; i < restaurants.length();i++){
-            String name = restaurants.getJSONObject(i).getJSONObject("displayName").getString("text");
-            System.out.println(name);
-        }
-        System.out.print(test);
+//        for(int i = 0; i < restaurants.length();i++){
+//            String name = restaurants.getJSONObject(i).getJSONObject("displayName").getString("text");
+//            System.out.println(name);
+//        }
+//        System.out.print(test);
 
     }
 }
