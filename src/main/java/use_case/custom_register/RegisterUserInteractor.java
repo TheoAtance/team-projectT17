@@ -1,0 +1,64 @@
+package use_case.custom_register;
+
+import entity.User;
+import use_case.IAuthGateway;
+import use_case.IUserRepo;
+
+/**
+ * The Interactor for the Register Use Case.
+ */
+public class RegisterUserInteractor implements RegisterInputBoundary {
+
+    private final IAuthGateway authGateway;
+    private final IUserRepo userRepository;
+    private final RegisterOutputBoundary registerPresenter;
+
+    public RegisterUserInteractor(
+            IAuthGateway authGateway,
+            IUserRepo userRepository,
+            RegisterOutputBoundary registerPresenter) {
+        this.authGateway = authGateway;
+        this.userRepository = userRepository;
+        this.registerPresenter = registerPresenter;
+    }
+
+    @Override
+    public void execute(RegisterInputData inputData) {
+        // 1. Validate passwords match
+        if (!inputData.getPassword().equals(inputData.getRepeatPassword())) {
+            registerPresenter.prepareFailView("Passwords do not match.");
+            return;
+        }
+
+        String email = inputData.getEmail();
+        String password = inputData.getPassword();
+        String nickname = inputData.getNickname();
+
+        try {
+            // 2. Create account in Firebase Auth
+            String uid = authGateway.registerWithEmailAndPassword(email, password);
+
+            // 3. Create and save User Entity
+            User newUser = new User(uid, email, nickname);
+
+            try {
+                userRepository.save(newUser);
+            } catch (RuntimeException e) {
+                // Failed to save profile after successful auth
+                registerPresenter.prepareFailView("Registration failed: Could not save user profile.");
+                return;
+            }
+
+            // 4. Success
+            RegisterOutputData outputData = new RegisterOutputData(
+                    newUser.getNickname(),
+                    true,
+                    newUser.getUid()
+            );
+            registerPresenter.prepareSuccessView(outputData);
+
+        } catch (RuntimeException e) {
+            registerPresenter.prepareFailView("Registration failed: " + e.getMessage());
+        }
+    }
+}

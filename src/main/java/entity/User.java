@@ -31,7 +31,7 @@ public class User {
             throw new IllegalArgumentException("Uid cannot be null or empty");
         }
         if ("".equals(email) || email == null) {
-            throw new IllegalArgumentException("Password cannot be null or empty");
+            throw new IllegalArgumentException("Email cannot be null or empty");
         }
         if ("".equals(nickname) || nickname == null) {
             throw new IllegalArgumentException("Nickname cannot be null or empty");
