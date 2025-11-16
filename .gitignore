@@ -37,3 +37,8 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+# ===================================
+# FIREBASE CREDENTIALS - DO NOT COMMIT
+# ===================================
+service-account-key.json
