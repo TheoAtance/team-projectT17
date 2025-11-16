@@ -36,7 +36,10 @@ build/
 
 ### Mac OS ###
 .DS_Store
-/.idea/vcs.xml
-/.idea/misc.xml
-/.idea/encodings.xml
+
 /token.txt
+
+# ===================================
+# FIREBASE CREDENTIALS - DO NOT COMMIT
+# ===================================
+service-account-key.json
