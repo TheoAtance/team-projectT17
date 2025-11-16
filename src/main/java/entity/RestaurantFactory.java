@@ -9,7 +9,14 @@ import java.util.*;
  */
 public class RestaurantFactory {
 
+    /**
+     * Create restaurant object with give JSONObject containing restaurant data
+     * @param restaurant JSONObject containing restaurant data
+     * @return a restaurant obj created by calling restaurant builder
+     */
     public Restaurant create(JSONObject restaurant){
+
+
         String id = restaurant.getString("name");
         String name = restaurant.getJSONObject("displayName").getString("text");
         String address = restaurant.getString("formattedAddress");
@@ -39,6 +46,7 @@ public class RestaurantFactory {
         for(int i = 0;i < jsonPhotos.length();i++){
                 photoIds.add(jsonPhotos.getJSONObject(i).getString("name"));
         }
+
 
         return new Restaurant.Builder()
                 .id(id)
