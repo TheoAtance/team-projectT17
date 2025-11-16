@@ -150,6 +150,8 @@ public class RestaurantDataImporter{
         Path folder = Path.of("src", "main", "java", "data");
         Files.createDirectories(folder);               // create if missing
 
+
+        // Version control (create new file with date without overwriting pre-existing file
         int counter = 1;
         String baseName = "restaurant";
         String extension = ".json";
@@ -160,8 +162,6 @@ public class RestaurantDataImporter{
             file = folder.resolve(baseName + "_" + formatted + "(" + counter + ")" + extension);
             counter++;
         }
-
-
 
         Files.writeString(file, restaurants.toString(2));
 
