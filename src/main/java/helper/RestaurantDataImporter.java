@@ -9,6 +9,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 
@@ -89,7 +91,6 @@ public class RestaurantDataImporter{
                                     "places.userRatingCount," +
                                     "places.regularOpeningHours," +
                                     "places.photos," +
-                                    "places.generativeSummary," +
                                     "places.googleMapsLinks," +
                                     "places.priceRange," +
                                     "nextPageToken"
@@ -127,6 +128,8 @@ public class RestaurantDataImporter{
                         String curId = curPlace.getString("name");
                         //test ++;
                         if(!placeById.containsKey(curId)){
+                            curPlace.put("rating", 0);
+                            curPlace.put("userRatingCount", 0);
                             placeById.put(curId, curPlace);
                         }
                     }
@@ -139,11 +142,26 @@ public class RestaurantDataImporter{
 
         JSONArray restaurants = new JSONArray(placeById.values());
 
+        LocalDate today = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd-yy");
+
+        String formatted = today.format(formatter);
 
         Path folder = Path.of("src", "main", "java", "data");
         Files.createDirectories(folder);               // create if missing
 
-        Path file = folder.resolve("restaurant.json");
+        int counter = 1;
+        String baseName = "restaurant";
+        String extension = ".json";
+
+        Path file = folder.resolve(baseName + "_" + formatted + extension);
+
+        while (Files.exists(file)) {
+            file = folder.resolve(baseName + "_" + formatted + "(" + counter + ")" + extension);
+            counter++;
+        }
+
+
 
         Files.writeString(file, restaurants.toString(2));
 
