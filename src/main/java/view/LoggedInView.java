@@ -21,6 +21,7 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
     private final JLabel welcomeLabel;
     private final JLabel uidLabel;
     private final JButton logoutButton;
+    private final JButton filterViewButton;
 
     private LogoutController logoutController;
 
@@ -52,6 +53,17 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
             }
         });
 
+        filterViewButton = new JButton("Filter");
+        filterViewButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        filterViewButton.addActionListener(evt -> {
+//            if (logoutController != null) {
+//                logoutController.execute();
+//            } else {
+                JOptionPane.showMessageDialog(this, "Filter button.");
+//            }
+        });
+
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         this.add(Box.createVerticalStrut(50));
         this.add(title);
@@ -61,6 +73,9 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         this.add(uidLabel);
         this.add(Box.createVerticalStrut(30));
         this.add(logoutButton);
+
+        this.add(Box.createVerticalStrut(30));
+        this.add(filterViewButton);
 
         // Initialize with current state
         updateView(loggedInViewModel.getState());
