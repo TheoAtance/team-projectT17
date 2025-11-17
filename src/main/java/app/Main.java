@@ -37,6 +37,7 @@ public class Main {
         appBuilder.addLoginView();
         appBuilder.addRegisterView();
         appBuilder.addLoggedInView();
+        appBuilder.addFilterView();
 
         // Set initial view
         viewManagerModel.setState("login"); // Start at login screen
