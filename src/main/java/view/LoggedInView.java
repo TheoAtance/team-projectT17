@@ -57,11 +57,11 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         filterViewButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         filterViewButton.addActionListener(evt -> {
-//            if (logoutController != null) {
-//                logoutController.execute();
-//            } else {
+              if (filterCo != null) {
+                  logoutController.execute();
+              } else {
                 JOptionPane.showMessageDialog(this, "Filter button.");
-//            }
+              }
         });
 
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
