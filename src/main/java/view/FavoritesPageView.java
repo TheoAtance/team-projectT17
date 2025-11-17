@@ -7,15 +7,14 @@ import interface_adapter.favorites.RemoveFavoriteController;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 /**
  * The View for the Favorites Use Case.
+ * Uses RestaurantPanel components to display favorite restaurants.
  */
-public class FavoritesView extends JFrame implements PropertyChangeListener {
+public class FavoritesPageView extends JFrame implements PropertyChangeListener {
 
     public static final String VIEW_NAME = "favorites";
 
@@ -29,7 +28,7 @@ public class FavoritesView extends JFrame implements PropertyChangeListener {
     private GetFavoritesController getFavoritesController;
     private RemoveFavoriteController removeFavoriteController;
 
-    public FavoritesView(FavoritesViewModel favoritesViewModel, String userId) {
+    public FavoritesPageView(FavoritesViewModel favoritesViewModel, String userId) {
         this.favoritesViewModel = favoritesViewModel;
         this.userId = userId;
 
@@ -118,7 +117,7 @@ public class FavoritesView extends JFrame implements PropertyChangeListener {
             restaurantsContainer.setBackground(new Color(249, 250, 251));
 
             for (FavoritesState.RestaurantDisplayData restaurantData : state.getRestaurants()) {
-                final JPanel panel = createRestaurantPanel(restaurantData);
+                final RestaurantPanel panel = createRestaurantPanel(restaurantData);
                 restaurantsContainer.add(panel);
             }
         }
@@ -127,58 +126,60 @@ public class FavoritesView extends JFrame implements PropertyChangeListener {
         restaurantsContainer.repaint();
     }
 
-    private JPanel createRestaurantPanel(FavoritesState.RestaurantDisplayData restaurantData) {
-        final JPanel panel = new JPanel();
-        panel.setLayout(new BorderLayout());
-        panel.setPreferredSize(new Dimension(280, 200));
-        panel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1, true));
-        panel.setBackground(Color.WHITE);
+    private RestaurantPanel createRestaurantPanel(FavoritesState.RestaurantDisplayData restaurantData) {
+        // Convert FavoritesState data to RestaurantPanel data
+        RestaurantPanel.RestaurantDisplayData panelData = convertToRestaurantPanelData(restaurantData);
 
-        final JLabel nameLabel = new JLabel(restaurantData.getName());
-        nameLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        nameLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 5, 10));
+        // Create the RestaurantPanel
+        RestaurantPanel restaurantPanel = new RestaurantPanel(panelData);
 
-        final JLabel typeLabel = new JLabel(restaurantData.getType());
-        typeLabel.setFont(new Font("Arial", Font.PLAIN, 12));
-        typeLabel.setForeground(Color.GRAY);
-        typeLabel.setBorder(BorderFactory.createEmptyBorder(0, 10, 5, 10));
+        // Set as favorite since we're in favorites page
+        restaurantPanel.setFavorite(true);
 
-        final JLabel ratingLabel = new JLabel("⭐ " + restaurantData.getRating());
-        ratingLabel.setFont(new Font("Arial", Font.PLAIN, 12));
-        ratingLabel.setBorder(BorderFactory.createEmptyBorder(0, 10, 5, 10));
-
-        final JPanel infoPanel = new JPanel();
-        infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
-        infoPanel.setBackground(Color.WHITE);
-        infoPanel.add(nameLabel);
-        infoPanel.add(typeLabel);
-        infoPanel.add(ratingLabel);
-
-        if (restaurantData.hasDiscount()) {
-            final JLabel discountLabel = new JLabel("💳 " + restaurantData.getDiscount());
-            discountLabel.setFont(new Font("Arial", Font.BOLD, 12));
-            discountLabel.setForeground(new Color(236, 72, 153));
-            discountLabel.setBorder(BorderFactory.createEmptyBorder(0, 10, 5, 10));
-            infoPanel.add(discountLabel);
-        }
-
-        final JButton removeButton = new JButton("Remove ❤️");
-        removeButton.setBackground(new Color(239, 68, 68));
-        removeButton.setForeground(Color.WHITE);
-        removeButton.setFocusPainted(false);
-        removeButton.setBorderPainted(false);
-
-        removeButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+        // Set up heart click listener to handle removal
+        restaurantPanel.setHeartClickListener((restaurantId, newFavoriteState) -> {
+            if (!newFavoriteState) {
                 handleRemoveFavorite(restaurantData);
+            } else {
+                // If somehow they favorite it again, just keep it as favorite
+                restaurantPanel.setFavorite(true);
             }
         });
 
-        panel.add(infoPanel, BorderLayout.CENTER);
-        panel.add(removeButton, BorderLayout.SOUTH);
+        return restaurantPanel;
+    }
 
-        return panel;
+    private RestaurantPanel.RestaurantDisplayData convertToRestaurantPanelData(FavoritesState.RestaurantDisplayData data) {
+        // Parse rating from String to double
+        double rating;
+        try {
+            rating = Double.parseDouble(data.getRating());
+        } catch (NumberFormatException e) {
+            rating = 0.0;
+        }
+
+        // Parse discount value from percentage string to double
+        double discountValue = 0.0;
+        if (data.hasDiscount() && data.getDiscount() != null && !data.getDiscount().isEmpty()) {
+            try {
+                // Extract number from discount string (e.g., "15% off" -> 0.15)
+                String discountStr = data.getDiscount().replaceAll("[^0-9.]", "");
+                if (!discountStr.isEmpty()) {
+                    discountValue = Double.parseDouble(discountStr) / 100.0;
+                }
+            } catch (NumberFormatException e) {
+                discountValue = 0.0;
+            }
+        }
+
+        return new RestaurantPanel.RestaurantDisplayData(
+                data.getId(),
+                data.getName(),
+                data.getType(),
+                rating,
+                data.hasDiscount(),
+                discountValue
+        );
     }
 
     private void handleRemoveFavorite(FavoritesState.RestaurantDisplayData restaurantData) {
@@ -192,7 +193,10 @@ public class FavoritesView extends JFrame implements PropertyChangeListener {
 
         if (result == JOptionPane.YES_OPTION) {
             if (removeFavoriteController != null) {
+                // Call the controller to remove from backend
                 removeFavoriteController.execute(userId, restaurantData.getId());
+                // IMMEDIATELY reload favorites to refresh the display - just like your old code
+                loadFavorites();
             } else {
                 JOptionPane.showMessageDialog(this,
                         "Remove Favorite Controller not initialized.",
@@ -248,7 +252,6 @@ public class FavoritesView extends JFrame implements PropertyChangeListener {
         if (success != null && !success.isEmpty()) {
             JOptionPane.showMessageDialog(this, success, "Success", JOptionPane.INFORMATION_MESSAGE);
             state.setSuccessMessage("");
-            loadFavorites();
         }
     }
 
