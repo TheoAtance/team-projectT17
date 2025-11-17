@@ -1,6 +1,7 @@
 package ui;
 
 import entity.Restaurant;
+import entity.User;
 import ui.components.RestaurantPanel;
 
 import javax.swing.*;
@@ -9,16 +10,39 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FavoritesPage extends JFrame {
-    private final JPanel restaurantsContainer;
-    private List<Restaurant> favoriteRestaurants;
+    private JPanel restaurantsContainer; // REMOVED 'final' keyword
+    private User currentUser;
+    private List<Restaurant> allRestaurants;
 
-    public FavoritesPage() {
-        setTitle("Favorite Restaurants");
+    // Callback interface to notify when user data changes
+    public interface UserUpdateListener {
+        void onUserUpdated(User updatedUser);
+    }
+    private UserUpdateListener userUpdateListener;
+
+    public FavoritesPage(User currentUser, List<Restaurant> allRestaurants) {
+        this.currentUser = currentUser;
+        this.allRestaurants = allRestaurants;
+
+        initializeUI();
+        loadFavorites();
+    }
+
+    public FavoritesPage(User currentUser, List<Restaurant> allRestaurants, UserUpdateListener listener) {
+        this.currentUser = currentUser;
+        this.allRestaurants = allRestaurants;
+        this.userUpdateListener = listener;
+
+        initializeUI();
+        loadFavorites();
+    }
+
+    private void initializeUI() {
+        setTitle("Favorite Restaurants - " + currentUser.getNickname());
         setSize(900, 600);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
-
-        favoriteRestaurants = new ArrayList<>();
+        setLocationRelativeTo(null); // Center the window
 
         // Header
         JPanel headerPanel = new JPanel(new BorderLayout());
@@ -29,11 +53,17 @@ public class FavoritesPage extends JFrame {
         titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
         headerPanel.add(titleLabel, BorderLayout.WEST);
 
+        // Add user info
+        JLabel userLabel = new JLabel("User: " + currentUser.getNickname());
+        userLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        userLabel.setForeground(Color.GRAY);
+        headerPanel.add(userLabel, BorderLayout.EAST);
+
         add(headerPanel, BorderLayout.NORTH);
 
-        // Main content area with scroll
-        restaurantsContainer = new JPanel();
-        restaurantsContainer.setLayout(new GridLayout(0, 3, 20, 20)); // 3 columns
+        // Main content area with scroll - INITIALIZE restaurantsContainer here
+        restaurantsContainer = new JPanel(); // This is where it gets initialized
+        restaurantsContainer.setLayout(new GridLayout(0, 3, 20, 20));
         restaurantsContainer.setBackground(new Color(249, 250, 251));
         restaurantsContainer.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
@@ -44,44 +74,40 @@ public class FavoritesPage extends JFrame {
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
         add(scrollPane, BorderLayout.CENTER);
-
-        // Load favorites (this would come from your data layer)
-        loadFavorites();
     }
 
     /**
-     * Load favorite restaurants and display them.
-     * In a real app, this would fetch from your data access layer.
+     * Load favorite restaurants from user's favoriteRestaurantIds
      */
     private void loadFavorites() {
-        // Clear existing panels
         restaurantsContainer.removeAll();
-
-        // CRITICAL FIX: Always reset to GridLayout when showing restaurants
         restaurantsContainer.setLayout(new GridLayout(0, 3, 20, 20));
         restaurantsContainer.setBackground(new Color(249, 250, 251));
+
+        List<Restaurant> favoriteRestaurants = getFavoriteRestaurantsFromUser();
 
         if (favoriteRestaurants.isEmpty()) {
             showEmptyState();
         } else {
-            System.out.println("Loading " + favoriteRestaurants.size() + " favorites"); // Debug line
+            // Update window title with count
+            setTitle("Favorite Restaurants (" + favoriteRestaurants.size() + ") - " + currentUser.getNickname());
 
             for (Restaurant restaurant : favoriteRestaurants) {
                 RestaurantPanel panel = new RestaurantPanel(restaurant);
                 panel.setFavorite(true);
 
-                // UPDATED: Use the new heart click listener instead of mouse listener
+                // Add heart click listener to remove from user's favorites
                 panel.setHeartClickListener((clickedRestaurant, newFavoriteState) -> {
                     if (!newFavoriteState) {
-                        // User wants to remove from favorites (heart was un-filled)
                         int result = JOptionPane.showConfirmDialog(
                                 FavoritesPage.this,
                                 "Remove " + clickedRestaurant.getName() + " from favorites?",
                                 "Remove Favorite",
-                                JOptionPane.YES_NO_OPTION
+                                JOptionPane.YES_NO_OPTION,
+                                JOptionPane.QUESTION_MESSAGE
                         );
                         if (result == JOptionPane.YES_OPTION) {
-                            removeFavorite(clickedRestaurant);
+                            removeFavoriteFromUser(clickedRestaurant);
                         } else {
                             // Revert the heart state if user cancels
                             panel.setFavorite(true);
@@ -98,9 +124,50 @@ public class FavoritesPage extends JFrame {
     }
 
     /**
-     * Show empty state when no favorites exist.
+     * Convert user's favorite restaurant IDs to actual Restaurant objects
+     */
+    private List<Restaurant> getFavoriteRestaurantsFromUser() {
+        List<Restaurant> favorites = new ArrayList<>();
+        for (String restaurantId : currentUser.getFavoriteRestaurantIds()) {
+            // Find the restaurant in allRestaurants by ID
+            for (Restaurant restaurant : allRestaurants) {
+                if (restaurant.getId().equals(restaurantId)) {
+                    favorites.add(restaurant);
+                    break;
+                }
+            }
+        }
+        return favorites;
+    }
+
+    /**
+     * Remove restaurant from user's favorites and notify listener
+     */
+    private void removeFavoriteFromUser(Restaurant restaurant) {
+        // Remove from user's favorite list
+        currentUser.removeFavoriteRestaurantId(restaurant.getId());
+
+        // Notify listener about user update
+        if (userUpdateListener != null) {
+            userUpdateListener.onUserUpdated(currentUser);
+        }
+
+        // Reload the display
+        loadFavorites();
+
+        // Show confirmation
+        JOptionPane.showMessageDialog(this,
+                restaurant.getName() + " removed from favorites!",
+                "Favorite Updated",
+                JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    /**
+     * Show empty state when no favorites exist
      */
     private void showEmptyState() {
+        setTitle("Favorite Restaurants (0) - " + currentUser.getNickname());
+
         restaurantsContainer.setLayout(new BorderLayout());
         restaurantsContainer.setBackground(new Color(249, 250, 251));
 
@@ -133,64 +200,62 @@ public class FavoritesPage extends JFrame {
     }
 
     /**
-     * Add a restaurant to favorites.
+     * Update the page with a new user object
      */
-    public void addFavorite(Restaurant restaurant) {
-        favoriteRestaurants.add(restaurant);
+    public void updateUser(User updatedUser) {
+        this.currentUser = updatedUser;
+        setTitle("Favorite Restaurants - " + currentUser.getNickname());
         loadFavorites();
     }
 
     /**
-     * Remove a restaurant from favorites.
+     * Set the user update listener
      */
-    public void removeFavorite(Restaurant restaurant) {
-        favoriteRestaurants.remove(restaurant);
-        loadFavorites();
+    public void setUserUpdateListener(UserUpdateListener listener) {
+        this.userUpdateListener = listener;
     }
 
     /**
-     * Set the list of favorite restaurants (used when loading from database).
+     * Get the current user (in case you need to access updated user data)
      */
-    public void setFavorites(List<Restaurant> restaurants) {
-        this.favoriteRestaurants = new ArrayList<>(restaurants);
-        loadFavorites();
+    public User getCurrentUser() {
+        return currentUser;
     }
 
-    /**
-     * Get the current list of favorite restaurants.
-     */
-    public List<Restaurant> getFavorites() {
-        return new ArrayList<>(favoriteRestaurants);
-    }
-
-    // Temporary launcher for development
+    // Demo main method to test the functionality
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            FavoritesPage page = new FavoritesPage();
+            // Create a sample user with some favorites
+            User demoUser = new User("user123", "john@example.com", "John Doe");
+            demoUser.addFavoriteRestaurantId("1");
+            demoUser.addFavoriteRestaurantId("3");
+            demoUser.addFavoriteRestaurantId("5");
 
-            // Add some sample favorites for testing
-            Restaurant r1 = new Restaurant("1", "Sweet Tooth Café", "123 Main St",
-                    "Desserts", 3.6, true, 0.15);
-            Restaurant r2 = new Restaurant("2", "Pizza Paradise", "456 Oak Ave",
-                    "Italian", 4.2, true, 0.10);
-            Restaurant r3 = new Restaurant("3", "Sushi Master", "789 Pine Rd",
-                    "Japanese", 4.8, false, 0);
-            Restaurant r4 = new Restaurant("4", "Burger Joint", "321 Elm St",
-                    "American", 4.5, true, 0.20);
-            Restaurant r5 = new Restaurant("5", "Taco Fiesta", "654 Maple Dr",
-                    "Mexican", 4.3, true, 0.12);
+            // Create sample restaurants
+            List<Restaurant> allRestaurants = new ArrayList<>();
+            allRestaurants.add(new Restaurant("1", "Sweet Tooth Café", "123 Main St",
+                    "Desserts", 3.6, true, 0.15));
+            allRestaurants.add(new Restaurant("2", "Pizza Paradise", "456 Oak Ave",
+                    "Italian", 4.2, true, 0.10));
+            allRestaurants.add(new Restaurant("3", "Sushi Master", "789 Pine Rd",
+                    "Japanese", 4.8, false, 0));
+            allRestaurants.add(new Restaurant("4", "Burger Joint", "321 Elm St",
+                    "American", 4.5, true, 0.20));
+            allRestaurants.add(new Restaurant("5", "Taco Fiesta", "654 Maple Dr",
+                    "Mexican", 4.3, true, 0.12));
 
-            // Use setFavorites instead of multiple addFavorite calls
-            List<Restaurant> favorites = new ArrayList<>();
-            favorites.add(r1);
-            favorites.add(r2);
-            favorites.add(r3);
-            favorites.add(r4);
-            favorites.add(r5);
+            // Create the favorites page with user and restaurants
+            FavoritesPage favoritesPage = new FavoritesPage(demoUser, allRestaurants,
+                    new FavoritesPage.UserUpdateListener() {
+                        @Override
+                        public void onUserUpdated(User updatedUser) {
+                            System.out.println("User favorites updated!");
+                            System.out.println("Current favorites: " + updatedUser.getFavoriteRestaurantIds());
+                            // Here you would typically save to your database
+                        }
+                    });
 
-            page.setFavorites(favorites);
-
-            page.setVisible(true);
+            favoritesPage.setVisible(true);
         });
     }
 }
