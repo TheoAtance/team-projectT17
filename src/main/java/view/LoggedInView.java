@@ -1,5 +1,6 @@
 package view;
 
+import interface_adapter.ViewManagerModel;
 import interface_adapter.logged_in.LoggedInState;
 import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.logout.LogoutController;
@@ -14,16 +15,15 @@ import java.beans.PropertyChangeListener;
  * Shows user information and provides logout functionality.
  */
 public class LoggedInView extends JPanel implements PropertyChangeListener {
-
     public static final String VIEW_NAME = "logged in";
     private final LoggedInViewModel loggedInViewModel;
-
     private final JLabel welcomeLabel;
     private final JLabel uidLabel;
     private final JButton logoutButton;
     private final JButton filterViewButton;
 
     private LogoutController logoutController;
+    private ViewManagerModel viewManagerModel;
 
     public LoggedInView(LoggedInViewModel loggedInViewModel) {
         this.loggedInViewModel = loggedInViewModel;
@@ -44,7 +44,6 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
 
         logoutButton = new JButton("Logout");
         logoutButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-
         logoutButton.addActionListener(evt -> {
             if (logoutController != null) {
                 logoutController.execute();
@@ -53,15 +52,15 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
             }
         });
 
-        filterViewButton = new JButton("Filter");
+        filterViewButton = new JButton("Filter Restaurants");
         filterViewButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-
         filterViewButton.addActionListener(evt -> {
-              if (filterCo != null) {
-                  logoutController.execute();
-              } else {
-                JOptionPane.showMessageDialog(this, "Filter button.");
-              }
+            if (viewManagerModel != null) {
+                viewManagerModel.setState("filter");
+                viewManagerModel.firePropertyChange();
+            } else {
+                JOptionPane.showMessageDialog(this, "View Manager not initialized.");
+            }
         });
 
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -72,10 +71,9 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         this.add(Box.createVerticalStrut(10));
         this.add(uidLabel);
         this.add(Box.createVerticalStrut(30));
-        this.add(logoutButton);
-
-        this.add(Box.createVerticalStrut(30));
         this.add(filterViewButton);
+        this.add(Box.createVerticalStrut(10));
+        this.add(logoutButton);
 
         // Initialize with current state
         updateView(loggedInViewModel.getState());
@@ -105,8 +103,11 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         return VIEW_NAME;
     }
 
-    // Added setter
     public void setLogoutController(LogoutController logoutController) {
         this.logoutController = logoutController;
+    }
+
+    public void setViewManagerModel(ViewManagerModel viewManagerModel) {
+        this.viewManagerModel = viewManagerModel;
     }
 }
