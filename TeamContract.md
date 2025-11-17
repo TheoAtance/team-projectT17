@@ -12,7 +12,7 @@ Once you have all agreed on the contents of the team contract, make a PR to merg
 
 ## Purpose of this Contract
 
-This contract sets out shared expectations and commitments for how our team will collaborate during the course. It is designed to promote accountability, professionalism, and mutual support as we complete individual preparation, readiness assurance tests, in-class activities, and our course project.
+This contract sets out shared expectations and commitments fo cor how our team will collaborate during theurse. It is designed to promote accountability, professionalism, and mutual support as we complete individual preparation, readiness assurance tests, in-class activities, and our course project.
 
 ---
 
