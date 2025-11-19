@@ -3,6 +3,7 @@ package data_access;
 import entity.Restaurant;
 import entity.RestaurantFactory;
 import use_case.filter.IRestaurantDataAccess;
+import use_case.view_restaurant.ViewRestaurantDataAccessInterface;
 import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -14,7 +15,8 @@ import org.json.JSONObject;
 /**
  * DAO for restaurant data implemented with json file to persist data
  */
-public class JsonRestaurantDataAccessObject implements IRestaurantDataAccess {
+public class JsonRestaurantDataAccessObject implements IRestaurantDataAccess,
+        ViewRestaurantDataAccessInterface {
     private final Map<String, Restaurant> restaurantById = new HashMap<>();
 
     /**
@@ -64,12 +66,19 @@ public class JsonRestaurantDataAccessObject implements IRestaurantDataAccess {
                 .toArray(String[]::new);
     }
 
+
     /**
-     * For debugging
+     * Get restaurant with given id
+     * @param id id of the restaurant to look up
+     * @return restaurant that corresponds to given id
      */
-    public void printAllNames() {
-        for (Restaurant restaurant : restaurantById.values()) {
-            System.out.println(restaurant.getName());
-        }
+    @Override
+    public Restaurant get(String id) {
+        return restaurantById.get(id);
+    }
+
+    @Override
+    public boolean existById(String id){
+        return restaurantById.containsKey(id);
     }
 }
