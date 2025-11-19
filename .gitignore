@@ -38,6 +38,7 @@ build/
 ### Mac OS ###
 .DS_Store
 
+# Token for google places api
 /token.txt
 
 # ===================================
