@@ -19,4 +19,10 @@ public interface IRestaurantDataAccess {
      * @return array of unique restaurant types
      */
     String[] getAllRestaurantTypes();
+
+    /**
+     * Get all restaurants in the data source.
+     * @return list of all restaurant objects
+     */
+    List<Restaurant> getAllRestaurants();
 }
