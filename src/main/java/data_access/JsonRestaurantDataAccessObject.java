@@ -65,6 +65,15 @@ public class JsonRestaurantDataAccessObject implements IRestaurantDataAccess {
     }
 
     /**
+     * Get all restaurants in data JSON.
+     * @return list of restaurant objects.
+     */
+    @Override
+    public List<Restaurant> getAllRestaurants() {
+        return new ArrayList<>(restaurantById.values());
+    }
+
+    /**
      * For debugging
      */
     public void printAllNames() {
