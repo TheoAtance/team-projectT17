@@ -118,27 +118,6 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
 
         this.add(Box.createVerticalStrut(30));
         this.add(restaurantSection);
-//
-//        // setup search listener
-//        searchField.getDocument().addDocumentListener(new DocumentListener() {
-//            @Override
-//            public void insertUpdate(DocumentEvent e) { filterRestaurants(); }
-//            @Override
-//            public void removeUpdate(DocumentEvent e) { filterRestaurants(); }
-//            @Override
-//            public void changedUpdate(DocumentEvent e) { filterRestaurants(); }
-//
-//            private void filterRestaurants() {
-//                if (allRestaurants == null) return;
-//
-//                String query = searchField.getText().trim().toLowerCase();
-//                List<Restaurant> filtered = allRestaurants.stream()
-//                        .filter(r -> r.getName().toLowerCase().contains(query))
-//                        .toList();
-//
-//                restaurantListView.updateRestaurants(filtered, heartListener);
-//            }
-//        });
 
         // Initialize with current state
         updateView(loggedInViewModel.getState());

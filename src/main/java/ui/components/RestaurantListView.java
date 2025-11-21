@@ -20,11 +20,21 @@ public class RestaurantListView extends JPanel {
 
     public RestaurantListView(List<Restaurant> restaurants, HeartClickListener heartListener) {
         setLayout(new BorderLayout());
-        contentPanel = new JPanel();
-        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
-        contentPanel.setBackground(Color.WHITE);
 
-        scrollPane = new JScrollPane(contentPanel);
+        // Main content panel with GridLayout for 3-column grid
+        contentPanel = new JPanel();
+        contentPanel.setOpaque(false); // let wrapper background show through
+        contentPanel.setLayout(new GridLayout(0, 3, 15, 15)); // dynamic rows, 3 columns, 15px spacing
+
+        // Wrapper panel to center grid and provide margin & background
+        JPanel wrapper = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+        wrapper.setBackground(Color.WHITE); // match the list search background
+        int margin = 15;
+        wrapper.setBorder(BorderFactory.createEmptyBorder(margin, margin, margin, margin));
+        wrapper.add(contentPanel);
+
+        // Scroll pane
+        scrollPane = new JScrollPane(wrapper);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
@@ -38,12 +48,15 @@ public class RestaurantListView extends JPanel {
 
         for (Restaurant restaurant : restaurants) {
             RestaurantPanel panel = new RestaurantPanel(restaurant);
+
+            // Optional padding inside each card
+            panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
             if (heartListener != null) {
                 panel.setHeartClickListener((r, newState) -> heartListener.onHeartClicked(r, newState));
             }
-            panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
             contentPanel.add(panel);
-            contentPanel.add(Box.createVerticalStrut(15)); // spacing between cards
         }
 
         contentPanel.revalidate();

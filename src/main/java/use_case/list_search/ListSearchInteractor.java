@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 public class ListSearchInteractor implements ListSearchInputBoundary {  // <--- implement interface
     private final IRestaurantDataAccess restaurantDataAccess;
     private final ListSearchOutputBoundary outputBoundary;
-    private final int maxVisibleRestaurants = 10;
+    private final int maxVisibleRestaurants = 200;
 
     public ListSearchInteractor(IRestaurantDataAccess restaurantDataAccess,
                                 ListSearchOutputBoundary outputBoundary) {
@@ -25,7 +25,7 @@ public class ListSearchInteractor implements ListSearchInputBoundary {  // <--- 
             List<Restaurant> allRestaurants = restaurantDataAccess.getAllRestaurants();
 
             List<Restaurant> filtered = allRestaurants.stream()
-                    .filter(r -> r.getName().toLowerCase().contains(query.toLowerCase()))
+                    .filter(r -> r.getName().toLowerCase().startsWith(query.toLowerCase()))
                     .sorted(Comparator.comparingDouble(this::ratingToReviewRatio).reversed())
                     .limit(maxVisibleRestaurants)
                     .collect(Collectors.toList());
