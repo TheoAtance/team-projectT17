@@ -9,12 +9,12 @@ import java.util.List;
 public interface ListSearchInputBoundary {
     /**
      * Execute the search for restaurants based on a query string.
-     * @param query the search text entered by the user
+     * @param inputData the search text entered by the user
      */
-    void search(String query);
+    void search(ListSearchInputData inputData);
 
     /**
-     * Optional: get all restaurants (for initial display or reset)
+     * Get all restaurants (for initial display or reset)
      * @return list of all restaurants
      */
     List<Restaurant> getAllRestaurants();

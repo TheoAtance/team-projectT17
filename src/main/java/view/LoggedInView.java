@@ -4,6 +4,7 @@ import interface_adapter.ViewManagerModel;
 import interface_adapter.logged_in.LoggedInState;
 import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.logout.LogoutController;
+import interface_adapter.list_search.ListSearchController;
 import ui.components.RestaurantListView;
 import entity.Restaurant;
 
@@ -34,6 +35,8 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
     private RestaurantListView restaurantListView; // scrollable restaurant list
     private List<Restaurant> allRestaurants; // all restaurants from interactor
     private RestaurantListView.HeartClickListener heartListener; // heart click callback
+
+    private ListSearchController searchController;
 
     public LoggedInView(LoggedInViewModel loggedInViewModel) {
         this.loggedInViewModel = loggedInViewModel;
@@ -115,27 +118,27 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
 
         this.add(Box.createVerticalStrut(30));
         this.add(restaurantSection);
-
-        // setup search listener
-        searchField.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) { filterRestaurants(); }
-            @Override
-            public void removeUpdate(DocumentEvent e) { filterRestaurants(); }
-            @Override
-            public void changedUpdate(DocumentEvent e) { filterRestaurants(); }
-
-            private void filterRestaurants() {
-                if (allRestaurants == null) return;
-
-                String query = searchField.getText().trim().toLowerCase();
-                List<Restaurant> filtered = allRestaurants.stream()
-                        .filter(r -> r.getName().toLowerCase().contains(query))
-                        .toList();
-
-                restaurantListView.updateRestaurants(filtered, heartListener);
-            }
-        });
+//
+//        // setup search listener
+//        searchField.getDocument().addDocumentListener(new DocumentListener() {
+//            @Override
+//            public void insertUpdate(DocumentEvent e) { filterRestaurants(); }
+//            @Override
+//            public void removeUpdate(DocumentEvent e) { filterRestaurants(); }
+//            @Override
+//            public void changedUpdate(DocumentEvent e) { filterRestaurants(); }
+//
+//            private void filterRestaurants() {
+//                if (allRestaurants == null) return;
+//
+//                String query = searchField.getText().trim().toLowerCase();
+//                List<Restaurant> filtered = allRestaurants.stream()
+//                        .filter(r -> r.getName().toLowerCase().contains(query))
+//                        .toList();
+//
+//                restaurantListView.updateRestaurants(filtered, heartListener);
+//            }
+//        });
 
         // Initialize with current state
         updateView(loggedInViewModel.getState());
@@ -166,6 +169,14 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         return VIEW_NAME;
     }
 
+    public RestaurantListView getRestaurantListView() {
+        return restaurantListView;
+    }
+
+    public RestaurantListView.HeartClickListener getHeartClickListener() {
+        return heartListener;
+    }
+
     public void setLogoutController(LogoutController logoutController) {
         this.logoutController = logoutController;
     }
@@ -182,5 +193,24 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         this.allRestaurants = restaurants;
         this.heartListener = heartListener;
         restaurantListView.updateRestaurants(allRestaurants, heartListener);
+    }
+    public void setSearchController(ListSearchController searchController) {
+        this.searchController = searchController;
+
+        // Update the search listener to use the controller
+        searchField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) { triggerSearch(); }
+            @Override
+            public void removeUpdate(DocumentEvent e) { triggerSearch(); }
+            @Override
+            public void changedUpdate(DocumentEvent e) { triggerSearch(); }
+
+            private void triggerSearch() {
+                if (searchController == null) return;
+                String query = searchField.getText().trim();
+                searchController.search(query);
+            }
+        });
     }
 }
