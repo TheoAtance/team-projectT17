@@ -3,6 +3,7 @@ package interface_adapter.list_search;
 import entity.Restaurant;
 import ui.components.RestaurantListView;
 import use_case.list_search.ListSearchOutputBoundary;
+import use_case.list_search.ListSearchOutputData;
 
 import java.util.List;
 
@@ -30,7 +31,8 @@ public class ListSearchPresenter implements ListSearchOutputBoundary {
      * Called when interactor delivers successful results.
      */
     @Override
-    public void presentResults(List<Restaurant> restaurants) {
+    public void presentResults(ListSearchOutputData outputData) {
+        List<Restaurant> restaurants = outputData.getFilteredRestaurants();
         restaurantListView.updateRestaurants(restaurants, heartClickListener);
     }
 

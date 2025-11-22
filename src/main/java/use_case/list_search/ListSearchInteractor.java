@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 public class ListSearchInteractor implements ListSearchInputBoundary {  // <--- implement interface
     private final IRestaurantDataAccess restaurantDataAccess;
     private final ListSearchOutputBoundary outputBoundary;
-    private final int maxVisibleRestaurants = 200;
+    private final int maxVisibleRestaurants = 300;
 
     public ListSearchInteractor(IRestaurantDataAccess restaurantDataAccess,
                                 ListSearchOutputBoundary outputBoundary) {
@@ -30,7 +30,8 @@ public class ListSearchInteractor implements ListSearchInputBoundary {  // <--- 
                     .limit(maxVisibleRestaurants)
                     .collect(Collectors.toList());
 
-            outputBoundary.presentResults(filtered);
+            ListSearchOutputData outputData = new ListSearchOutputData(filtered);
+            outputBoundary.presentResults(outputData);
         } catch (Exception e) {
             outputBoundary.presentError("Error searching restaurants: " + e.getMessage());
         }

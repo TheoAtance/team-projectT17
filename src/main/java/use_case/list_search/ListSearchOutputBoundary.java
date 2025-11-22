@@ -9,9 +9,9 @@ import java.util.List;
 public interface ListSearchOutputBoundary {
     /**
      * Passes the search results to the presenter (or directly to the view)
-     * @param restaurants list of restaurants matching the query
+     * @param outputData list of restaurants matching the query
      */
-    void presentResults(List<Restaurant> restaurants);
+    void presentResults(ListSearchOutputData outputData);
 
     /**
      * Optional: handle error case
