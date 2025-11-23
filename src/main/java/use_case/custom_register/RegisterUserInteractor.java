@@ -30,6 +30,12 @@ public class RegisterUserInteractor implements RegisterInputBoundary {
             return;
         }
 
+        // 2. Validate non-empty nickname
+        if (inputData.getNickname() == null || inputData.getNickname().trim().isEmpty()) {
+            registerPresenter.prepareFailView("Nickname cannot be empty.");
+            return;
+        }
+
         String email = inputData.getEmail();
         String password = inputData.getPassword();
         String nickname = inputData.getNickname();
