@@ -1,4 +1,8 @@
-package translation;
+package use_case.translation;
 
-public class TranslationInputBoundary {
+public interface TranslationInputBoundary {
+    /**
+     * Execute the translation use case.
+     */
+    void execute(TranslationInputData inputData);
 }
