@@ -19,6 +19,7 @@ import interface_adapter.logout.LogoutPresenter;
 import interface_adapter.register.RegisterController;
 import interface_adapter.register.RegisterPresenter;
 import interface_adapter.register.RegisterViewModel;
+import interface_adapter.view_restaurant.ViewRestaurantViewModel;
 import use_case.IAuthGateway;
 import use_case.IUserRepo;
 import use_case.custom_login.CustomLoginInputBoundary;
@@ -31,12 +32,10 @@ import use_case.google_login.GoogleLoginInputBoundary;
 import use_case.google_login.GoogleLoginInteractor;
 import use_case.logout.LogoutInputBoundary;
 import use_case.logout.LogoutUserInteractor;
-import view.FilterView;
-import view.LoginView;
-import view.LoggedInView;
-import view.RegisterView;
+import view.*;
 
 import javax.swing.*;
+import javax.swing.text.View;
 import java.awt.*;
 import java.io.IOException;
 
@@ -45,32 +44,39 @@ import java.io.IOException;
  * all the components of the application using dependency injection.
  */
 public class AppBuilder {
-    private final JPanel cardPanel;
-    private final ViewManagerModel viewManagerModel;
-    private final CardLayout cardLayout;
+    private final JPanel cardPanel = new JPanel();
+    private final CardLayout cardLayout = new CardLayout();
+    final ViewManagerModel viewManagerModel = new ViewManagerModel();
+    final ViewManager viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
 
-    // Shared data access objects
-    private final IAuthGateway authGateway;
-    private final IUserRepo userRepository;
-    private JsonRestaurantDataAccessObject restaurantDataAccess;
 
-    // View Models
+    // ======== View Models ========
+
+    // Account
     private LoginViewModel loginViewModel;
     private RegisterViewModel registerViewModel;
     private LoggedInViewModel loggedInViewModel;
+
+    // Filter
     private FilterViewModel filterViewModel;
+
+    // Restaurant info
+    private ViewRestaurantViewModel restaurantViewModel;
+    private RestaurantView restaurantView;
+
+
+    // Shared data access objects
+    private final IAuthGateway authGateway = new FirebaseUserAuth();
+    private final IUserRepo userRepository = new FirestoreUserRepo();;
+    private JsonRestaurantDataAccessObject restaurantDataAccess;
+
 
     // Shared Google Login Controller
     private GoogleLoginController googleLoginController;
 
-    public AppBuilder(JPanel cardPanel, ViewManagerModel viewManagerModel, CardLayout cardLayout) {
-        this.cardPanel = cardPanel;
-        this.viewManagerModel = viewManagerModel;
-        this.cardLayout = cardLayout;
-
-        // Initialize shared data access objects
-        this.authGateway = new FirebaseUserAuth();
-        this.userRepository = new FirestoreUserRepo();
+    public AppBuilder() {
+        // tell card panel to use cardLayout to manage its layout.
+        cardPanel.setLayout(cardLayout);
 
         // Initialize restaurant data access
         try {
@@ -86,8 +92,10 @@ public class AppBuilder {
 
     /**
      * Adds the Login View to the application.
+     *
+     * @return
      */
-    public void addLoginView() {
+    public AppBuilder addLoginView() {
         // Create View Model
         loginViewModel = new LoginViewModel();
 
@@ -129,12 +137,16 @@ public class AppBuilder {
 
         // Add to card panel
         cardPanel.add(loginView, loginView.getViewName());
+
+        return this;
     }
 
     /**
      * Adds the Register View to the application.
+     *
+     * @return
      */
-    public void addRegisterView() {
+    public AppBuilder addRegisterView() {
         // Create View Model
         registerViewModel = new RegisterViewModel();
 
@@ -176,12 +188,16 @@ public class AppBuilder {
 
         // Add to card panel
         cardPanel.add(registerView, registerView.getViewName());
+
+        return this;
     }
 
     /**
      * Adds the Logged In View to the application.
+     *
+     * @return
      */
-    public void addLoggedInView() {
+    public AppBuilder addLoggedInView() {
         // Create View Model (if not already created)
         if (loggedInViewModel == null) {
             loggedInViewModel = new LoggedInViewModel();
@@ -210,12 +226,16 @@ public class AppBuilder {
 
         // Add to card panel
         cardPanel.add(loggedInView, loggedInView.getViewName());
+
+        return this;
     }
 
     /**
      * Adds the Filter View to the application.
+     *
+     * @return
      */
-    public void addFilterView() {
+    public AppBuilder addFilterView() {
         // Create View Model
         filterViewModel = new FilterViewModel();
 
@@ -237,6 +257,28 @@ public class AppBuilder {
 
         // Add to card panel
         cardPanel.add(filterView, filterView.getViewName());
+
+        return this;
+    }
+
+    public AppBuilder addRestaurantView(){
+        restaurantViewModel = new ViewRestaurantViewModel();
+        restaurantView = new RestaurantView(restaurantViewModel);
+        cardPanel.add(restaurantView, restaurantView.getViewName());
+        return this;
+    }
+
+    public JFrame build(){
+        final JFrame application = new JFrame("UofT Eats - Restaurant Review App");
+        application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        application.setSize(600, 500);
+
+        application.add(cardPanel);
+
+        viewManagerModel.setState(loginViewModel.getViewName());
+        viewManagerModel.firePropertyChange();
+
+        return application;
     }
 
     /**
