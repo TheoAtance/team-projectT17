@@ -195,13 +195,23 @@ public class FavoritesPageView extends JFrame implements PropertyChangeListener 
             if (removeFavoriteController != null) {
                 // Call the controller to remove from backend
                 removeFavoriteController.execute(userId, restaurantData.getId());
-                // IMMEDIATELY reload favorites to refresh the display - just like your old code
-                loadFavorites();
+                // Don't call loadFavorites() - let the state update trigger the refresh automatically
             } else {
                 JOptionPane.showMessageDialog(this,
                         "Remove Favorite Controller not initialized.",
                         "Error",
                         JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            // User cancelled - revert the heart icon back to filled
+            for (Component component : restaurantsContainer.getComponents()) {
+                if (component instanceof RestaurantPanel) {
+                    RestaurantPanel panel = (RestaurantPanel) component;
+                    if (panel.getDisplayData().getId().equals(restaurantData.getId())) {
+                        panel.setFavorite(true);
+                        break;
+                    }
+                }
             }
         }
     }

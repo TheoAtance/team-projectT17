@@ -52,7 +52,7 @@ class FavoritesPageViewTest {
                         // Return the current user favorites
                         FavoritesState currentState = viewModel.getState();
                         currentState.setRestaurants(new ArrayList<>(userFavorites));
-                        viewModel.setState(currentState);
+                        viewModel.firePropertyChanged(); // Use firePropertyChanged to ensure update
                     }
                 };
 
@@ -70,7 +70,7 @@ class FavoritesPageViewTest {
                         FavoritesState currentState = viewModel.getState();
                         currentState.setRestaurants(new ArrayList<>(userFavorites));
                         currentState.setSuccessMessage("Restaurant removed from favorites successfully!");
-                        viewModel.setState(currentState);
+                        viewModel.firePropertyChanged(); // Use firePropertyChanged to ensure update
                     }
                 };
 
