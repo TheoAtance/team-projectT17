@@ -1,5 +1,6 @@
 package view;
 
+import interface_adapter.ViewManagerModel;
 import interface_adapter.filter.FilterController;
 import interface_adapter.filter.FilterState;
 import interface_adapter.filter.FilterViewModel;
@@ -17,8 +18,10 @@ public class FilterView extends JPanel implements PropertyChangeListener {
 
     private final FilterViewModel filterViewModel;
     private FilterController filterController;
+    private ViewManagerModel viewManagerModel;
 
     private final JLabel titleLabel;
+    private final JButton backButton;
     private final JPanel buttonPanel;
     private final JPanel resultPanel;
     private final JLabel filterTypeLabel;
@@ -33,6 +36,18 @@ public class FilterView extends JPanel implements PropertyChangeListener {
         titleLabel = new JLabel(FilterViewModel.TITLE_LABEL);
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+
+        // Back button
+        backButton = new JButton("← Back");
+        backButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        backButton.addActionListener(evt -> {
+            if (viewManagerModel != null) {
+                viewManagerModel.setState("logged in");
+                viewManagerModel.firePropertyChange();
+            } else {
+                JOptionPane.showMessageDialog(this, "View Manager not initialized.");
+            }
+        });
 
         // Button panel for filter buttons
         buttonPanel = new JPanel();
@@ -58,6 +73,8 @@ public class FilterView extends JPanel implements PropertyChangeListener {
         // Main layout
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         this.add(Box.createVerticalStrut(20));
+        this.add(backButton);
+        this.add(Box.createVerticalStrut(10));
         this.add(titleLabel);
         this.add(Box.createVerticalStrut(20));
         this.add(buttonPanel);
@@ -128,5 +145,9 @@ public class FilterView extends JPanel implements PropertyChangeListener {
     public void setFilterController(FilterController filterController) {
         this.filterController = filterController;
         initializeFilterButtons();
+    }
+
+    public void setViewManagerModel(ViewManagerModel viewManagerModel) {
+        this.viewManagerModel = viewManagerModel;
     }
 }
