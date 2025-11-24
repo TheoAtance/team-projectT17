@@ -63,7 +63,7 @@ class FavoritesPageViewTest {
                         System.out.println("Removing restaurant " + inputData.getRestaurantId() +
                                 " from user's favorites: " + inputData.getUserId());
 
-                        // Actually remove from the user's favorites list
+                        // Remove from the user's favorites list
                         userFavorites.removeIf(restaurant -> restaurant.getId().equals(inputData.getRestaurantId()));
 
                         // Update state to reflect the change
@@ -85,7 +85,7 @@ class FavoritesPageViewTest {
                 // Make the window visible
                 favoritesView.setVisible(true);
 
-                // **CRITICAL FIX**: Set initial restaurants in state and trigger display
+                // Set initial restaurants in state and trigger display
                 state.setRestaurants(new ArrayList<>(userFavorites));
                 viewModel.firePropertyChanged(); // This triggers the property change to display restaurants
 
