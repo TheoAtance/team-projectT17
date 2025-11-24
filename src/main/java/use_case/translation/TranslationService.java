@@ -2,6 +2,7 @@ package use_case.translation;
 
 import java.util.List;
 
+
 public interface TranslationService {
     List<TranslatedText> translateTexts(List<String> texts, String targetLanguage) throws Exception;
 
@@ -15,4 +16,3 @@ public interface TranslationService {
         public String detectedSourceLanguage() { return detectedSourceLanguage; }
     }
 }
-
