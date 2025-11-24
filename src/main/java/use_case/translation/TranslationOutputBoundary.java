@@ -1,8 +1,4 @@
-package use_case.translation;
+package translation;
 
-public interface TranslationOutputBoundary {
-    /**
-     * Present the result of the translation use case.
-     */
-    void present(TranslationOutputData outputData);
+public class TranslationOutputBoundary {
 }
