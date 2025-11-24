@@ -2,77 +2,73 @@ package data_access;
 
 import entity.Restaurant;
 import entity.RestaurantFactory;
-
+import use_case.filter.IRestaurantDataAccess;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import java.util.*;
+import java.util.stream.Collectors;
 import java.nio.file.Files;
 import java.nio.file.Path;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
  * DAO for restaurant data implemented with json file to persist data
  */
-public class JsonRestaurantDataAccessObject {
+public class JsonRestaurantDataAccessObject implements IRestaurantDataAccess {
     private final Map<String, Restaurant> restaurantById = new HashMap<>();
 
     /**
      * Construct DAO for saving to and reading from a local json file
      * @param jsonPath the json file path to extract data from
-     * @param restaurantFactory the factory to create Restaurant objects
+     * @param restaurantFactory factory for creating restaurant objects
      * @throws IOException throws IOException
      */
     public JsonRestaurantDataAccessObject(String jsonPath, RestaurantFactory restaurantFactory) throws IOException {
-
-        try{
-            JSONArray restaurantData = new JSONArray(Files.readString(Path.of("src/main/java/data/restaurant.json")));
-
-            for(int i = 0; i < restaurantData.length(); i++){
+        try {
+            JSONArray restaurantData = new JSONArray(Files.readString(Path.of(jsonPath)));
+            // Map id to their respective restaurant obj
+            for (int i = 0; i < restaurantData.length(); i++) {
                 JSONObject curObj = restaurantData.getJSONObject(i);
                 String restaurantId = curObj.getString("name");
                 Restaurant restaurant = restaurantFactory.create(curObj);
                 restaurantById.put(restaurantId, restaurant);
             }
-        }catch(IOException e){
+        } catch (IOException e) {
             throw new IOException(e);
         }
     }
 
     /**
-     * Gets a restaurant by its ID.
-     * @param restaurantId the ID of the restaurant
-     * @return the Restaurant object, or null if not found
+     * Get all restaurants of a specific type.
+     * @param type the restaurant type to filter by
+     * @return list of restaurants matching the type
      */
-    public Restaurant getRestaurantById(String restaurantId) {
-        return restaurantById.get(restaurantId);
+    @Override
+    public List<Restaurant> getRestaurantsByType(String type) {
+        return restaurantById.values().stream()
+                .filter(restaurant -> restaurant.getType().equals(type))
+                .collect(Collectors.toList());
     }
 
     /**
-     * Gets multiple restaurants by their IDs.
-     * @param restaurantIds list of restaurant IDs
-     * @return list of Restaurant objects
+     * Get all unique restaurant types available.
+     * Limited to 5 types for now.
+     * @return array of unique restaurant types
      */
-    public List<Restaurant> getRestaurantsByIds(List<String> restaurantIds) {
-        final List<Restaurant> restaurants = new ArrayList<>();
-        for (String restaurantId : restaurantIds) {
-            final Restaurant restaurant = restaurantById.get(restaurantId);
-            if (restaurant != null) {
-                restaurants.add(restaurant);
-            }
-        }
-        return restaurants;
+    @Override
+    public String[] getAllRestaurantTypes() {
+        return restaurantById.values().stream()
+                .map(Restaurant::getType)
+                .distinct()
+                .limit(5)
+                .toArray(String[]::new);
     }
 
     /**
      * For debugging
      */
-    public void printAllNames(){
-        for(Restaurant restaurant : restaurantById.values()){
+    public void printAllNames() {
+        for (Restaurant restaurant : restaurantById.values()) {
             System.out.println(restaurant.getName());
         }
     }

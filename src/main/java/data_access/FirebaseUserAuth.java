@@ -228,7 +228,7 @@ public class FirebaseUserAuth implements IAuthGateway {
             if (query != null && query.contains("code=")) {
                 String code = query.substring(query.indexOf("code=") + 5);
                 authCodeHolder[0] = code.split("&")[0]; // Extract code only
-                String response = "✅ You may now close this tab and return to the app.";
+                String response = "You may now close this tab and return to the app.";
                 exchange.sendResponseHeaders(200, response.length());
                 exchange.getResponseBody().write(response.getBytes());
                 exchange.close();

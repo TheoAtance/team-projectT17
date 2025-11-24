@@ -2,7 +2,12 @@ package app;
 
 import data_access.FirebaseUserAuth;
 import data_access.FirestoreUserRepo;
+import data_access.JsonRestaurantDataAccessObject;
+import entity.RestaurantFactory;
 import interface_adapter.ViewManagerModel;
+import interface_adapter.filter.FilterController;
+import interface_adapter.filter.FilterPresenter;
+import interface_adapter.filter.FilterViewModel;
 import interface_adapter.google_login.GoogleLoginController;
 import interface_adapter.google_login.GoogleLoginPresenter;
 import interface_adapter.logged_in.LoggedInViewModel;
@@ -20,16 +25,20 @@ import use_case.custom_login.CustomLoginInputBoundary;
 import use_case.custom_login.CustomLoginUserInteractor;
 import use_case.custom_register.RegisterInputBoundary;
 import use_case.custom_register.RegisterUserInteractor;
+import use_case.filter.FilterInputBoundary;
+import use_case.filter.FilterInteractor;
 import use_case.google_login.GoogleLoginInputBoundary;
 import use_case.google_login.GoogleLoginInteractor;
 import use_case.logout.LogoutInputBoundary;
 import use_case.logout.LogoutUserInteractor;
+import view.FilterView;
 import view.LoginView;
 import view.LoggedInView;
 import view.RegisterView;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 
 /**
  * The AppBuilder is responsible for constructing and wiring together
@@ -43,11 +52,13 @@ public class AppBuilder {
     // Shared data access objects
     private final IAuthGateway authGateway;
     private final IUserRepo userRepository;
+    private JsonRestaurantDataAccessObject restaurantDataAccess;
 
     // View Models
     private LoginViewModel loginViewModel;
     private RegisterViewModel registerViewModel;
     private LoggedInViewModel loggedInViewModel;
+    private FilterViewModel filterViewModel;
 
     // Shared Google Login Controller
     private GoogleLoginController googleLoginController;
@@ -60,6 +71,17 @@ public class AppBuilder {
         // Initialize shared data access objects
         this.authGateway = new FirebaseUserAuth();
         this.userRepository = new FirestoreUserRepo();
+
+        // Initialize restaurant data access
+        try {
+            RestaurantFactory restaurantFactory = new RestaurantFactory();
+            this.restaurantDataAccess = new JsonRestaurantDataAccessObject(
+                    "src/main/java/data/restaurant.json",
+                    restaurantFactory
+            );
+        } catch (IOException e) {
+            System.err.println("Failed to load restaurant data: " + e.getMessage());
+        }
     }
 
     /**
@@ -183,10 +205,38 @@ public class AppBuilder {
 
         // Create View
         LoggedInView loggedInView = new LoggedInView(loggedInViewModel);
-        loggedInView.setLogoutController(logoutController); // Inject controller
+        loggedInView.setLogoutController(logoutController);
+        loggedInView.setViewManagerModel(viewManagerModel);
 
         // Add to card panel
         cardPanel.add(loggedInView, loggedInView.getViewName());
+    }
+
+    /**
+     * Adds the Filter View to the application.
+     */
+    public void addFilterView() {
+        // Create View Model
+        filterViewModel = new FilterViewModel();
+
+        // Create Presenter
+        FilterPresenter filterPresenter = new FilterPresenter(filterViewModel);
+
+        // Create Interactor
+        FilterInputBoundary filterInteractor = new FilterInteractor(
+                restaurantDataAccess,
+                filterPresenter
+        );
+
+        // Create Controller
+        FilterController filterController = new FilterController(filterInteractor);
+
+        // Create View
+        FilterView filterView = new FilterView(filterViewModel);
+        filterView.setFilterController(filterController);
+
+        // Add to card panel
+        cardPanel.add(filterView, filterView.getViewName());
     }
 
     /**

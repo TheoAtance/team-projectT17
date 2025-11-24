@@ -1,6 +1,6 @@
 import data_access.JsonRestaurantDataAccessObject;
 import entity.RestaurantFactory;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 public class JsonRestaurantDAOTest {
     @Test
