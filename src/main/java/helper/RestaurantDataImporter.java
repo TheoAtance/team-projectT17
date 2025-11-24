@@ -42,9 +42,9 @@ public class RestaurantDataImporter{
 
         // get api key from env and check if it's valid
 
-        String apiKey = System.getenv("PLACE_API_TOKEN");
+        String apiKey = System.getenv("PLACES_API_TOKEN");
         if(apiKey == null || apiKey.isEmpty()){
-            throw new IllegalStateException("Missing environment variable: PLACE_API_TOKEN");
+            throw new IllegalStateException("Missing environment variable: PLACES_API_TOKEN");
         }
 
 
@@ -128,8 +128,8 @@ public class RestaurantDataImporter{
                         String curId = curPlace.getString("name");
                         //test ++;
                         if(!placeById.containsKey(curId)){
-                            curPlace.put("rating", 0);
-                            curPlace.put("userRatingCount", 0);
+//                            curPlace.put("rating", 0);
+//                            curPlace.put("userRatingCount", 0); // uncomment these when we want to implement our own rating system
                             placeById.put(curId, curPlace);
                         }
                     }

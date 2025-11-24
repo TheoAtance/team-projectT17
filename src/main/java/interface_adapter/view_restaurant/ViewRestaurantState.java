@@ -1,5 +1,6 @@
 package interface_adapter.view_restaurant;
 
+import java.awt.image.BufferedImage;
 import java.util.List;
 
 /**
@@ -13,7 +14,7 @@ public class ViewRestaurantState {
     private int ratingCount = 0;
     private String phoneNumber = "";
     private List<String> openingHours;
-    private List<String> photoIds;
+    private List<BufferedImage> photos;
     private String restaurantDndError;
 
 
@@ -25,7 +26,7 @@ public class ViewRestaurantState {
         ratingCount = copy.ratingCount;
         phoneNumber = copy.phoneNumber;
         openingHours = copy.openingHours;
-        photoIds = copy.photoIds;
+        photos = copy.photos;
         restaurantDndError = copy.restaurantDndError;
     }
 
@@ -89,12 +90,12 @@ public class ViewRestaurantState {
         this.openingHours = openingHours;
     }
 
-    public List<String> getPhotoIds() {
-        return photoIds;
+    public List<BufferedImage> getPhotos() {
+        return photos;
     }
 
-    public void setPhotoIds(List<String> photoIds) {
-        this.photoIds = photoIds;
+    public void setPhotos(List<BufferedImage> photos) {
+        this.photos = photos;
     }
 
     public String getRestaurantDndError() {

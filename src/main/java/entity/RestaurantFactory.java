@@ -40,11 +40,15 @@ public class RestaurantFactory {
         }
 
 
-        JSONArray jsonPhotos = restaurant.getJSONArray("photos");
         List<String> photoIds = new ArrayList<>();
 
-        for(int i = 0;i < jsonPhotos.length();i++){
+        if (restaurant.has("photos")){
+            JSONArray jsonPhotos = restaurant.getJSONArray("photos");
+
+            for(int i = 0;i < jsonPhotos.length();i++){
                 photoIds.add(jsonPhotos.getJSONObject(i).getString("name"));
+            }
+
         }
 
 

@@ -1,5 +1,6 @@
 package interface_adapter.view_restaurant;
 
+import interface_adapter.ViewManagerModel;
 import use_case.view_restaurant.ViewRestaurantOutputBoundary;
 import use_case.view_restaurant.ViewRestaurantOutputData;
 
@@ -8,18 +9,21 @@ import javax.swing.text.View;
 public class ViewRestaurantPresenter implements ViewRestaurantOutputBoundary {
 
     private final ViewRestaurantViewModel viewRestaurantViewModel;
-    private final ViewRestaurantOutputData viewRestaurantOutputData;
+    private final ViewManagerModel viewManagerModel;
 
-    public ViewRestaurantPresenter(ViewRestaurantViewModel viewRestaurantViewModel,
-                                   ViewRestaurantOutputData viewRestaurantOutputData) {
+
+    public ViewRestaurantPresenter(ViewManagerModel viewManagerModel,
+                                   ViewRestaurantViewModel viewRestaurantViewModel) {
+
         this.viewRestaurantViewModel = viewRestaurantViewModel;
-        this.viewRestaurantOutputData = viewRestaurantOutputData;
+        this.viewManagerModel = viewManagerModel;
     }
 
     @Override
     public void prepareSuccessView(ViewRestaurantOutputData data){
         // copies the current state, so that in case there are states that do not require updating,
         // we can preserve those states.
+        System.out.println("[Presenter] prepareSuccessView called, name = " + data.getName());
 
         ViewRestaurantState newState = new ViewRestaurantState(viewRestaurantViewModel.getState());
 
@@ -34,7 +38,7 @@ public class ViewRestaurantPresenter implements ViewRestaurantOutputBoundary {
         newState.setRatingCount(data.getRatingCount());
         newState.setPhoneNumber(data.getPhoneNumber());
         newState.setOpeningHours(data.getOpeningHours());
-        newState.setPhotoIds(data.getPhotoIds());
+        newState.setPhotos(data.getPhotos());
 
         viewRestaurantViewModel.setState(newState);
         viewRestaurantViewModel.firePropertyChange("restaurant info");
