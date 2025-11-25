@@ -30,13 +30,20 @@ import use_case.filter.FilterInputBoundary;
 import use_case.filter.FilterInteractor;
 import use_case.google_login.GoogleLoginInputBoundary;
 import use_case.google_login.GoogleLoginInteractor;
+import use_case.list_search.ListSearchInputBoundary;
 import use_case.logout.LogoutInputBoundary;
 import use_case.logout.LogoutUserInteractor;
+import use_case.list_search.ListSearchInteractor;
+import use_case.filter.IRestaurantDataAccess;
+import interface_adapter.list_search.ListSearchController;
+import interface_adapter.list_search.ListSearchPresenter;
+import interface_adapter.list_search.ListSearchViewModel;
 import view.*;
 
 import javax.swing.*;
 import javax.swing.text.View;
 import java.awt.*;
+import java.util.List;
 import java.io.IOException;
 
 /**
@@ -223,6 +230,21 @@ public class AppBuilder {
         LoggedInView loggedInView = new LoggedInView(loggedInViewModel);
         loggedInView.setLogoutController(logoutController);
         loggedInView.setViewManagerModel(viewManagerModel);
+
+        ListSearchViewModel listSearchViewModel = new ListSearchViewModel();
+        ListSearchPresenter listSearchPresenter = new ListSearchPresenter(loggedInView.getRestaurantListView(),
+                loggedInView.getHeartClickListener());
+        ListSearchInteractor listSearchInteractor = new ListSearchInteractor(restaurantDataAccess, listSearchPresenter);
+        ListSearchController listSearchController = new ListSearchController(listSearchInteractor);
+
+        // Wire the search controller to the loggedInView search bar
+        loggedInView.setSearchController(listSearchController);
+
+        // Optionally preload all restaurants
+        List allRestaurants = restaurantDataAccess.getAllRestaurants();
+        loggedInView.setAllRestaurants(allRestaurants, (restaurant, newState) -> {
+            System.out.println("Heart toggled for: " + restaurant.getName() + " → " + newState);
+        });
 
         // Add to card panel
         cardPanel.add(loggedInView, loggedInView.getViewName());
