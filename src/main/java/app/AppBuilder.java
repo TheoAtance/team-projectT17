@@ -30,18 +30,12 @@ import use_case.filter.FilterInputBoundary;
 import use_case.filter.FilterInteractor;
 import use_case.google_login.GoogleLoginInputBoundary;
 import use_case.google_login.GoogleLoginInteractor;
-import use_case.list_search.ListSearchInputBoundary;
 import use_case.logout.LogoutInputBoundary;
 import use_case.logout.LogoutUserInteractor;
-import use_case.list_search.ListSearchInteractor;
-import use_case.filter.IRestaurantDataAccess; // Note: This is an interface, not the concrete class
-import interface_adapter.list_search.ListSearchController;
-import interface_adapter.list_search.ListSearchPresenter;
-import interface_adapter.list_search.ListSearchViewModel; // Import the new ListSearchViewModel
 import view.*;
-import ui.components.RestaurantListView; // Import for HeartClickListener
 
 import javax.swing.*;
+import javax.swing.text.View;
 import java.awt.*;
 import java.io.IOException;
 
@@ -62,7 +56,6 @@ public class AppBuilder {
     private LoginViewModel loginViewModel;
     private RegisterViewModel registerViewModel;
     private LoggedInViewModel loggedInViewModel;
-    private ListSearchViewModel listSearchViewModel; // NEW: ListSearchViewModel
 
     // Filter
     private FilterViewModel filterViewModel;
@@ -74,9 +67,8 @@ public class AppBuilder {
 
     // Shared data access objects
     private final IAuthGateway authGateway = new FirebaseUserAuth();
-    private final IUserRepo userRepository = new FirestoreUserRepo();
-    // It's good practice to refer to the interface here if possible for the interactor
-    private IRestaurantDataAccess restaurantDataAccess; // Changed to interface type
+    private final IUserRepo userRepository = new FirestoreUserRepo();;
+    private JsonRestaurantDataAccessObject restaurantDataAccess;
 
 
     // Shared Google Login Controller
@@ -89,7 +81,6 @@ public class AppBuilder {
         // Initialize restaurant data access
         try {
             RestaurantFactory restaurantFactory = new RestaurantFactory();
-            // Assign to the interface type
             this.restaurantDataAccess = new JsonRestaurantDataAccessObject(
                     "src/main/java/data/restaurant.json",
                     restaurantFactory
@@ -211,9 +202,6 @@ public class AppBuilder {
         if (loggedInViewModel == null) {
             loggedInViewModel = new LoggedInViewModel();
         }
-        // NEW: Initialize ListSearchViewModel
-        listSearchViewModel = new ListSearchViewModel();
-
 
         // Create Logout Presenter
         LogoutPresenter logoutPresenter = new LogoutPresenter(
@@ -231,42 +219,13 @@ public class AppBuilder {
         // Create Logout Controller
         LogoutController logoutController = new LogoutController(logoutInteractor);
 
-        // NEW: Define the HeartClickListener implementation.
-        // This is where you would trigger a FavoriteRestaurantUseCase in the future.
-        RestaurantListView.HeartClickListener heartListener = (restaurant, newState) -> {
-            System.out.println("Heart toggled for: " + restaurant.getName() + " → " + newState);
-        };
-
-        if (filterViewModel == null) {
-            filterViewModel = new FilterViewModel();
-        }
-
-        // CORRECTED: Pass filterViewName to LoggedInView
-        LoggedInView loggedInView = new LoggedInView(
-                loggedInViewModel,
-                listSearchViewModel,
-                heartListener,
-                FilterView.VIEW_NAME
-        );
+        // Create View
+        LoggedInView loggedInView = new LoggedInView(loggedInViewModel);
         loggedInView.setLogoutController(logoutController);
         loggedInView.setViewManagerModel(viewManagerModel);
 
-        // NEW: Wiring for ListSearch
-        // ListSearchPresenter now takes ListSearchViewModel
-        ListSearchPresenter listSearchPresenter = new ListSearchPresenter(listSearchViewModel);
-        // ListSearchInteractor now uses the IRestaurantDataAccess interface
-        ListSearchInputBoundary listSearchInteractor = new ListSearchInteractor(restaurantDataAccess, listSearchPresenter);
-        ListSearchController listSearchController = new ListSearchController(listSearchInteractor);
-
-        // Wire the search controller to the loggedInView search bar
-        loggedInView.setSearchController(listSearchController);
-
-        // Initial search to populate the restaurant list when LoggedInView is first shown
-        // This ensures the view starts with all restaurants displayed.
-        listSearchController.search(""); // An empty query returns all restaurants
-
         // Add to card panel
-        cardPanel.add(loggedInView, LoggedInView.VIEW_NAME); // Use constant for view name
+        cardPanel.add(loggedInView, loggedInView.getViewName());
 
         return this;
     }
@@ -285,7 +244,7 @@ public class AppBuilder {
 
         // Create Interactor
         FilterInputBoundary filterInteractor = new FilterInteractor(
-                restaurantDataAccess, // Use the interface
+                restaurantDataAccess,
                 filterPresenter
         );
 
@@ -317,11 +276,7 @@ public class AppBuilder {
 
         application.add(cardPanel);
 
-        // 1. Set the state (active view name) in the ViewManagerModel
         viewManagerModel.setState(loginViewModel.getViewName());
-
-        // 2. Explicitly fire the property change to notify ViewManager
-        // that the active view has changed.
         viewManagerModel.firePropertyChange();
 
         return application;
