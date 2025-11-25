@@ -32,7 +32,14 @@ import use_case.google_login.GoogleLoginInputBoundary;
 import use_case.google_login.GoogleLoginInteractor;
 import use_case.logout.LogoutInputBoundary;
 import use_case.logout.LogoutUserInteractor;
+import use_case.translation.TranslationInputBoundary;
+import use_case.translation.TranslationInteractor;
 import view.*;
+import interface_adapter.translation.TranslationController;
+import interface_adapter.translation.TranslationPresenter;
+import use_case.translation.DeeplTranslationService;
+import use_case.translation.TranslationService;
+import view.RestaurantView;
 
 import javax.swing.*;
 import javax.swing.text.View;
@@ -264,6 +271,26 @@ public class AppBuilder {
     public AppBuilder addRestaurantView(){
         restaurantViewModel = new ViewRestaurantViewModel();
         restaurantView = new RestaurantView(restaurantViewModel);
+
+        // Create the TranslationService (DeepL implementation)
+        TranslationService translationService =
+                new DeeplTranslationService(System.getenv("DEEPL_API_KEY"), false);
+        // adjust constructor args if your DeeplTranslationService differs
+
+        // Create the presenter that will show a small popup dialog
+        TranslationPresenter translationPresenter =
+                new TranslationPresenter(restaurantView); // dialog centered on this view
+
+        // Create the interactor
+        TranslationInputBoundary translationInteractor =
+                new TranslationInteractor(translationService, translationPresenter);
+
+        // Create the controller and inject into the view
+        TranslationController translationController =
+                new TranslationController(translationInteractor);
+
+        restaurantView.setTranslationController(translationController);
+
         cardPanel.add(restaurantView, restaurantView.getViewName());
         return this;
     }

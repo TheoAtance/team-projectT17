@@ -1,4 +1,5 @@
 package view;
+import interface_adapter.translation.TranslationController;
 import interface_adapter.view_restaurant.ViewRestaurantController;
 import interface_adapter.view_restaurant.ViewRestaurantState;
 import interface_adapter.view_restaurant.ViewRestaurantViewModel;
@@ -12,12 +13,13 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-public class RestaurantView extends JPanel implements ActionListener, PropertyChangeListener{
+public class RestaurantView extends JPanel implements ActionListener, PropertyChangeListener {
     private final String viewName = "restaurant info";
     private ViewRestaurantViewModel viewRestaurantViewModel;
     private final RestaurantTitlePanel titlePanel;
+    private TranslationController translationController;
 
-    public RestaurantView(ViewRestaurantViewModel viewRestaurantViewModel){
+    public RestaurantView(ViewRestaurantViewModel viewRestaurantViewModel) {
         this.viewRestaurantViewModel = viewRestaurantViewModel;
         ViewRestaurantState state = viewRestaurantViewModel.getState();
 
@@ -40,5 +42,9 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
 
     public String getViewName() {
         return viewName;
+    }
+
+    public void setTranslationController(TranslationController translationController) {
+        this.translationController = translationController;
     }
 }
