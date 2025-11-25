@@ -1,6 +1,8 @@
 package use_case.custom_login;
 
+import data_access.CurrentUser;
 import entity.User;
+import org.checkerframework.checker.units.qual.C;
 import use_case.IAuthGateway;
 import use_case.IUserRepo;
 
@@ -44,9 +46,9 @@ public class CustomLoginUserInteractor implements CustomLoginInputBoundary {
         }
 
         // 2. Authentication was successful, now fetch the corresponding User Entity (profile)
-        Optional<User> userProfile = userRepository.getUserByUid(uid);
+        User user = userRepository.getUserByUid(uid);
 
-        if (userProfile.isEmpty()) {
+        if (user == null) {
             // 3. The user was authenticated by Firebase, but their profile data is missing from Firestore database.
             authGateway.logout(); // Clear the successful login session.
             loginPresenter.prepareFailView("Account found, but profile data is missing.");
@@ -54,7 +56,6 @@ public class CustomLoginUserInteractor implements CustomLoginInputBoundary {
         }
 
         // 4. Success: User is logged in and profile data is retrieved.
-        User user = userProfile.get();
 
         // Prepare output data for the presenter
         CustomLoginOutputData outputData = new CustomLoginOutputData(
@@ -62,6 +63,12 @@ public class CustomLoginUserInteractor implements CustomLoginInputBoundary {
                 true,
                 user.getUid()
         );
+
+        userRepository.loadAllUsers();
+
+        CurrentUser test = new CurrentUser(authGateway, userRepository);
+        String curUser = test.getCurrentUser().getNickname();
+        System.out.println("Custom Login Current User test: " + curUser);
 
         loginPresenter.prepareSuccessView(outputData);
     }
