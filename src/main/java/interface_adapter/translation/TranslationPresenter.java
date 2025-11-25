@@ -9,17 +9,17 @@ import java.util.List;
 
 public class TranslationPresenter implements TranslationOutputBoundary {
 
-    private final Component parent;
+    private final Component content;
 
-    public TranslationPresenter(Component parent) {
-        this.parent = parent; // e.g., your RestaurantView
+    public TranslationPresenter(Component content) {
+        this.content = content; // RestaurantView
     }
 
     @Override
     public void present(TranslationOutputData outputData) {
         if (outputData.isError()) {
             JOptionPane.showMessageDialog(
-                    parent,
+                    content,
                     outputData.getErrorMessage(),
                     "Translation error",
                     JOptionPane.ERROR_MESSAGE
@@ -37,7 +37,7 @@ public class TranslationPresenter implements TranslationOutputBoundary {
         }
 
         JOptionPane.showMessageDialog(
-                parent,
+                content,
                 text,
                 "Translated comment (" + outputData.getTargetLanguage() + ")",
                 JOptionPane.PLAIN_MESSAGE
