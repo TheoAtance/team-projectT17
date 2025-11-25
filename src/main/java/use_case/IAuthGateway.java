@@ -29,4 +29,12 @@ public interface IAuthGateway {
      * Clears the current user session (signs out the user).
      */
     void logout();
+
+
+    /**
+     * Get the current user's uid
+     * @return current user's uid
+     */
+    String getCurrentUserUid();
+
 }
