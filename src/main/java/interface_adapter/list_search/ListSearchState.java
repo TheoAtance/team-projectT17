@@ -1,46 +1,53 @@
 package interface_adapter.list_search;
 
-import entity.Restaurant;
+// NEW: Import RestaurantPanel for its inner class
+import view.RestaurantPanel;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class ListSearchState {
-    private List<Restaurant> filteredRestaurants = new ArrayList<>();
-    private String errorMessage = null;
-    // We can also track the current query if needed for the UI
+    // CHANGED: Type to List<RestaurantPanel.RestaurantDisplayData>
+    private List<RestaurantPanel.RestaurantDisplayData> filteredRestaurants = new ArrayList<>();
     private String searchQuery = "";
+    private String errorMessage = null;
 
-    // Copy Constructor: Creates a copy of another state
+    // Default constructor (important for view models)
+    public ListSearchState() {
+    }
+
+    // Copy constructor (for immutability pattern if needed, or defensive copying)
     public ListSearchState(ListSearchState copy) {
-        this.filteredRestaurants = copy.filteredRestaurants;
-        this.errorMessage = copy.errorMessage;
+        this.filteredRestaurants = new ArrayList<>(copy.filteredRestaurants);
         this.searchQuery = copy.searchQuery;
+        this.errorMessage = copy.errorMessage;
     }
 
-    // Default Constructor
-    public ListSearchState() {}
-
-    public List<Restaurant> getFilteredRestaurants() {
+    // Getters
+    // CHANGED: Return type
+    public List<RestaurantPanel.RestaurantDisplayData> getFilteredRestaurants() {
         return filteredRestaurants;
-    }
-
-    public void setFilteredRestaurants(List<Restaurant> filteredRestaurants) {
-        this.filteredRestaurants = filteredRestaurants;
-    }
-
-    public String getErrorMessage() {
-        return errorMessage;
-    }
-
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
     }
 
     public String getSearchQuery() {
         return searchQuery;
     }
 
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    // Setters
+    // CHANGED: Parameter type
+    public void setFilteredRestaurants(List<RestaurantPanel.RestaurantDisplayData> filteredRestaurants) {
+        this.filteredRestaurants = filteredRestaurants;
+    }
+
     public void setSearchQuery(String searchQuery) {
         this.searchQuery = searchQuery;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
     }
 }

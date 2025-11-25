@@ -7,9 +7,10 @@ import interface_adapter.logout.LogoutController;
 import interface_adapter.list_search.ListSearchController;
 import interface_adapter.list_search.ListSearchState;
 import interface_adapter.list_search.ListSearchViewModel;
-import ui.components.RestaurantListView;
-// No direct import of RestaurantPanel needed if HeartClickListener is from RestaurantListView
-import entity.Restaurant;
+// import view.RestaurantListView; // REMOVED: Since RestaurantListView will also be in 'view' package now
+import view.RestaurantListView; // NEW: Assuming RestaurantListView is moved to 'view' package
+import view.RestaurantPanel; // NEW: Import the new RestaurantPanel
+// import entity.Restaurant; // REMOVED: RestaurantPanel no longer takes entity.Restaurant
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -35,7 +36,7 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
     private final JLabel welcomeLabel;
     private final JLabel uidLabel;
     private final JButton logoutButton;
-    private final JButton filterViewButton; // Declared
+    private final JButton filterViewButton;
 
     // Controllers for actions
     private LogoutController logoutController;
@@ -46,29 +47,26 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
     private JTextField searchField;
     private RestaurantListView restaurantListView;
 
-    // This listener can be passed down, or a specific method can be called on the controller
-    // For now, let's keep it here, but ideally, this would trigger a use case.
-    private RestaurantListView.HeartClickListener heartListener;
+    // CHANGED: Type of heartListener is now RestaurantPanel.HeartClickListener
+    private RestaurantPanel.HeartClickListener heartListener;
 
-    // NEW: Field to store the name of the filter view
     private final String filterViewName;
 
 
     public LoggedInView(LoggedInViewModel loggedInViewModel,
                         ListSearchViewModel listSearchViewModel,
-                        RestaurantListView.HeartClickListener heartListener,
-                        String filterViewName) { // RE-ADDED: filterViewName parameter
+                        // CHANGED: Parameter type for heartListener
+                        RestaurantPanel.HeartClickListener heartListener,
+                        String filterViewName) {
 
         this.loggedInViewModel = loggedInViewModel;
         this.listSearchViewModel = listSearchViewModel;
         this.heartListener = heartListener;
-        this.filterViewName = filterViewName; // Initialize the new field
+        this.filterViewName = filterViewName;
 
-        // Add self as listener to both view models
         this.loggedInViewModel.addPropertyChangeListener(this);
         this.listSearchViewModel.addPropertyChangeListener(this);
 
-        // --- LoggedInView specific UI setup ---
         final JLabel title = new JLabel(LoggedInViewModel.TITLE_LABEL);
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
         title.setFont(new Font("Arial", Font.BOLD, 24));
@@ -92,12 +90,10 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
             }
         });
 
-        // FIXED: Initialize filterViewButton
-        filterViewButton = new JButton("Filter Restaurants"); // NEW
+        filterViewButton = new JButton("Filter Restaurants");
         filterViewButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         filterViewButton.addActionListener(evt -> {
             if (viewManagerModel != null) {
-                // Use the stored filterViewName
                 viewManagerModel.setState(this.filterViewName);
                 viewManagerModel.firePropertyChange();
             } else {
@@ -117,13 +113,11 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         this.add(Box.createVerticalStrut(10));
         this.add(logoutButton);
 
-        // --- Restaurant Search Section UI setup ---
         JPanel restaurantSection = new JPanel();
         restaurantSection.setLayout(new BoxLayout(restaurantSection, BoxLayout.Y_AXIS));
         restaurantSection.setAlignmentX(Component.CENTER_ALIGNMENT);
         restaurantSection.setMaximumSize(new Dimension(Integer.MAX_VALUE, 500));
 
-        // Search bar
         JPanel searchPanel = new JPanel();
         searchPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 0));
         searchPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
@@ -139,7 +133,6 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         searchField.setMaximumSize(new Dimension(maxFieldWidth, 24));
         searchPanel.add(searchField);
 
-        // Add DocumentListener here, directly linking to the searchController
         searchField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) { triggerSearch(); }
@@ -158,8 +151,8 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         restaurantSection.add(searchPanel);
         restaurantSection.add(Box.createVerticalStrut(10));
 
-        // Initialize RestaurantListView with an empty list
-        // It will be updated via propertyChange from ListSearchViewModel
+        // NEW: RestaurantListView constructor now expects RestaurantPanel.RestaurantDisplayData
+        // and RestaurantPanel.HeartClickListener
         restaurantListView = new RestaurantListView(new ArrayList<>(), this.heartListener);
         JScrollPane restaurantScrollPane = restaurantListView.getScrollPane();
         restaurantScrollPane.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
@@ -169,7 +162,6 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         this.add(Box.createVerticalStrut(30));
         this.add(restaurantSection);
 
-        // Initialize views with current states
         updateLoggedInView(loggedInViewModel.getState());
         updateListSearchView(listSearchViewModel.getState());
     }
@@ -205,6 +197,8 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
             state.setErrorMessage(null);
         }
 
+        // NEW: The state.getFilteredRestaurants() must now return List<RestaurantPanel.RestaurantDisplayData>
+        // and restaurantListView.updateRestaurants() must accept it.
         restaurantListView.updateRestaurants(state.getFilteredRestaurants(), this.heartListener);
     }
 

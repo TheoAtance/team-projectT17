@@ -1,11 +1,11 @@
-package ui.components;
+package view; // Ensure this is in the 'view' package
 
-import entity.Restaurant;
+import view.RestaurantPanel; // Import the new RestaurantPanel
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
-import java.util.ArrayList; // Added for default constructor
+import java.util.ArrayList;
 
 /**
  * A scrollable panel that displays a grid of RestaurantPanel cards.
@@ -16,17 +16,14 @@ public class RestaurantListView extends JPanel {
 
     private final JPanel contentPanel;
     private final JScrollPane scrollPane;
-    private final HeartClickListener heartListener; // Stored here to pass to RestaurantPanel
+    private final RestaurantPanel.HeartClickListener heartListener;
 
     // adjustable column settings
     private int preferredColumns = 5;      // default column count
-    private int cardWidth = 250;           // estimated width of a card including padding
+    // FIXED: Declare cardWidth as a local constant matching RestaurantPanel's CARD_WIDTH
+    private static final int CARD_WIDTH_FIXED = 280; // Use a distinct name to avoid confusion
 
-    public interface HeartClickListener {
-        void onHeartClicked(Restaurant restaurant, boolean newFavoriteState);
-    }
-
-    public RestaurantListView(List<Restaurant> restaurants, HeartClickListener heartListener) {
+    public RestaurantListView(List<RestaurantPanel.RestaurantDisplayData> displayDataList, RestaurantPanel.HeartClickListener heartListener) {
         setLayout(new BorderLayout());
         this.heartListener = heartListener; // Store the listener
 
@@ -58,11 +55,10 @@ public class RestaurantListView extends JPanel {
         });
 
         // Populate initially (if any restaurants are passed)
-        populateRestaurants(restaurants); // Removed heartListener from here as it's a field now
+        populateRestaurants(displayDataList);
     }
 
-    // New constructor for situations where no initial restaurants are available
-    public RestaurantListView(HeartClickListener heartListener) {
+    public RestaurantListView(RestaurantPanel.HeartClickListener heartListener) {
         this(new ArrayList<>(), heartListener);
     }
 
@@ -74,8 +70,8 @@ public class RestaurantListView extends JPanel {
         int width = getWidth();
         if (width <= 0) return;
 
-        // estimate number of columns based on available space
-        int calculatedColumns = Math.max(1, width / cardWidth);
+        // FIXED: Use the local CARD_WIDTH_FIXED constant
+        int calculatedColumns = Math.max(1, width / CARD_WIDTH_FIXED);
 
         if (calculatedColumns != preferredColumns) {
             preferredColumns = calculatedColumns;
@@ -85,16 +81,15 @@ public class RestaurantListView extends JPanel {
         }
     }
 
-    // Modified populateRestaurants to use the stored heartListener
-    private void populateRestaurants(List<Restaurant> restaurants) {
+    private void populateRestaurants(List<RestaurantPanel.RestaurantDisplayData> displayDataList) {
         contentPanel.removeAll();
 
-        for (Restaurant restaurant : restaurants) {
-            RestaurantPanel panel = new RestaurantPanel(restaurant);
+        for (RestaurantPanel.RestaurantDisplayData displayData : displayDataList) {
+            RestaurantPanel panel = new RestaurantPanel(displayData);
             panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-            if (this.heartListener != null) { // Use the stored heartListener
-                panel.setHeartClickListener((r, newState) -> this.heartListener.onHeartClicked(r, newState));
+            if (this.heartListener != null) {
+                panel.setHeartClickListener(this.heartListener);
             }
 
             contentPanel.add(panel);
@@ -104,14 +99,8 @@ public class RestaurantListView extends JPanel {
         contentPanel.repaint();
     }
 
-    /**
-     * Allows dynamic updating of the grid.
-     * The heartListener no longer needs to be passed here, as it's part of the component's state.
-     */
-    public void updateRestaurants(List<Restaurant> restaurants, HeartClickListener heartListener) {
-        // We now ignore the heartListener passed here, and use the one from the constructor.
-        // This makes the RestaurantListView self-contained regarding its listener.
-        populateRestaurants(restaurants);
+    public void updateRestaurants(List<RestaurantPanel.RestaurantDisplayData> displayDataList, RestaurantPanel.HeartClickListener heartListener) {
+        populateRestaurants(displayDataList);
     }
 
     public JScrollPane getScrollPane() {

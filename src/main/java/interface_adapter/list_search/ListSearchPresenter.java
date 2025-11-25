@@ -2,11 +2,12 @@ package interface_adapter.list_search;
 
 import use_case.list_search.ListSearchOutputBoundary;
 import use_case.list_search.ListSearchOutputData;
+import view.RestaurantPanel; // NEW: Import RestaurantPanel for its inner class
+import entity.Restaurant; // Keep this, as interactor passes entity.Restaurant
 
-/**
- * Presenter for the ListSearch use case.
- * Updates the ListSearchViewModel.
- */
+import java.util.ArrayList;
+import java.util.List;
+
 public class ListSearchPresenter implements ListSearchOutputBoundary {
 
     private final ListSearchViewModel listSearchViewModel;
@@ -15,33 +16,37 @@ public class ListSearchPresenter implements ListSearchOutputBoundary {
         this.listSearchViewModel = listSearchViewModel;
     }
 
-    /**
-     * Called when interactor delivers successful results.
-     */
     @Override
     public void presentResults(ListSearchOutputData outputData) {
-        // 1. Get the current state
         ListSearchState state = listSearchViewModel.getState();
 
-        // 2. Update the state with new data
-        state.setFilteredRestaurants(outputData.getFilteredRestaurants());
-        // Clear any previous error since this was successful
-        state.setErrorMessage(null);
+        // Convert List<entity.Restaurant> from outputData to List<RestaurantPanel.RestaurantDisplayData>
+        List<RestaurantPanel.RestaurantDisplayData> displayDataList = new ArrayList<>();
+        for (Restaurant restaurant : outputData.getFilteredRestaurants()) { // ADJUSTED: Use getFilteredRestaurants()
+            RestaurantPanel.RestaurantDisplayData displayData = new RestaurantPanel.RestaurantDisplayData(
+                    restaurant.getId(),
+                    restaurant.getName(),
+                    restaurant.getType(),
+                    restaurant.getRating(),
+                    restaurant.hasStudentDiscount(),
+                    restaurant.getDiscountValue()
+            );
+            displayDataList.add(displayData);
+        }
 
-        // 3. Update ViewModel and fire change
+        state.setFilteredRestaurants(displayDataList);
+        // REMOVED: ListSearchOutputData does not contain searchQuery, so we don't update it from outputData.
+        // The searchQuery is typically stored in the ListSearchState as part of the input, not output.
+        // state.setSearchQuery(outputData.getSearchQuery()); // THIS LINE IS REMOVED
+
         listSearchViewModel.setState(state);
         listSearchViewModel.firePropertyChanged();
     }
 
-    /**
-     * Called on search error.
-     */
     @Override
-    public void presentError(String error) {
+    public void presentError(String errorMessage) {
         ListSearchState state = listSearchViewModel.getState();
-
-        state.setErrorMessage(error);
-
+        state.setErrorMessage(errorMessage);
         listSearchViewModel.setState(state);
         listSearchViewModel.firePropertyChanged();
     }
