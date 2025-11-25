@@ -1,5 +1,6 @@
 package app;
 
+import data_access.CurrentUser;
 import data_access.FirebaseUserAuth;
 import data_access.FirestoreUserRepo;
 import data_access.GooglePlacesGateway;
@@ -75,7 +76,9 @@ public class AppBuilder {
 
     // Shared data access objects
     private final IAuthGateway authGateway = new FirebaseUserAuth();
-    private final IUserRepo userRepository = new FirestoreUserRepo();;
+    private final IUserRepo userRepository = new FirestoreUserRepo();
+    private final CurrentUser currentUser = new CurrentUser(authGateway, userRepository);
+
     private JsonRestaurantDataAccessObject restaurantDataAccess;
     private GooglePlacesGateway googlePlacesGateway = new GooglePlacesGateway();
 
@@ -222,7 +225,8 @@ public class AppBuilder {
         // Create Logout Interactor
         LogoutInputBoundary logoutInteractor = new LogoutUserInteractor(
                 authGateway,
-                logoutPresenter
+                logoutPresenter,
+                currentUser
         );
 
         // Create Logout Controller

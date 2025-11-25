@@ -14,7 +14,7 @@ public interface IUserRepo {
      * @return An Optional containing the User entity if found, or an empty Optional otherwise.
      * @throws PersistenceException if an unexpected database error occurs during retrieval.
      */
-    Optional<User> getUserByUid(String uid) throws PersistenceException;
+    User getUserByUid(String uid) throws PersistenceException;
 
     /**
      * Saves a new User Entity to the database. This is used immediately after registration.
@@ -37,4 +37,11 @@ public interface IUserRepo {
      * @return true if the user exists in Firestore, false otherwise.
      */
     boolean existsByUid(String uid);
+
+
+    /**
+     * Get all user documents from firebase and use each user's data to make a user obj then map the user's uid
+     * to its respective user obj then save this in-memory map as a field for easy access to user data.
+     */
+    void loadAllUsers() throws PersistenceException;
 }
