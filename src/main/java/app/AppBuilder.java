@@ -254,6 +254,7 @@ public class AppBuilder {
         // Create View
         FilterView filterView = new FilterView(filterViewModel);
         filterView.setFilterController(filterController);
+        filterView.setViewManagerModel(viewManagerModel);
 
         // Add to card panel
         cardPanel.add(filterView, filterView.getViewName());
