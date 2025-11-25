@@ -1,34 +1,31 @@
 package interface_adapter.list_search;
 
-import entity.Restaurant;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.util.List;
 
 /**
  * Observable view model for ListSearch.
+ * Holds the ListSearchState.
  */
 public class ListSearchViewModel {
+    public static final String STATE_PROPERTY = "state";
+
     private final PropertyChangeSupport support = new PropertyChangeSupport(this);
-    private List<Restaurant> filteredRestaurants;
-    private String errorMessage;
+    private ListSearchState state = new ListSearchState();
 
-    public void setFilteredRestaurants(List<Restaurant> restaurants) {
-        this.filteredRestaurants = restaurants;
-        support.firePropertyChange("filteredRestaurants", null, restaurants);
+    public void setState(ListSearchState state) {
+        this.state = state;
     }
 
-    public List<Restaurant> getFilteredRestaurants() {
-        return filteredRestaurants;
+    public ListSearchState getState() {
+        return state;
     }
 
-    public void setErrorMessage(String error) {
-        this.errorMessage = error;
-        support.firePropertyChange("errorMessage", null, error);
-    }
-
-    public String getErrorMessage() {
-        return errorMessage;
+    /**
+     * Fires a property change to let the View know the State has changed.
+     */
+    public void firePropertyChanged() {
+        support.firePropertyChange(STATE_PROPERTY, null, this.state);
     }
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {
