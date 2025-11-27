@@ -1,11 +1,8 @@
 package app;
 
 import data_access.FirebaseService;
-import interface_adapter.ViewManagerModel;
-import view.ViewManager;
 
 import javax.swing.*;
-import java.awt.*;
 
 /**
  * The Main class for the Restaurant Review Application.
@@ -14,10 +11,7 @@ import java.awt.*;
 public class Main {
     public static void main(String[] args) {
         // Initialize Firebase
-        System.out.println("Initializing Firebase...");
         FirebaseService firebaseService = FirebaseService.getInstance();
-        System.out.println("Firebase initialized successfully.");
-
 
         // Build the application
         AppBuilder appBuilder = new AppBuilder();
@@ -28,13 +22,9 @@ public class Main {
                 .addFilterView()
                 .build();
 
-
-
         // Display the application
         application.pack();
         application.setLocationRelativeTo(null); // Center on screen
         application.setVisible(true);
-
-        System.out.println("Application launched successfully!");
     }
 }

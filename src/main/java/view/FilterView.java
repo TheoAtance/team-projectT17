@@ -88,7 +88,6 @@ public class FilterView extends JPanel implements PropertyChangeListener {
         buttonPanel = new JPanel();
         buttonPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
         buttonPanel.setBackground(Color.WHITE);
-        buttonPanel.setBorder(BorderFactory.createLineBorder(Color.RED, 2)); // Debug border
 
         topPanel.add(headerPanel, BorderLayout.NORTH);
         topPanel.add(buttonPanel, BorderLayout.CENTER);
@@ -114,20 +113,12 @@ public class FilterView extends JPanel implements PropertyChangeListener {
      * This should be called after the controller is set.
      */
     public void initializeFilterButtons() {
-        System.out.println("initializeFilterButtons() called");
-
         if (filterController == null) {
-            System.out.println("FilterController is null!");
             return;
         }
 
         buttonPanel.removeAll();
         String[] types = filterController.getAvailableTypes();
-
-        System.out.println("Available types in FilterView: " + types.length);
-        for (String type : types) {
-            System.out.println("  - Creating button for: " + type);
-        }
 
         if (types.length == 0) {
             JLabel noTypesLabel = new JLabel("No restaurant types available");
@@ -138,14 +129,11 @@ public class FilterView extends JPanel implements PropertyChangeListener {
                 JButton typeButton = createFilterButton(type);
                 typeButton.addActionListener(e -> filterController.execute(type));
                 buttonPanel.add(typeButton);
-                System.out.println("  ✓ Button added to panel: " + type);
             }
         }
 
-        System.out.println("Button panel component count: " + buttonPanel.getComponentCount());
         buttonPanel.revalidate();
         buttonPanel.repaint();
-        System.out.println("Button panel revalidated and repainted");
     }
 
     private JButton createFilterButton(String text) {
@@ -159,8 +147,6 @@ public class FilterView extends JPanel implements PropertyChangeListener {
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         button.setPreferredSize(new Dimension(180, 40));
         button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-
-        System.out.println("Created button: " + text + " with size: " + button.getPreferredSize());
 
         // Hover effect
         button.addMouseListener(new java.awt.event.MouseAdapter() {

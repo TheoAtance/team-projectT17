@@ -236,8 +236,6 @@ public class AppBuilder {
      * @return this AppBuilder for method chaining
      */
     public AppBuilder addFilterView() {
-        System.out.println("Adding FilterView...");
-
         // Create View Model
         filterViewModel = new FilterViewModel();
 
@@ -253,20 +251,6 @@ public class AppBuilder {
         // Create Controller
         FilterController filterController = new FilterController(filterInteractor);
 
-        System.out.println("FilterController created");
-
-        // Test if we can get types
-        try {
-            String[] types = filterController.getAvailableTypes();
-            System.out.println("Available restaurant types: " + types.length);
-            for (String type : types) {
-                System.out.println("  - " + type);
-            }
-        } catch (Exception e) {
-            System.err.println("Error getting available types: " + e.getMessage());
-            e.printStackTrace();
-        }
-
         // Create View
         FilterView filterView = new FilterView(filterViewModel);
         filterView.setFilterController(filterController);
@@ -274,8 +258,6 @@ public class AppBuilder {
 
         // Add to card panel
         cardPanel.add(filterView, filterView.getViewName());
-
-        System.out.println("FilterView added to card panel");
 
         return this;
     }

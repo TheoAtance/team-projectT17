@@ -24,10 +24,8 @@ public class JsonRestaurantDataAccessObject implements IRestaurantDataAccess {
      * @throws IOException throws IOException
      */
     public JsonRestaurantDataAccessObject(String jsonPath, RestaurantFactory restaurantFactory) throws IOException {
-        System.out.println("Loading restaurant data from: " + jsonPath);
         try {
             JSONArray restaurantData = new JSONArray(Files.readString(Path.of(jsonPath)));
-            System.out.println("Loaded " + restaurantData.length() + " restaurants from JSON");
 
             // Map id to their respective restaurant obj
             for (int i = 0; i < restaurantData.length(); i++) {
@@ -36,8 +34,6 @@ public class JsonRestaurantDataAccessObject implements IRestaurantDataAccess {
                 Restaurant restaurant = restaurantFactory.create(curObj);
                 restaurantById.put(restaurantId, restaurant);
             }
-
-            System.out.println("Successfully loaded " + restaurantById.size() + " restaurants into memory");
         } catch (IOException e) {
             System.err.println("ERROR: Failed to load restaurant data!");
             e.printStackTrace();
@@ -52,12 +48,9 @@ public class JsonRestaurantDataAccessObject implements IRestaurantDataAccess {
      */
     @Override
     public List<Restaurant> getRestaurantsByType(String type) {
-        System.out.println("Filtering restaurants by type: " + type);
-        List<Restaurant> filtered = restaurantById.values().stream()
+        return restaurantById.values().stream()
                 .filter(restaurant -> restaurant.getType().equals(type))
                 .collect(Collectors.toList());
-        System.out.println("Found " + filtered.size() + " restaurants of type: " + type);
-        return filtered;
     }
 
     /**
@@ -67,17 +60,11 @@ public class JsonRestaurantDataAccessObject implements IRestaurantDataAccess {
      */
     @Override
     public String[] getAllRestaurantTypes() {
-        System.out.println("Getting all restaurant types...");
-        System.out.println("Total restaurants in memory: " + restaurantById.size());
-
-        String[] types = restaurantById.values().stream()
+        return restaurantById.values().stream()
                 .map(Restaurant::getType)
                 .distinct()
                 .limit(5)
                 .toArray(String[]::new);
-
-        System.out.println("Found " + types.length + " unique types");
-        return types;
     }
 
     /**
