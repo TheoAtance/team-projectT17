@@ -81,4 +81,11 @@ public class JsonRestaurantDataAccessObject implements IRestaurantDataAccess,
     public boolean existById(String id){
         return restaurantById.containsKey(id);
     }
+
+    public Restaurant getRandom(){
+        List<Restaurant> restaurants = new ArrayList<>(restaurantById.values());
+        Random rand = new Random();
+        int randomIndex = rand.nextInt(restaurants.size());
+        return restaurants.get(randomIndex);
+    }
 }

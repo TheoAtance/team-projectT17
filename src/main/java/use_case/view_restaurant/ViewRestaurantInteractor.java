@@ -66,6 +66,7 @@ public class ViewRestaurantInteractor implements ViewRestaurantInputBoundary{
             final ViewRestaurantOutputData viewRestaurantOutputData =
                     new ViewRestaurantOutputData.Builder()
                             .name(restaurant.getName())
+                            .id(restaurant.getId())
                             .address(restaurant.getAddress())
                             .type(restaurant.getType())
                             .rating(restaurant.getRating())

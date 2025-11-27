@@ -8,6 +8,7 @@ import java.util.List;
  */
 public class ViewRestaurantState {
     private String name = "";
+    private String id = "";
     private String address = "";
     private String type = "";
     private double rating = 0;
@@ -20,6 +21,7 @@ public class ViewRestaurantState {
 
     public ViewRestaurantState(ViewRestaurantState copy) {
         name = copy.name;
+        id = copy.id;
         address = copy.address;
         type = copy.type;
         rating = copy.rating;
@@ -40,6 +42,14 @@ public class ViewRestaurantState {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getAddress() {

@@ -3,11 +3,13 @@ package view.panel_makers;
 import javax.naming.NamingEnumeration;
 import javax.swing.*;
 import java.awt.*;
+import java.util.concurrent.Flow;
 
 public class RestaurantTitlePanel extends JPanel{
     private final JLabel nameLabel;
     private final PillIconTextPanel ratingPill;
     private final PillIconTextPanel typePill;
+    private final PillIconTextPanel exitPill;
 
     public RestaurantTitlePanel(String name, String type, double rating, int ratingCount){
         setLayout(new BorderLayout());
@@ -20,18 +22,30 @@ public class RestaurantTitlePanel extends JPanel{
 
         typePill = new PillIconTextPanel(type);
         ratingPill = new PillIconTextPanel("★", rating + " (" + ratingCount + ")");
+        exitPill = new PillIconTextPanel("x");
+
+        exitPill.getTextLabel().setFont(exitPill.getTextLabel().getFont().deriveFont(Font.BOLD, 16f));
+        exitPill.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
 
         // add an invisible wrapper panel that aligns the pill so that it hugs the right wall
         JPanel rightWrapper = new JPanel(new FlowLayout(FlowLayout.RIGHT,16, 8));
+        JPanel leftWrapper = new JPanel(new FlowLayout(FlowLayout.LEFT, 16, 8));
+
+        leftWrapper.setOpaque(false);
         rightWrapper.setOpaque(false);
-        rightWrapper.add(typePill);
-        rightWrapper.add(ratingPill);
+
+
+        leftWrapper.add(nameLabel);
+        leftWrapper.add(typePill);
+
+        leftWrapper.add(ratingPill);
+        rightWrapper.add(exitPill);
 
         // A container for name and pill so we can make it stick to the top with BorderLayout.NORTH
         JPanel topRow = new JPanel(new BorderLayout());
         topRow.setOpaque(false);
-        topRow.add(nameLabel, BorderLayout.WEST);
+        topRow.add(leftWrapper, BorderLayout.WEST);
         topRow.add(rightWrapper, BorderLayout.EAST);
         topRow.setBorder(BorderFactory.createEmptyBorder(12, 0, 8, 0));
 
@@ -53,5 +67,9 @@ public class RestaurantTitlePanel extends JPanel{
         typePill.setText(type);
         revalidate();
         repaint();
+    }
+
+    public PillIconTextPanel getExitPill(){
+        return exitPill;
     }
 }

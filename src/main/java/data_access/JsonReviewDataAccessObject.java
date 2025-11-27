@@ -16,8 +16,8 @@ public class JsonReviewDataAccessObject implements AddReviewDataAccessInterface 
             JSONArray reviewData = new JSONArray(Files.readString(Path.of(jsonPath)));
             for(int i = 0; i < reviewData.length();i++){
                 JSONObject curObj = reviewData.getJSONObject(i);
-                String reviewId = curObj.getString("id");
-                String userId = curObj.getString("userId");
+                String reviewId = curObj.getString("reviewId");
+                String userId = curObj.getString("authorId");
                 String restaurantId = curObj.getString("restaurantId");
                 String content = curObj.getString("content");
                 int likes = curObj.getInt("likes");

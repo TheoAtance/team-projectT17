@@ -32,6 +32,7 @@ public class ViewRestaurantPresenter implements ViewRestaurantOutputBoundary {
         // (this error results in accidentally painting partially wrong information onto screen)
 
         newState.setName(data.getName());
+        newState.setId(data.getId());
         newState.setAddress(data.getAddress());
         newState.setType(data.getType());
         newState.setRating(data.getRating());

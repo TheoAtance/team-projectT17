@@ -19,16 +19,19 @@ public class Main {
         FirebaseService firebaseService = FirebaseService.getInstance();
         System.out.println("Firebase initialized successfully.");
 
+        System.setProperty("sun.java2d.opengl", "true");
+
 
         // Build the application
         AppBuilder appBuilder = new AppBuilder();
         JFrame application = appBuilder
-//                .addLoginView()
-//                .addRegisterView()
-//                .addLoggedInView()
-//                .addFilterView()
                 .addRestaurantView()
+                .addLoginView()
+                .addRegisterView()
+                .addLoggedInView()
+                .addFilterView()
                 .addRestaurantUseCase()
+                .addAddReviewUseCase()
                 .build();
 
 

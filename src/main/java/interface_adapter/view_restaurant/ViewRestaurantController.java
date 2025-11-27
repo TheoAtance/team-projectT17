@@ -17,10 +17,7 @@ public class ViewRestaurantController {
     }
 
     public void execute(String restaurantId) throws IOException {
-        System.out.println("[Controller] execute called with id = " + restaurantId);
-
         final ViewRestaurantInputData viewRestaurantInputData = new ViewRestaurantInputData(restaurantId);
-
         viewRestaurantUseCaseInteractor.execute(viewRestaurantInputData);
     }
 }

@@ -9,6 +9,7 @@ public class PillIconTextPanel extends RoundedPanel {
 
     private final JLabel iconLabel;
     private final JLabel textLabel;
+    private final int radius = -1;
 
     public PillIconTextPanel(String icon, String text) {
         super(30);
@@ -16,6 +17,7 @@ public class PillIconTextPanel extends RoundedPanel {
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         setBackground(Color.WHITE);
         setAlignmentX(Component.LEFT_ALIGNMENT);
+
 
         iconLabel = new JLabel(icon);
         textLabel = new JLabel(text);
@@ -67,6 +69,10 @@ public class PillIconTextPanel extends RoundedPanel {
         iconLabel.setText(icon);
         revalidate();
         repaint();
+    }
+
+    public JLabel getTextLabel(){
+        return textLabel;
     }
 
     @Override
