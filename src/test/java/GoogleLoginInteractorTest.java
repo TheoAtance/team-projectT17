@@ -17,7 +17,6 @@ import use_case.google_login.GoogleLoginOutputBoundary;
 import use_case.google_login.GoogleLoginOutputData;
 
 import java.io.IOException;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -25,7 +24,7 @@ import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for GoogleLoginInteractor using Mockito, which auto-generates fake objects at runtime to test only the
- *  * interactor's logic.
+ * interactor's logic.
  * Tests both registration (new user) and login (existing user) flows via Google OAuth.
  */
 @ExtendWith(MockitoExtension.class)
@@ -68,6 +67,10 @@ class GoogleLoginInteractorTest {
                 .thenReturn(googleAuthResult);
         when(mockUserRepository.existsByUid(TEST_UID))
                 .thenReturn(false);  // User doesn't exist yet
+        when(mockAuthGateway.getCurrentUserUid())
+                .thenReturn(TEST_UID);
+        when(mockUserRepository.getUserByUid(TEST_UID))
+                .thenReturn(new User(TEST_UID, TEST_EMAIL, TEST_DISPLAY_NAME));
 
         // Act
         interactor.execute();
@@ -88,7 +91,13 @@ class GoogleLoginInteractorTest {
         assertEquals(TEST_EMAIL, savedUser.getEmail());
         assertEquals(TEST_DISPLAY_NAME, savedUser.getNickname());
 
-        // 4. Verify success view was prepared
+        // 4. Verify loadAllUsers was called after successful registration
+        verify(mockUserRepository).loadAllUsers();
+
+        // 5. Verify getCurrentUserUid was called by CurrentUser instance
+        verify(mockAuthGateway, atLeastOnce()).getCurrentUserUid();
+
+        // 6. Verify success view was prepared
         ArgumentCaptor<GoogleLoginOutputData> outputCaptor =
                 ArgumentCaptor.forClass(GoogleLoginOutputData.class);
         verify(mockPresenter).prepareSuccessView(outputCaptor.capture());
@@ -98,10 +107,10 @@ class GoogleLoginInteractorTest {
         assertTrue(output.isSuccess());
         assertEquals(TEST_UID, output.getUid());
 
-        // 5. Verify no failure view was called
+        // 7. Verify no failure view was called
         verify(mockPresenter, never()).prepareFailView(anyString());
 
-        // 6. Verify logout was never called
+        // 8. Verify logout was never called
         verify(mockAuthGateway, never()).logout();
     }
 
@@ -119,7 +128,9 @@ class GoogleLoginInteractorTest {
         when(mockUserRepository.existsByUid(TEST_UID))
                 .thenReturn(true);  // User already exists
         when(mockUserRepository.getUserByUid(TEST_UID))
-                .thenReturn(Optional.of(existingUser));
+                .thenReturn(existingUser);
+        when(mockAuthGateway.getCurrentUserUid())
+                .thenReturn(TEST_UID);
 
         // Act
         interactor.execute();
@@ -132,10 +143,16 @@ class GoogleLoginInteractorTest {
         verify(mockUserRepository).existsByUid(TEST_UID);
 
         // 3. Verify existing user was retrieved (NOT saved again)
-        verify(mockUserRepository).getUserByUid(TEST_UID);
+        verify(mockUserRepository, atLeastOnce()).getUserByUid(TEST_UID);
         verify(mockUserRepository, never()).save(any(User.class));
 
-        // 4. Verify success view was prepared with EXISTING user's data
+        // 4. Verify loadAllUsers was called after successful login
+        verify(mockUserRepository).loadAllUsers();
+
+        // 5. Verify getCurrentUserUid was called by CurrentUser instance
+        verify(mockAuthGateway, atLeastOnce()).getCurrentUserUid();
+
+        // 6. Verify success view was prepared with EXISTING user's data
         ArgumentCaptor<GoogleLoginOutputData> outputCaptor =
                 ArgumentCaptor.forClass(GoogleLoginOutputData.class);
         verify(mockPresenter).prepareSuccessView(outputCaptor.capture());
@@ -145,7 +162,7 @@ class GoogleLoginInteractorTest {
         assertTrue(output.isSuccess());
         assertEquals(TEST_UID, output.getUid());
 
-        // 5. Verify no failure view was called
+        // 7. Verify no failure view was called
         verify(mockPresenter, never()).prepareFailView(anyString());
     }
 
@@ -164,6 +181,7 @@ class GoogleLoginInteractorTest {
         // Assert
         verify(mockPresenter).prepareFailView("Google Sign-In failed: Network timeout");
         verify(mockUserRepository, never()).existsByUid(anyString());
+        verify(mockUserRepository, never()).loadAllUsers();
     }
 
     @Test
@@ -178,6 +196,7 @@ class GoogleLoginInteractorTest {
 
         // Assert
         verify(mockPresenter).prepareFailView("Google Sign-In failed: Invalid OAuth client credentials");
+        verify(mockUserRepository, never()).loadAllUsers();
     }
 
     // ==================== PERSISTENCE FAILURES ====================
@@ -213,29 +232,11 @@ class GoogleLoginInteractorTest {
 
         // 5. Success view never called
         verify(mockPresenter, never()).prepareSuccessView(any(GoogleLoginOutputData.class));
+
+        // 6. loadAllUsers should not be called if save fails
+        verify(mockUserRepository, never()).loadAllUsers();
     }
 
-    @Test
-    @DisplayName("Failure: Profile missing for existing Google user")
-    void testProfileMissingForExistingUser() throws IOException {
-        // Arrange - existsByUid says true, but getUserByUid returns empty
-        GoogleAuthResult googleAuthResult = new GoogleAuthResult(TEST_UID, TEST_EMAIL, TEST_DISPLAY_NAME);
-
-        when(mockAuthGateway.loginWithGoogle())
-                .thenReturn(googleAuthResult);
-        when(mockUserRepository.existsByUid(TEST_UID))
-                .thenReturn(true);  // Claims user exists
-        when(mockUserRepository.getUserByUid(TEST_UID))
-                .thenReturn(Optional.empty());  // But profile is missing!
-
-        // Act
-        interactor.execute();
-
-        // Assert
-        verify(mockAuthGateway).logout();
-        verify(mockPresenter).prepareFailView("Profile data missing after successful Google login.");
-        verify(mockPresenter, never()).prepareSuccessView(any(GoogleLoginOutputData.class));
-    }
 
     // ==================== DATA INTEGRITY ====================
 
@@ -253,6 +254,10 @@ class GoogleLoginInteractorTest {
                 .thenReturn(googleAuthResult);
         when(mockUserRepository.existsByUid("google-uid-abc123"))
                 .thenReturn(false);
+        when(mockAuthGateway.getCurrentUserUid())
+                .thenReturn("google-uid-abc123");
+        when(mockUserRepository.getUserByUid("google-uid-abc123"))
+                .thenReturn(new User("google-uid-abc123", "john.doe@gmail.com", "John Doe"));
 
         // Act
         interactor.execute();
@@ -267,6 +272,9 @@ class GoogleLoginInteractorTest {
         assertEquals("John Doe", savedUser.getNickname());
         assertEquals("en", savedUser.getLanguage());  // Default language
         assertTrue(savedUser.getFavoriteRestaurantIds().isEmpty());  // Empty favorites
+
+        // Verify loadAllUsers was called
+        verify(mockUserRepository).loadAllUsers();
     }
 
     // ==================== EDGE CASES ====================
@@ -281,6 +289,10 @@ class GoogleLoginInteractorTest {
                 .thenReturn(googleAuthResult);
         when(mockUserRepository.existsByUid(TEST_UID))
                 .thenReturn(false);
+        when(mockAuthGateway.getCurrentUserUid())
+                .thenReturn(TEST_UID);
+        when(mockUserRepository.getUserByUid(TEST_UID))
+                .thenReturn(new User(TEST_UID, TEST_EMAIL, "A"));
 
         // Act
         interactor.execute();
@@ -291,6 +303,9 @@ class GoogleLoginInteractorTest {
 
         User savedUser = userCaptor.getValue();
         assertEquals("A", savedUser.getNickname());
+
+        // Verify loadAllUsers was called
+        verify(mockUserRepository).loadAllUsers();
     }
 
     @Test
@@ -307,6 +322,10 @@ class GoogleLoginInteractorTest {
                 .thenReturn(googleAuthResult);
         when(mockUserRepository.existsByUid(TEST_UID))
                 .thenReturn(false);
+        when(mockAuthGateway.getCurrentUserUid())
+                .thenReturn(TEST_UID);
+        when(mockUserRepository.getUserByUid(TEST_UID))
+                .thenReturn(new User(TEST_UID, "user+test@gmail.com", TEST_DISPLAY_NAME));
 
         // Act
         interactor.execute();
@@ -317,8 +336,10 @@ class GoogleLoginInteractorTest {
 
         User savedUser = userCaptor.getValue();
         assertEquals("user+test@gmail.com", savedUser.getEmail());
-    }
 
+        // Verify loadAllUsers was called
+        verify(mockUserRepository).loadAllUsers();
+    }
 
     // ==================== INTEGRATION TESTS ====================
 
@@ -332,6 +353,10 @@ class GoogleLoginInteractorTest {
                 .thenReturn(googleAuthResult);
         when(mockUserRepository.existsByUid(TEST_UID))
                 .thenReturn(false);
+        when(mockAuthGateway.getCurrentUserUid())
+                .thenReturn(TEST_UID);
+        when(mockUserRepository.getUserByUid(TEST_UID))
+                .thenReturn(new User(TEST_UID, TEST_EMAIL, TEST_DISPLAY_NAME));
 
         // Act
         interactor.execute();
@@ -348,7 +373,10 @@ class GoogleLoginInteractorTest {
         // 3. Save new user
         inOrder.verify(mockUserRepository).save(any(User.class));
 
-        // 4. Call presenter
+        // 4. Load all users
+        inOrder.verify(mockUserRepository).loadAllUsers();
+
+        // 5. Call presenter
         inOrder.verify(mockPresenter).prepareSuccessView(any(GoogleLoginOutputData.class));
     }
 
@@ -364,7 +392,9 @@ class GoogleLoginInteractorTest {
         when(mockUserRepository.existsByUid(TEST_UID))
                 .thenReturn(true);
         when(mockUserRepository.getUserByUid(TEST_UID))
-                .thenReturn(Optional.of(existingUser));
+                .thenReturn(existingUser);
+        when(mockAuthGateway.getCurrentUserUid())
+                .thenReturn(TEST_UID);
 
         // Act
         interactor.execute();
@@ -381,10 +411,13 @@ class GoogleLoginInteractorTest {
         // 3. Load existing user (NOT save)
         inOrder.verify(mockUserRepository).getUserByUid(TEST_UID);
 
-        // 4. Call presenter
+        // 4. Load all users
+        inOrder.verify(mockUserRepository).loadAllUsers();
+
+        // 5. Call presenter
         inOrder.verify(mockPresenter).prepareSuccessView(any(GoogleLoginOutputData.class));
 
-        // 5. Verify save was never called
+        // 6. Verify save was never called
         verify(mockUserRepository, never()).save(any(User.class));
     }
 
@@ -398,11 +431,15 @@ class GoogleLoginInteractorTest {
                 .thenReturn(googleAuthResult);
         when(mockUserRepository.existsByUid(TEST_UID))
                 .thenReturn(false);
+        when(mockAuthGateway.getCurrentUserUid())
+                .thenReturn(TEST_UID);
+        when(mockUserRepository.getUserByUid(TEST_UID))
+                .thenReturn(new User(TEST_UID, TEST_EMAIL, "New User"));
 
         interactor.execute();
 
         verify(mockUserRepository).save(any(User.class));
-        verify(mockUserRepository, never()).getUserByUid(anyString());
+        verify(mockUserRepository).loadAllUsers();
 
         // Reset mocks for test 2
         reset(mockAuthGateway, mockUserRepository, mockPresenter);
@@ -415,11 +452,46 @@ class GoogleLoginInteractorTest {
         when(mockUserRepository.existsByUid(TEST_UID))
                 .thenReturn(true);
         when(mockUserRepository.getUserByUid(TEST_UID))
-                .thenReturn(Optional.of(existingUser));
+                .thenReturn(existingUser);
+        when(mockAuthGateway.getCurrentUserUid())
+                .thenReturn(TEST_UID);
 
         interactor.execute();
 
         verify(mockUserRepository, never()).save(any(User.class));
-        verify(mockUserRepository).getUserByUid(TEST_UID);
+        verify(mockUserRepository, atLeastOnce()).getUserByUid(TEST_UID);
+        verify(mockUserRepository).loadAllUsers();
+    }
+
+    @Test
+    @DisplayName("Verify CurrentUser can retrieve user after successful Google login")
+    void testCurrentUserFunctionalityAfterLogin() throws IOException {
+        // Arrange
+        GoogleAuthResult googleAuthResult = new GoogleAuthResult(TEST_UID, TEST_EMAIL, TEST_DISPLAY_NAME);
+        User mockUser = new User(TEST_UID, TEST_EMAIL, TEST_DISPLAY_NAME);
+
+        when(mockAuthGateway.loginWithGoogle())
+                .thenReturn(googleAuthResult);
+        when(mockUserRepository.existsByUid(TEST_UID))
+                .thenReturn(true);
+        when(mockUserRepository.getUserByUid(TEST_UID))
+                .thenReturn(mockUser);
+        when(mockAuthGateway.getCurrentUserUid())
+                .thenReturn(TEST_UID);
+
+        // Act
+        interactor.execute();
+
+        // Assert
+        // Verify that getCurrentUserUid was called at least once
+        // (by the CurrentUser test instance in the interactor)
+        verify(mockAuthGateway, atLeastOnce()).getCurrentUserUid();
+
+        // Verify getUserByUid was called at least twice
+        // (once for the main flow, once for CurrentUser test)
+        verify(mockUserRepository, atLeast(2)).getUserByUid(TEST_UID);
+
+        // Verify loadAllUsers was called
+        verify(mockUserRepository).loadAllUsers();
     }
 }

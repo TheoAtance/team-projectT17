@@ -3,7 +3,6 @@ import use_case.custom_login.CustomLoginOutputBoundary;
 import use_case.custom_login.CustomLoginUserInteractor;
 import use_case.custom_login.CustomLoginOutputData;
 
-
 import entity.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,8 +15,6 @@ import use_case.AuthFailureException;
 import use_case.IAuthGateway;
 import use_case.IUserRepo;
 import use_case.PersistenceException;
-
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -69,8 +66,10 @@ class CustomLoginUserInteractorTest {
 
         when(mockAuthGateway.loginWithEmailAndPassword(TEST_EMAIL, TEST_PASSWORD))
                 .thenReturn(TEST_UID);
+        when(mockAuthGateway.getCurrentUserUid())
+                .thenReturn(TEST_UID);
         when(mockUserRepository.getUserByUid(TEST_UID))
-                .thenReturn(Optional.of(mockUser));
+                .thenReturn(mockUser);
 
         // Act
         interactor.execute(inputData);
@@ -79,10 +78,13 @@ class CustomLoginUserInteractorTest {
         // 1. Verify authentication was attempted
         verify(mockAuthGateway).loginWithEmailAndPassword(TEST_EMAIL, TEST_PASSWORD);
 
-        // 2. Verify user profile was retrieved
-        verify(mockUserRepository).getUserByUid(TEST_UID);
+        // 2. Verify loadAllUsers was called after successful login
+        verify(mockUserRepository).loadAllUsers();
 
-        // 3. Verify success view was prepared with correct data
+        // 3. Verify getCurrentUserUid was called by CurrentUser instance
+        verify(mockAuthGateway, atLeastOnce()).getCurrentUserUid();
+
+        // 4. Verify success view was prepared with correct data
         ArgumentCaptor<CustomLoginOutputData> outputCaptor =
                 ArgumentCaptor.forClass(CustomLoginOutputData.class);
         verify(mockPresenter).prepareSuccessView(outputCaptor.capture());
@@ -92,10 +94,10 @@ class CustomLoginUserInteractorTest {
         assertTrue(output.isSuccess());
         assertEquals(TEST_UID, output.getUid());
 
-        // 4. Verify no failure view was called
+        // 5. Verify no failure view was called
         verify(mockPresenter, never()).prepareFailView(anyString());
 
-        // 5. Verify logout was never called
+        // 6. Verify logout was never called
         verify(mockAuthGateway, never()).logout();
     }
 
@@ -117,6 +119,7 @@ class CustomLoginUserInteractorTest {
         verify(mockAuthGateway).loginWithEmailAndPassword(TEST_EMAIL, "wrongPassword");
         verify(mockPresenter).prepareFailView("Login failed: Invalid email or password.");
         verify(mockUserRepository, never()).getUserByUid(anyString());
+        verify(mockUserRepository, never()).loadAllUsers();
         verify(mockPresenter, never()).prepareSuccessView(any(CustomLoginOutputData.class));
     }
 
@@ -135,6 +138,7 @@ class CustomLoginUserInteractorTest {
         // Assert
         verify(mockPresenter).prepareFailView("Login failed: Invalid email or password.");
         verify(mockUserRepository, never()).getUserByUid(anyString());
+        verify(mockUserRepository, never()).loadAllUsers();
     }
 
     @Test
@@ -152,6 +156,7 @@ class CustomLoginUserInteractorTest {
         // Assert
         verify(mockPresenter).prepareFailView("Login failed: Network timeout");
         verify(mockUserRepository, never()).getUserByUid(anyString());
+        verify(mockUserRepository, never()).loadAllUsers();
     }
 
     // ==================== DATA INTEGRITY FAILURES ====================
@@ -165,7 +170,7 @@ class CustomLoginUserInteractorTest {
         when(mockAuthGateway.loginWithEmailAndPassword(TEST_EMAIL, TEST_PASSWORD))
                 .thenReturn(TEST_UID);
         when(mockUserRepository.getUserByUid(TEST_UID))
-                .thenReturn(Optional.empty());  // Profile missing!
+                .thenReturn(null);  // Profile missing!
 
         // Act
         interactor.execute(inputData);
@@ -185,8 +190,10 @@ class CustomLoginUserInteractorTest {
 
         // 5. Success view never called
         verify(mockPresenter, never()).prepareSuccessView(any(CustomLoginOutputData.class));
-    }
 
+        // 6. loadAllUsers should never be called if profile is missing
+        verify(mockUserRepository, never()).loadAllUsers();
+    }
 
     // ==================== EDGE CASES ====================
 
@@ -204,6 +211,7 @@ class CustomLoginUserInteractorTest {
 
         // Assert
         verify(mockPresenter).prepareFailView("Login failed: Invalid email format");
+        verify(mockUserRepository, never()).loadAllUsers();
     }
 
     @Test
@@ -220,6 +228,7 @@ class CustomLoginUserInteractorTest {
 
         // Assert
         verify(mockPresenter).prepareFailView("Login failed: Password cannot be empty");
+        verify(mockUserRepository, never()).loadAllUsers();
     }
 
     @Test
@@ -232,8 +241,10 @@ class CustomLoginUserInteractorTest {
 
         when(mockAuthGateway.loginWithEmailAndPassword(TEST_EMAIL, TEST_PASSWORD))
                 .thenReturn(TEST_UID);
+        when(mockAuthGateway.getCurrentUserUid())
+                .thenReturn(TEST_UID);
         when(mockUserRepository.getUserByUid(TEST_UID))
-                .thenReturn(Optional.of(mockUser));
+                .thenReturn(mockUser);
 
         // Act
         interactor.execute(inputData);
@@ -245,6 +256,9 @@ class CustomLoginUserInteractorTest {
 
         CustomLoginOutputData output = outputCaptor.getValue();
         assertEquals("Test@User#123", output.getNickname());
+
+        // Verify loadAllUsers was called
+        verify(mockUserRepository).loadAllUsers();
     }
 
     @Test
@@ -256,8 +270,10 @@ class CustomLoginUserInteractorTest {
 
         when(mockAuthGateway.loginWithEmailAndPassword(TEST_EMAIL, TEST_PASSWORD))
                 .thenReturn(TEST_UID);
+        when(mockAuthGateway.getCurrentUserUid())
+                .thenReturn(TEST_UID);
         when(mockUserRepository.getUserByUid(TEST_UID))
-                .thenReturn(Optional.of(mockUser));
+                .thenReturn(mockUser);
 
         // Act
         interactor.execute(inputData);
@@ -271,10 +287,13 @@ class CustomLoginUserInteractorTest {
         // 2. Then, retrieve profile
         inOrder.verify(mockUserRepository).getUserByUid(TEST_UID);
 
-        // 3. Finally, call presenter
+        // 3. Load all users into cache
+        inOrder.verify(mockUserRepository).loadAllUsers();
+
+        // 4. Finally, call presenter
         inOrder.verify(mockPresenter).prepareSuccessView(any(CustomLoginOutputData.class));
 
-        // 4. Logout should never be called in success case
+        // 5. Logout should never be called in success case
         verify(mockAuthGateway, never()).logout();
     }
 
@@ -289,8 +308,10 @@ class CustomLoginUserInteractorTest {
 
         when(mockAuthGateway.loginWithEmailAndPassword(TEST_EMAIL, TEST_PASSWORD))
                 .thenReturn(TEST_UID);
+        when(mockAuthGateway.getCurrentUserUid())
+                .thenReturn(TEST_UID);
         when(mockUserRepository.getUserByUid(TEST_UID))
-                .thenReturn(Optional.of(mockUser));
+                .thenReturn(mockUser);
 
         // Act
         interactor.execute(inputData);
@@ -305,5 +326,35 @@ class CustomLoginUserInteractorTest {
         assertEquals(TEST_NICKNAME, output.getNickname());
         assertEquals(TEST_UID, output.getUid());
         assertTrue(output.isSuccess());
+
+        // Verify loadAllUsers was called
+        verify(mockUserRepository).loadAllUsers();
+    }
+
+    @Test
+    @DisplayName("Verify CurrentUser can retrieve user after successful login")
+    void testCurrentUserFunctionalityAfterLogin() {
+        // Arrange
+        CustomLoginInputData inputData = new CustomLoginInputData(TEST_EMAIL, TEST_PASSWORD);
+        User mockUser = new User(TEST_UID, TEST_EMAIL, TEST_NICKNAME);
+
+        when(mockAuthGateway.loginWithEmailAndPassword(TEST_EMAIL, TEST_PASSWORD))
+                .thenReturn(TEST_UID);
+        when(mockAuthGateway.getCurrentUserUid())
+                .thenReturn(TEST_UID);
+        when(mockUserRepository.getUserByUid(TEST_UID))
+                .thenReturn(mockUser);
+
+        // Act
+        interactor.execute(inputData);
+
+        // Assert
+        // Verify that getCurrentUserUid was called at least once
+        // (by the CurrentUser test instance in the interactor)
+        verify(mockAuthGateway, atLeastOnce()).getCurrentUserUid();
+
+        // Verify getUserByUid was called at least twice
+        // (once for the main flow, once for CurrentUser test)
+        verify(mockUserRepository, atLeast(2)).getUserByUid(TEST_UID);
     }
 }

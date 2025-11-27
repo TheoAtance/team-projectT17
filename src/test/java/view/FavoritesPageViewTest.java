@@ -1,4 +1,4 @@
-package test.view;
+package view;
 
 import interface_adapter.favorites.FavoritesState;
 import interface_adapter.favorites.FavoritesViewModel;

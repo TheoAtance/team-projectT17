@@ -1,3 +1,4 @@
+import data_access.CurrentUser;
 import use_case.logout.LogoutOutputBoundary;
 import use_case.logout.LogoutOutputData;
 import use_case.logout.LogoutUserInteractor;
@@ -20,13 +21,15 @@ class LogoutUserInteractorTest {
     private IAuthGateway authGateway;
     private LogoutOutputBoundary presenter;
     private LogoutUserInteractor interactor;
+    private CurrentUser currentUser;
 
     @BeforeEach
     void setUp() {
         authGateway = mock(IAuthGateway.class);
         presenter = mock(LogoutOutputBoundary.class);
+        currentUser = mock(CurrentUser.class);
 
-        interactor = new LogoutUserInteractor(authGateway, presenter);
+        interactor = new LogoutUserInteractor(authGateway, presenter, currentUser);
     }
 
     @Test

@@ -112,18 +112,8 @@ public class FirestoreUserRepo implements IUserRepo {
      * resulting in O(1) time complexity. The operation is asynchronous but blocks until
      * the document is retrieved from Firestore.
      *
-     * <p>Usage Example:</p>
-     *
-     * Optional&lt;User&gt; user = userRepo.getUserByUid("tRcfmLH7o1dYrUkm9");
-     * if (user.isPresent()) {
-     *     System.out.println("Found user: " + user.get().getNickname());
-     * } else {
-     *     System.out.println("User not found");
-     * }
-     *
-     *
      * @param uid The unique Firebase Authentication ID of the user
-     * @return An Optional containing the User if found, or Optional.empty() if not found
+     * @return User associated with the uid
      * @throws PersistenceException if a database error occurs during retrieval
      */
     @Override
