@@ -35,7 +35,6 @@ import use_case.logout.LogoutUserInteractor;
 import view.*;
 
 import javax.swing.*;
-import javax.swing.text.View;
 import java.awt.*;
 import java.io.IOException;
 
@@ -67,7 +66,7 @@ public class AppBuilder {
 
     // Shared data access objects
     private final IAuthGateway authGateway = new FirebaseUserAuth();
-    private final IUserRepo userRepository = new FirestoreUserRepo();;
+    private final IUserRepo userRepository = new FirestoreUserRepo();
     private JsonRestaurantDataAccessObject restaurantDataAccess;
 
 
@@ -87,13 +86,14 @@ public class AppBuilder {
             );
         } catch (IOException e) {
             System.err.println("Failed to load restaurant data: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
     /**
      * Adds the Login View to the application.
      *
-     * @return
+     * @return this AppBuilder for method chaining
      */
     public AppBuilder addLoginView() {
         // Create View Model
@@ -144,7 +144,7 @@ public class AppBuilder {
     /**
      * Adds the Register View to the application.
      *
-     * @return
+     * @return this AppBuilder for method chaining
      */
     public AppBuilder addRegisterView() {
         // Create View Model
@@ -195,7 +195,7 @@ public class AppBuilder {
     /**
      * Adds the Logged In View to the application.
      *
-     * @return
+     * @return this AppBuilder for method chaining
      */
     public AppBuilder addLoggedInView() {
         // Create View Model (if not already created)
@@ -233,9 +233,11 @@ public class AppBuilder {
     /**
      * Adds the Filter View to the application.
      *
-     * @return
+     * @return this AppBuilder for method chaining
      */
     public AppBuilder addFilterView() {
+        System.out.println("Adding FilterView...");
+
         // Create View Model
         filterViewModel = new FilterViewModel();
 
@@ -251,6 +253,20 @@ public class AppBuilder {
         // Create Controller
         FilterController filterController = new FilterController(filterInteractor);
 
+        System.out.println("FilterController created");
+
+        // Test if we can get types
+        try {
+            String[] types = filterController.getAvailableTypes();
+            System.out.println("Available restaurant types: " + types.length);
+            for (String type : types) {
+                System.out.println("  - " + type);
+            }
+        } catch (Exception e) {
+            System.err.println("Error getting available types: " + e.getMessage());
+            e.printStackTrace();
+        }
+
         // Create View
         FilterView filterView = new FilterView(filterViewModel);
         filterView.setFilterController(filterController);
@@ -259,20 +275,32 @@ public class AppBuilder {
         // Add to card panel
         cardPanel.add(filterView, filterView.getViewName());
 
+        System.out.println("FilterView added to card panel");
+
         return this;
     }
 
-    public AppBuilder addRestaurantView(){
+    /**
+     * Adds the Restaurant View to the application.
+     *
+     * @return this AppBuilder for method chaining
+     */
+    public AppBuilder addRestaurantView() {
         restaurantViewModel = new ViewRestaurantViewModel();
         restaurantView = new RestaurantView(restaurantViewModel);
         cardPanel.add(restaurantView, restaurantView.getViewName());
         return this;
     }
 
-    public JFrame build(){
+    /**
+     * Builds and returns the JFrame application.
+     *
+     * @return the configured JFrame
+     */
+    public JFrame build() {
         final JFrame application = new JFrame("UofT Eats - Restaurant Review App");
         application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        application.setSize(600, 500);
+        application.setSize(900, 600);
 
         application.add(cardPanel);
 

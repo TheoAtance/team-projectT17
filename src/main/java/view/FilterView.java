@@ -9,9 +9,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.List;
 
 /**
  * View for filtering restaurants by type.
+ * Displays filtered restaurants using RestaurantPanel cards.
  */
 public class FilterView extends JPanel implements PropertyChangeListener {
     public static final String VIEW_NAME = "filter";
@@ -23,23 +25,37 @@ public class FilterView extends JPanel implements PropertyChangeListener {
     private final JLabel titleLabel;
     private final JButton backButton;
     private final JPanel buttonPanel;
-    private final JPanel resultPanel;
-    private final JLabel filterTypeLabel;
-    private final JTextArea restaurantListArea;
+    private final JPanel restaurantCardsPanel;
     private final JScrollPane scrollPane;
+    private final JLabel filterTypeLabel;
 
     public FilterView(FilterViewModel filterViewModel) {
         this.filterViewModel = filterViewModel;
         this.filterViewModel.addPropertyChangeListener(this);
 
-        // Title
-        titleLabel = new JLabel(FilterViewModel.TITLE_LABEL);
-        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        // Set layout for the main panel
+        setLayout(new BorderLayout());
+        setBackground(new Color(249, 250, 251));
+
+        // Top panel with back button, title, and filter buttons
+        JPanel topPanel = new JPanel();
+        topPanel.setLayout(new BorderLayout());
+        topPanel.setBackground(Color.WHITE);
+        topPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // Header section (back button, title, filter type label)
+        JPanel headerPanel = new JPanel();
+        headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
+        headerPanel.setBackground(Color.WHITE);
 
         // Back button
         backButton = new JButton("← Back");
-        backButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        backButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+        backButton.setFont(new Font("Arial", Font.PLAIN, 14));
+        backButton.setFocusPainted(false);
+        backButton.setBorderPainted(false);
+        backButton.setContentAreaFilled(false);
+        backButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         backButton.addActionListener(evt -> {
             if (viewManagerModel != null) {
                 viewManagerModel.setState("logged in");
@@ -49,38 +65,48 @@ public class FilterView extends JPanel implements PropertyChangeListener {
             }
         });
 
-        // Button panel for filter buttons
-        buttonPanel = new JPanel();
-        buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        // Title
+        titleLabel = new JLabel(FilterViewModel.TITLE_LABEL);
+        titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
 
-        // Result panel
-        resultPanel = new JPanel();
-        resultPanel.setLayout(new BoxLayout(resultPanel, BoxLayout.Y_AXIS));
-
+        // Filter type label
         filterTypeLabel = new JLabel("Select a restaurant type");
-        filterTypeLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        filterTypeLabel.setFont(new Font("Arial", Font.ITALIC, 14));
+        filterTypeLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        filterTypeLabel.setFont(new Font("Arial", Font.ITALIC, 16));
+        filterTypeLabel.setForeground(new Color(107, 114, 128));
 
-        restaurantListArea = new JTextArea(15, 40);
-        restaurantListArea.setEditable(false);
-        restaurantListArea.setFont(new Font("Arial", Font.PLAIN, 12));
-        scrollPane = new JScrollPane(restaurantListArea);
+        headerPanel.add(backButton);
+        headerPanel.add(Box.createVerticalStrut(10));
+        headerPanel.add(titleLabel);
+        headerPanel.add(Box.createVerticalStrut(5));
+        headerPanel.add(filterTypeLabel);
+        headerPanel.add(Box.createVerticalStrut(15));
 
-        resultPanel.add(filterTypeLabel);
-        resultPanel.add(Box.createVerticalStrut(10));
-        resultPanel.add(scrollPane);
+        // Button panel for filter type buttons
+        buttonPanel = new JPanel();
+        buttonPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        buttonPanel.setBackground(Color.WHITE);
+        buttonPanel.setBorder(BorderFactory.createLineBorder(Color.RED, 2)); // Debug border
 
-        // Main layout
-        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        this.add(Box.createVerticalStrut(20));
-        this.add(backButton);
-        this.add(Box.createVerticalStrut(10));
-        this.add(titleLabel);
-        this.add(Box.createVerticalStrut(20));
-        this.add(buttonPanel);
-        this.add(Box.createVerticalStrut(20));
-        this.add(resultPanel);
-        this.add(Box.createVerticalStrut(20));
+        topPanel.add(headerPanel, BorderLayout.NORTH);
+        topPanel.add(buttonPanel, BorderLayout.CENTER);
+
+        // Restaurant cards panel with grid layout
+        restaurantCardsPanel = new JPanel();
+        restaurantCardsPanel.setLayout(new GridLayout(0, 3, 20, 20)); // 3 columns, auto rows
+        restaurantCardsPanel.setBackground(new Color(249, 250, 251));
+        restaurantCardsPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // Scroll pane for restaurant cards
+        scrollPane = new JScrollPane(restaurantCardsPanel);
+        scrollPane.setBorder(null);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+
+        // Add components to main panel
+        add(topPanel, BorderLayout.NORTH);
+        add(scrollPane, BorderLayout.CENTER);
     }
 
     /**
@@ -88,21 +114,65 @@ public class FilterView extends JPanel implements PropertyChangeListener {
      * This should be called after the controller is set.
      */
     public void initializeFilterButtons() {
+        System.out.println("initializeFilterButtons() called");
+
         if (filterController == null) {
+            System.out.println("FilterController is null!");
             return;
         }
 
         buttonPanel.removeAll();
         String[] types = filterController.getAvailableTypes();
 
+        System.out.println("Available types in FilterView: " + types.length);
         for (String type : types) {
-            JButton typeButton = new JButton(type);
-            typeButton.addActionListener(e -> filterController.execute(type));
-            buttonPanel.add(typeButton);
+            System.out.println("  - Creating button for: " + type);
         }
 
+        if (types.length == 0) {
+            JLabel noTypesLabel = new JLabel("No restaurant types available");
+            noTypesLabel.setFont(new Font("Arial", Font.ITALIC, 14));
+            buttonPanel.add(noTypesLabel);
+        } else {
+            for (String type : types) {
+                JButton typeButton = createFilterButton(type);
+                typeButton.addActionListener(e -> filterController.execute(type));
+                buttonPanel.add(typeButton);
+                System.out.println("  ✓ Button added to panel: " + type);
+            }
+        }
+
+        System.out.println("Button panel component count: " + buttonPanel.getComponentCount());
         buttonPanel.revalidate();
         buttonPanel.repaint();
+        System.out.println("Button panel revalidated and repainted");
+    }
+
+    private JButton createFilterButton(String text) {
+        JButton button = new JButton(text);
+        button.setFont(new Font("Arial", Font.BOLD, 14));
+        button.setForeground(Color.WHITE);
+        button.setBackground(new Color(239, 68, 68));
+        button.setFocusPainted(false);
+        button.setBorderPainted(true);
+        button.setOpaque(true); // IMPORTANT for custom background colors
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setPreferredSize(new Dimension(180, 40));
+        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+
+        System.out.println("Created button: " + text + " with size: " + button.getPreferredSize());
+
+        // Hover effect
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(new Color(220, 50, 50));
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(new Color(239, 68, 68));
+            }
+        });
+
+        return button;
     }
 
     @Override
@@ -123,19 +193,39 @@ public class FilterView extends JPanel implements PropertyChangeListener {
             filterTypeLabel.setText("Showing: " + state.getCurrentFilterType());
         }
 
-        // Update restaurant list
-        StringBuilder sb = new StringBuilder();
-        java.util.List<String> names = state.getRestaurantNames();
+        // Clear previous restaurant cards
+        restaurantCardsPanel.removeAll();
 
-        if (names.isEmpty()) {
-            sb.append("No restaurants found for this type.");
+        // Get restaurant names from state
+        List<String> restaurantNames = state.getRestaurantNames();
+
+        if (restaurantNames.isEmpty()) {
+            JLabel emptyLabel = new JLabel("No restaurants found for this type.");
+            emptyLabel.setFont(new Font("Arial", Font.ITALIC, 16));
+            emptyLabel.setForeground(new Color(107, 114, 128));
+            restaurantCardsPanel.add(emptyLabel);
         } else {
-            for (int i = 0; i < names.size(); i++) {
-                sb.append((i + 1)).append(". ").append(names.get(i)).append("\n");
+            // Create RestaurantPanel for each restaurant
+            for (String restaurantName : restaurantNames) {
+                // Create display data for the restaurant panel
+                // Note: We only have the name from the state, so we'll use placeholder data
+                RestaurantPanel.RestaurantDisplayData displayData =
+                        new RestaurantPanel.RestaurantDisplayData(
+                                restaurantName,           // id (using name as placeholder)
+                                restaurantName,           // name
+                                state.getCurrentFilterType(), // type
+                                4.5,                      // rating (placeholder)
+                                false,                    // hasDiscount (placeholder)
+                                0.0                       // discountValue
+                        );
+
+                RestaurantPanel restaurantPanel = new RestaurantPanel(displayData);
+                restaurantCardsPanel.add(restaurantPanel);
             }
         }
 
-        restaurantListArea.setText(sb.toString());
+        restaurantCardsPanel.revalidate();
+        restaurantCardsPanel.repaint();
     }
 
     public String getViewName() {
