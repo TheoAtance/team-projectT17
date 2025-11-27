@@ -16,13 +16,11 @@ public class ViewRestaurantInteractor implements ViewRestaurantInputBoundary{
 
     private final ViewRestaurantDataAccessInterface restaurantDataAccessObject;
     private final ViewRestaurantOutputBoundary viewRestaurantPresenter;
-    private final  GooglePlacesGateway googlePlacesGateway;
+
 
     public ViewRestaurantInteractor(ViewRestaurantDataAccessInterface restaurantDataAccessObject,
-                                    GooglePlacesGateway googlePlacesGateway,
                                     ViewRestaurantOutputBoundary viewRestaurantPresenter) {
         this.restaurantDataAccessObject = restaurantDataAccessObject;
-        this.googlePlacesGateway = googlePlacesGateway;
         this.viewRestaurantPresenter = viewRestaurantPresenter;
     }
 
@@ -39,29 +37,8 @@ public class ViewRestaurantInteractor implements ViewRestaurantInputBoundary{
         }
 
         else{
-            ArrayList<BufferedImage> images = new ArrayList<>();
-            String apiKey = System.getenv("PLACES_API_TOKEN");
+
             Restaurant restaurant = restaurantDataAccessObject.get(id);
-            System.out.println(restaurant.getPhotoIds().size());
-
-            BufferedImage image = ImageIO.read(Objects.requireNonNull(getClass().getResource("/images/no_image.png")));;
-            if(restaurant.getPhotoIds().isEmpty()){
-                images.add(image);
-            }
-
-            for(int i = 0; i < restaurant.getPhotoIds().size();i++){
-
-                if (apiKey == null) {
-                    // No API key → use placeholder images
-                    image = ImageIO.read(Objects.requireNonNull(getClass().getResource("/images/placeholder.png")));
-                }
-                else {
-                    // API key exists → load real Google image
-                    image = googlePlacesGateway.fetchRestaurantImage(restaurant.getPhotoIds().get(i), apiKey);
-                }
-
-                images.add(image);
-            }
 
             final ViewRestaurantOutputData viewRestaurantOutputData =
                     new ViewRestaurantOutputData.Builder()
@@ -73,7 +50,7 @@ public class ViewRestaurantInteractor implements ViewRestaurantInputBoundary{
                             .ratingCount(restaurant.getRatingCount())
                             .phoneNumber(restaurant.getPhoneNumber())
                             .openingHours(restaurant.getHours())
-                            .photos(images)
+                            .photoIds(restaurant.getPhotoIds())
                             .build();
 
             System.out.println("[Interactor] calling presenter.prepareSuccessView");

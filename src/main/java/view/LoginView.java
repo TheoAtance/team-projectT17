@@ -174,6 +174,8 @@ public class LoginView extends JPanel implements ActionListener, PropertyChangeL
         this.add(errorLabel);
         this.add(Box.createVerticalStrut(15));
         this.add(buttons);
+
+
     }
 
     @Override

@@ -71,8 +71,6 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
 
 
     public RestaurantView(ViewRestaurantViewModel viewRestaurantViewModel, AddReviewViewModel addReviewViewModel){
-
-
         this.viewRestaurantViewModel = viewRestaurantViewModel;
         this.addReviewViewModel = addReviewViewModel;
         ViewRestaurantState state = viewRestaurantViewModel.getState();

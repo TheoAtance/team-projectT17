@@ -24,9 +24,7 @@ public class CurrentUser {
             return currentUser;
         }
 
-        User user = userRepo.getUserByUid(currentUid);
-
-        return user;
+        return userRepo.getUserByUid(currentUid);
     }
 
     /**

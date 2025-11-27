@@ -23,7 +23,6 @@ import java.io.IOException;
 public class LoggedInView extends JPanel implements PropertyChangeListener {
     public static final String VIEW_NAME = "logged in";
     private final LoggedInViewModel loggedInViewModel;
-    private final ViewRestaurantViewModel viewRestaurantViewModel;
     private final JLabel welcomeLabel;
     private final JLabel uidLabel;
     private final JButton logoutButton;
@@ -34,10 +33,10 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
     private ViewRestaurantController viewRestaurantController;
     private RandomRestaurantController randomRestaurantController;
     private ViewManagerModel viewManagerModel;
+    private ViewRestaurantViewModel viewRestaurantViewModel;
 
-    public LoggedInView(LoggedInViewModel loggedInViewModel, ViewRestaurantViewModel viewRestaurantViewModel) {
+    public LoggedInView(LoggedInViewModel loggedInViewModel) {
         this.loggedInViewModel = loggedInViewModel;
-        this.viewRestaurantViewModel = viewRestaurantViewModel;
         this.loggedInViewModel.addPropertyChangeListener(this);
 
         final JLabel title = new JLabel(LoggedInViewModel.TITLE_LABEL);
@@ -154,6 +153,14 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
 
     public void setViewManagerModel(ViewManagerModel viewManagerModel) {
         this.viewManagerModel = viewManagerModel;
+    }
+
+    public void setViewRestaurantViewModel(ViewRestaurantViewModel viewRestaurantViewModel){
+        this.viewRestaurantViewModel = viewRestaurantViewModel;
+    }
+
+    public void setLoadingCursor(){
+        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
     }
 
 

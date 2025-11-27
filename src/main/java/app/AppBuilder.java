@@ -246,9 +246,10 @@ public class AppBuilder {
         LogoutController logoutController = new LogoutController(logoutInteractor);
 
         // Create View
-        loggedInView = new LoggedInView(loggedInViewModel, viewRestaurantViewModel);
+        loggedInView = new LoggedInView(loggedInViewModel);
         loggedInView.setLogoutController(logoutController);
         loggedInView.setViewManagerModel(viewManagerModel);
+        loggedInView.setViewRestaurantViewModel(viewRestaurantViewModel);
 
         // Add to card panel
         cardPanel.add(loggedInView, loggedInView.getViewName());
@@ -299,13 +300,13 @@ public class AppBuilder {
 
     public AppBuilder addRestaurantUseCase(){
         final ViewRestaurantOutputBoundary viewRestaurantOutputBoundary =
-                new ViewRestaurantPresenter(viewManagerModel, viewRestaurantViewModel);
+                new ViewRestaurantPresenter(viewManagerModel, viewRestaurantViewModel, googlePlacesGateway);
 
         final ViewRestaurantInputBoundary viewRestaurantInteractor =
-                new ViewRestaurantInteractor(restaurantDataAccess, googlePlacesGateway, viewRestaurantOutputBoundary);
+                new ViewRestaurantInteractor(restaurantDataAccess, viewRestaurantOutputBoundary);
 
         final RandomRestaurantInputBoundary randomRestaurantInteractor =
-                new RandomRestaurantInteractor(restaurantDataAccess, googlePlacesGateway, viewRestaurantOutputBoundary);
+                new RandomRestaurantInteractor(restaurantDataAccess, viewRestaurantOutputBoundary);
 
         ViewRestaurantController viewRestaurantController = new ViewRestaurantController(viewRestaurantInteractor);
         RandomRestaurantController randomRestaurantController = new RandomRestaurantController(randomRestaurantInteractor);
@@ -337,8 +338,9 @@ public class AppBuilder {
     public JFrame build() throws IOException {
         final JFrame application = new JFrame("UofT Eats - Restaurant Review App");
         application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        application.setSize(600, 500);
+
         application.add(cardPanel);
+
         viewManager.setApp(application);
 
         viewManagerModel.setState(loginViewModel.getViewName());

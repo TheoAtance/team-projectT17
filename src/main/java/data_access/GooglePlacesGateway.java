@@ -1,16 +1,19 @@
 package data_access;
 
+import interface_adapter.ImageDataAccessInterface;
+
 import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import javax.imageio.ImageIO;
 
-public class GooglePlacesGateway {
+public class GooglePlacesGateway implements ImageDataAccessInterface {
 
     public GooglePlacesGateway() {
     }
 
+    @Override
     public BufferedImage fetchRestaurantImage(String photoReference, String apiKey) {
         try {
             // photoName == value from photos[].name"

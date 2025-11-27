@@ -3,6 +3,8 @@ package use_case.add_review;
 import data_access.CurrentUser;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 public class AddReviewInteractor implements AddReviewInputBoundary{
@@ -23,6 +25,11 @@ public class AddReviewInteractor implements AddReviewInputBoundary{
 
         // generate a random unique id
         String reviewId = UUID.randomUUID().toString();
+
+        LocalDate today = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+
+        String date = today.format(formatter);
 
         String userId = currentUser.getCurrentUser().getUid();
         String restaurantId = addReviewInputData.getRestaurantId();
@@ -47,7 +54,7 @@ public class AddReviewInteractor implements AddReviewInputBoundary{
         }
 
         try {
-            jsonReviewDataAccessObject.addReview(reviewId, userId, restaurantId, content);
+            jsonReviewDataAccessObject.addReview(reviewId, userId, restaurantId, date, content);
             addReviewPresenter.prepareSuccessView("Review added!");   // no output data needed
 
         } catch (IOException e) {

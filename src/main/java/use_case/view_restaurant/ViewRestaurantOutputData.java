@@ -1,5 +1,4 @@
 package use_case.view_restaurant;
-import java.nio.Buffer;
 import java.util.List;
 import java.awt.image.BufferedImage;
 /**
@@ -14,7 +13,7 @@ public class ViewRestaurantOutputData {
     private final int ratingCount;
     private final String phoneNumber;
     private final List<String> openingHours;
-    private final List<BufferedImage> photos;
+    private final List<String> photoIds;
 
     public static class Builder{
         private String name;
@@ -25,7 +24,7 @@ public class ViewRestaurantOutputData {
         private int ratingCount;
         private String phoneNumber;
         private List<String> openingHours;
-        private List<BufferedImage> photos;
+        private List<String> photoIds;
 
         public Builder name(String name){
             this.name = name;
@@ -67,8 +66,8 @@ public class ViewRestaurantOutputData {
             return this;
         }
 
-        public Builder photos(List<BufferedImage> photos){
-            this.photos = photos;
+        public Builder photoIds(List<String> photoIds){
+            this.photoIds = photoIds;
             return this;
         }
 
@@ -86,7 +85,7 @@ public class ViewRestaurantOutputData {
         this.ratingCount = builder.ratingCount;
         this.phoneNumber = builder.phoneNumber;
         this.openingHours = builder.openingHours;
-        this.photos = builder.photos;
+        this.photoIds = builder.photoIds;
     }
 
     public String getName() {
@@ -121,7 +120,7 @@ public class ViewRestaurantOutputData {
         return openingHours;
     }
 
-    public List<BufferedImage> getPhotos() {
-        return photos;
+    public List<String> getPhotoIds() {
+        return photoIds;
     }
 }

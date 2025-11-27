@@ -11,5 +11,6 @@ public interface AddReviewDataAccessInterface {
      * @param restaurantId restaurant id
      * @param content content of the review
      */
-    void addReview(String reviewId, String userId, String restaurantId, String content) throws IOException;
+
+    void addReview(String reviewId, String userId, String restaurantId, String content, String creationDate) throws IOException;
 }
