@@ -16,7 +16,7 @@ public class TranslationViewDemo {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            // 1. Get DeepL API key
+            // Get DeepL API key
             String key = System.getenv("DEEPL_API_KEY");
             if (key == null || key.isBlank()) {
                 JOptionPane.showMessageDialog(null,
@@ -26,8 +26,6 @@ public class TranslationViewDemo {
                         JOptionPane.ERROR_MESSAGE);
                 return;
             }
-
-            // 2. Set up clean-architecture stack for translation
 
             // View models
             ViewManagerModel viewManagerModel = new ViewManagerModel();
@@ -46,13 +44,13 @@ public class TranslationViewDemo {
             // Controller
             TranslationController controller = new TranslationController(interactor);
 
-            // 3. Build the TranslationView and hook controller
+            // Build the TranslationView
             String previousViewName = "previous-demo-view";
             TranslationView translationView =
                     new TranslationView(translationViewModel, viewManagerModel, previousViewName);
             translationView.setTranslationController(controller);
 
-            // 4. Give it some example reviews to translate
+            // Some example reviews to translate
             Review r1 = new Review("user1", "rest1",
                     "The food here is amazing!", 5);
             Review r2 = new Review("user2", "rest1",
@@ -60,10 +58,10 @@ public class TranslationViewDemo {
 
             translationView.setCurrentReviews(List.of(r1, r2));
 
-            // Optionally: trigger an initial translation to French so it's not empty:
-            controller.execute(List.of(r1, r2), "FR");
+            // Initial translation to English so it's not empty:
+            controller.execute(List.of(r1, r2), "en-US");
 
-            // 5. Show the view in a frame
+            // Show in a frame
             JFrame frame = new JFrame("TranslationView Real Demo");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setContentPane(translationView);

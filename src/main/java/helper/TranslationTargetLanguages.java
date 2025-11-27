@@ -39,17 +39,17 @@ public final class TranslationTargetLanguages {
         LANGUAGE_CODES.put("Latvian", "LV");
         LANGUAGE_CODES.put("Lithuanian", "LT");
 
-        // Non-European / others
+        //others
         LANGUAGE_CODES.put("Russian", "RU");
         LANGUAGE_CODES.put("Turkish", "TR");
         LANGUAGE_CODES.put("Arabic", "AR");
-        LANGUAGE_CODES.put("Hebrew", "HE");       // next-gen only
-        LANGUAGE_CODES.put("Thai", "TH");         // next-gen only
-        LANGUAGE_CODES.put("Vietnamese", "VI");   // next-gen only
+        LANGUAGE_CODES.put("Hebrew", "HE");
+        LANGUAGE_CODES.put("Thai", "TH");
+        LANGUAGE_CODES.put("Vietnamese", "VI");
         LANGUAGE_CODES.put("Indonesian", "ID");
         LANGUAGE_CODES.put("Ukrainian", "UK");
 
-        // East Asian languages
+        // East Asian
         LANGUAGE_CODES.put("Japanese", "JA");
         LANGUAGE_CODES.put("Korean", "KO");
         LANGUAGE_CODES.put("Chinese (Simplified)", "ZH-HANS");

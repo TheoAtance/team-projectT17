@@ -24,8 +24,8 @@ public class TranslationView extends JPanel implements PropertyChangeListener {
     public static final String VIEW_NAME = "translation";
 
     private final TranslationViewModel translationViewModel;
-    private final ViewManagerModel viewManagerModel;   // kept for consistency, not used in Back
-    private final String previousViewName;             // kept for now, but not used
+    private final ViewManagerModel viewManagerModel;
+    private final String previousViewName;
 
     private TranslationController translationController;
     private List<Review> currentReviews;               // reviews to translate
@@ -51,11 +51,11 @@ public class TranslationView extends JPanel implements PropertyChangeListener {
 
         this.translationViewModel.addPropertyChangeListener(this);
 
-        // --- language setup from helper ---
+        // language setup from helper
         this.languageCodes =
                 new LinkedHashMap<>(TranslationTargetLanguages.getLanguageCodes());
 
-        // --- layout + base panel settings ---
+        // layout settings
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
@@ -64,7 +64,7 @@ public class TranslationView extends JPanel implements PropertyChangeListener {
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
 
-        // Language label (shows use-case result, e.g. EN-US / ZH-HANS)
+        // Language label
         languageLabel = new JLabel("Language: EN-US");
         languageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         languageLabel.setFont(new Font("Arial", Font.ITALIC, 14));
@@ -80,12 +80,12 @@ public class TranslationView extends JPanel implements PropertyChangeListener {
         translatedArea.setLineWrap(true);
         translatedArea.setWrapStyleWord(true);
 
-        // Choose a font that can display Chinese and other Unicode text
+        // Need a font that can display Chinese and other Unicode text
         Font base = UIManager.getFont("TextArea.font");
         if (base == null) {
             base = new JTextArea().getFont();
         }
-        // Try a common CJK-friendly font on Windows; fall back if not available
+        // Try a common CJK-friendly font on Windows
         Font cjkCandidate = new Font("Microsoft YaHei", Font.PLAIN, base.getSize());
         if (cjkCandidate.canDisplay('\u4E2D')) { // '中'
             translatedArea.setFont(cjkCandidate);
@@ -95,7 +95,7 @@ public class TranslationView extends JPanel implements PropertyChangeListener {
 
         JScrollPane scrollPane = new JScrollPane(translatedArea);
 
-        // Dropdown + Translate button row
+        // Translate button row
         languageCombo = new JComboBox<>(languageCodes.keySet().toArray(new String[0]));
         languageCombo.setSelectedItem("English (US)");   // default
 
