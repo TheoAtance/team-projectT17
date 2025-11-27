@@ -1,6 +1,10 @@
 package use_case.translation;
 
-import com.deepl.api.*;
+import com.deepl.api.DeepLException;
+import com.deepl.api.TextResult;
+import com.deepl.api.TextTranslationOptions;
+import com.deepl.api.Translator;
+
 import java.util.ArrayList;
 import java.util.List;
 

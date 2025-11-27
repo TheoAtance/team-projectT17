@@ -2,9 +2,6 @@ package interface_adapter.translation;
 
 import java.util.List;
 
-/**
- * State object for the translation view.
- */
 public class TranslationState {
     private List<String> translatedContents;
     private String targetLanguage;

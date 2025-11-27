@@ -1,46 +1,38 @@
 package interface_adapter.translation;
 
+import interface_adapter.ViewManagerModel;
 import use_case.translation.TranslationOutputBoundary;
 import use_case.translation.TranslationOutputData;
 
-import javax.swing.*;
-import java.awt.*;
-import java.util.List;
-
 public class TranslationPresenter implements TranslationOutputBoundary {
 
-    private final Component content;
+    private final ViewManagerModel viewManagerModel;
+    private final TranslationViewModel translationViewModel;
 
-    public TranslationPresenter(Component content) {
-        this.content = content; // RestaurantView
+    public TranslationPresenter(ViewManagerModel viewManagerModel,
+                                TranslationViewModel translationViewModel) {
+        this.viewManagerModel = viewManagerModel;
+        this.translationViewModel = translationViewModel;
     }
 
     @Override
     public void present(TranslationOutputData outputData) {
+        // Update view-model state
+        TranslationState state = translationViewModel.getState();
+        state.setTargetLanguage(outputData.getTargetLanguage());
+        state.setTranslatedContents(outputData.getTranslatedContents());
+
         if (outputData.isError()) {
-            JOptionPane.showMessageDialog(
-                    content,
-                    outputData.getErrorMessage(),
-                    "Translation error",
-                    JOptionPane.ERROR_MESSAGE
-            );
-            return;
-        }
-
-        List<String> translated = outputData.getTranslatedContents();
-        String text;
-
-        if (translated == null || translated.isEmpty()) {
-            text = "(No translated text)";
+            state.setErrorMessage(outputData.getErrorMessage());
         } else {
-            text = translated.get(0); // one review at a time
+            state.setErrorMessage(null);
         }
 
-        JOptionPane.showMessageDialog(
-                content,
-                text,
-                "Translated comment (" + outputData.getTargetLanguage() + ")",
-                JOptionPane.PLAIN_MESSAGE
-        );
+        translationViewModel.setState(state);
+        translationViewModel.firePropertyChanged();
+
+        // Switch to the translation view page
+        viewManagerModel.setState(translationViewModel.getViewName());
+        viewManagerModel.firePropertyChange();
     }
 }

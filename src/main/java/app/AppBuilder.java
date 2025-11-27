@@ -35,10 +35,12 @@ import use_case.logout.LogoutUserInteractor;
 import use_case.translation.TranslationInputBoundary;
 import use_case.translation.TranslationInteractor;
 import view.*;
+import interface_adapter.translation.TranslationViewModel;
 import interface_adapter.translation.TranslationController;
 import interface_adapter.translation.TranslationPresenter;
-import use_case.translation.DeeplTranslationService;
 import use_case.translation.TranslationService;
+import use_case.translation.DeeplTranslationService;
+import view.TranslationView;
 import view.RestaurantView;
 
 import javax.swing.*;
@@ -80,6 +82,12 @@ public class AppBuilder {
 
     // Shared Google Login Controller
     private GoogleLoginController googleLoginController;
+
+
+    // Translation
+    private TranslationViewModel translationViewModel;
+    private TranslationView translationView;
+
 
     public AppBuilder() {
         // tell card panel to use cardLayout to manage its layout.
@@ -272,28 +280,42 @@ public class AppBuilder {
         restaurantViewModel = new ViewRestaurantViewModel();
         restaurantView = new RestaurantView(restaurantViewModel);
 
-        // Create the TranslationService (DeepL implementation)
-        TranslationService translationService =
-                new DeeplTranslationService(System.getenv("DEEPL_API_KEY"), false);
-        // adjust constructor args if your DeeplTranslationService differs
-
-        // Create the presenter that will show a small popup dialog
-        TranslationPresenter translationPresenter =
-                new TranslationPresenter(restaurantView); // dialog centered on this view
-
-        // Create the interactor
-        TranslationInputBoundary translationInteractor =
-                new TranslationInteractor(translationService, translationPresenter);
-
-        // Create the controller and inject into the view
-        TranslationController translationController =
-                new TranslationController(translationInteractor);
-
-        restaurantView.setTranslationController(translationController);
-
         cardPanel.add(restaurantView, restaurantView.getViewName());
         return this;
     }
+
+    public AppBuilder addTranslationView() {
+        // ViewModel
+        this.translationViewModel = new TranslationViewModel();
+
+        // Translation service (DeepL)
+        TranslationService translationService =
+                new DeeplTranslationService(System.getenv("DEEPL_API_KEY"), false);
+
+        // Presenter
+        TranslationPresenter translationPresenter =
+                new TranslationPresenter(viewManagerModel, translationViewModel);
+
+        // Interactor
+        TranslationInputBoundary translationInteractor =
+                new TranslationInteractor(translationService, translationPresenter);
+
+        // Controller
+        TranslationController translationController =
+                new TranslationController(translationInteractor);
+
+        // View – back button should go to the restaurant page.
+        String previousViewName = restaurantView.getViewName();  // requires addRestaurantView() called earlier
+        translationView = new TranslationView(translationViewModel, viewManagerModel, previousViewName);
+        translationView.setTranslationController(translationController);
+
+        // Register view with CardLayout
+        cardPanel.add(translationView, TranslationView.VIEW_NAME);
+
+        return this;
+    }
+
+
 
     public JFrame build(){
         final JFrame application = new JFrame("UofT Eats - Restaurant Review App");

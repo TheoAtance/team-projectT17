@@ -1,16 +1,11 @@
+// src/main/java/interface_adapter/translation/TranslationViewModel.java
 package interface_adapter.translation;
 
 import interface_adapter.ViewModel;
-
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
-/**
- * ViewModel for the translation view.
- * Holds TranslationState and notifies listeners when it changes.
- */
 public class TranslationViewModel extends ViewModel {
-
     public static final String VIEW_NAME = "translation";
 
     private final PropertyChangeSupport support = new PropertyChangeSupport(this);
