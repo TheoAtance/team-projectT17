@@ -3,6 +3,7 @@ package use_case.display_reviews;
 import data_access.FirestoreUserRepo;
 import data_access.JsonReviewDataAccessObject;
 import entity.Review;
+import use_case.IUserRepo;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -12,11 +13,11 @@ import java.util.Map;
 public class DisplayReviewsInteractor implements DisplayReviewsInputBoundary{
     private final JsonReviewDataAccessObject jsonReviewDataAccessObject;
     private final DisplayReviewsOutputBoundary displayReviewsPresenter;
-    private final FirestoreUserRepo firestoreUserRepo;
+    private final IUserRepo firestoreUserRepo;
 
     public DisplayReviewsInteractor(JsonReviewDataAccessObject jsonReviewDataAccessObject,
                                     DisplayReviewsOutputBoundary displayReviewsPresenter,
-                                    FirestoreUserRepo firestoreUserRepo) {
+                                    IUserRepo firestoreUserRepo) {
         this.jsonReviewDataAccessObject = jsonReviewDataAccessObject;
         this.displayReviewsPresenter = displayReviewsPresenter;
         this.firestoreUserRepo = firestoreUserRepo;
@@ -48,6 +49,7 @@ public class DisplayReviewsInteractor implements DisplayReviewsInputBoundary{
                 String authorDisplayName = firestoreUserRepo.getUserByUid(review.getAuthorId()).getNickname();
                 String content = review.getContent();
                 String creationDate = review.getCreationDate();
+
 
                 DisplayReviewsOutputData displayReviewsOutputData = new DisplayReviewsOutputData(
                         authorDisplayName,

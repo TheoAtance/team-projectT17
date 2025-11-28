@@ -1,9 +1,10 @@
 package interface_adapter.display_reviews;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DisplayReviewsStateList {
-    List<DisplayReviewsState> displayReviewsStateList;
+    List<DisplayReviewsState> displayReviewsStateList = new ArrayList<DisplayReviewsState>();
     private String errorMessage;
 
     public DisplayReviewsStateList() {

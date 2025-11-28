@@ -6,6 +6,9 @@ import interface_adapter.ViewManagerModel;
 import interface_adapter.add_review.AddReviewController;
 import interface_adapter.add_review.AddReviewPresenter;
 import interface_adapter.add_review.AddReviewViewModel;
+import interface_adapter.display_reviews.DisplayReviewsController;
+import interface_adapter.display_reviews.DisplayReviewsPresenter;
+import interface_adapter.display_reviews.DisplayReviewsViewModel;
 import interface_adapter.filter.FilterController;
 import interface_adapter.filter.FilterPresenter;
 import interface_adapter.filter.FilterViewModel;
@@ -33,6 +36,10 @@ import use_case.custom_login.CustomLoginInputBoundary;
 import use_case.custom_login.CustomLoginUserInteractor;
 import use_case.custom_register.RegisterInputBoundary;
 import use_case.custom_register.RegisterUserInteractor;
+import use_case.display_reviews.DisplayReviewsInputBoundary;
+import use_case.display_reviews.DisplayReviewsInteractor;
+import use_case.display_reviews.DisplayReviewsOutputBoundary;
+import use_case.display_reviews.DisplayReviewsOutputData;
 import use_case.filter.FilterInputBoundary;
 import use_case.filter.FilterInteractor;
 import use_case.google_login.GoogleLoginInputBoundary;
@@ -80,6 +87,9 @@ public class AppBuilder {
 
     //Add review
     private final AddReviewViewModel addReviewViewModel = new AddReviewViewModel();
+
+    //Display Review
+    private final DisplayReviewsViewModel displayReviewsViewModel = new DisplayReviewsViewModel();
 
 
     // Shared data access objects
@@ -292,12 +302,14 @@ public class AppBuilder {
     public AppBuilder addRestaurantView(){
 
         viewRestaurantViewModel = new ViewRestaurantViewModel();
-        restaurantView = new RestaurantView(viewRestaurantViewModel, addReviewViewModel);
+        restaurantView = new RestaurantView(viewRestaurantViewModel);
         cardPanel.add(restaurantView, restaurantView.getViewName());
 
 
         return this;
     }
+
+
 
     public AppBuilder addRestaurantUseCase(){
         final ViewRestaurantOutputBoundary viewRestaurantOutputBoundary =
@@ -315,6 +327,9 @@ public class AppBuilder {
         restaurantView.setViewRestaurantController(viewRestaurantController);
         restaurantView.setLoggedInViewModel(loggedInViewModel);
         restaurantView.setViewManagerModel(viewManagerModel);
+        restaurantView.setAddReviewViewModel(addReviewViewModel);
+        restaurantView.setDisplayReviewViewModel(displayReviewsViewModel);
+
         loggedInView.setViewRestaurantController(viewRestaurantController);
         loggedInView.setRandomRestaurantController(randomRestaurantController);
 
@@ -331,6 +346,19 @@ public class AppBuilder {
 
         AddReviewController addReviewController = new AddReviewController(addReviewInteractor);
         restaurantView.setAddReviewController(addReviewController);
+
+        return this;
+    }
+
+    public AppBuilder addDisplayReviewUseCase(){
+        final DisplayReviewsOutputBoundary DisplayReviewPresenter =
+                new DisplayReviewsPresenter(displayReviewsViewModel);
+
+        final DisplayReviewsInputBoundary displayReviewsInteractor =
+                new DisplayReviewsInteractor(reviewDataAccess, DisplayReviewPresenter, userRepository);
+
+        DisplayReviewsController displayReviewsController = new DisplayReviewsController(displayReviewsInteractor);
+        restaurantView.setDisplayReviewController(displayReviewsController);
 
         return this;
     }

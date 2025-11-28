@@ -32,6 +32,7 @@ public class Main {
                 .addFilterView()
                 .addRestaurantUseCase()
                 .addAddReviewUseCase()
+                .addDisplayReviewUseCase()
                 .build();
 
 
