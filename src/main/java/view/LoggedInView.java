@@ -1,6 +1,7 @@
 package view;
 
 import interface_adapter.ViewManagerModel;
+import interface_adapter.display_reviews.DisplayReviewsController;
 import interface_adapter.logged_in.LoggedInState;
 import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.logout.LogoutController;
@@ -147,6 +148,7 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         this.randomRestaurantController = randomRestaurantController;
     }
 
+
     public ViewRestaurantController getViewRestaurantController(){
         return viewRestaurantController;
     }
@@ -159,9 +161,7 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         this.viewRestaurantViewModel = viewRestaurantViewModel;
     }
 
-    public void setLoadingCursor(){
-        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-    }
+
 
 
 }

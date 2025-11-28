@@ -1,6 +1,7 @@
 package interface_adapter.view_restaurant;
 
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -14,8 +15,8 @@ public class ViewRestaurantState {
     private double rating = 0;
     private int ratingCount = 0;
     private String phoneNumber = "";
-    private List<String> openingHours;
-    private List<BufferedImage> photos;
+    private List<String> openingHours = new ArrayList<String>();
+    private List<BufferedImage> photos = new ArrayList<BufferedImage>();
     private String restaurantDndError;
 
 

@@ -209,6 +209,7 @@ public class FirestoreUserRepo implements IUserRepo {
                 try {
                     User user = documentToUser(document);
                     if (user != null) {
+                        System.out.println(user.getUid());
                         usersById.put(user.getUid(), user);
                     }
                 } catch (PersistenceException e) {
