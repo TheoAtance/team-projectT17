@@ -4,6 +4,7 @@ import interface_adapter.google_login.GoogleLoginController;
 import interface_adapter.register.RegisterController;
 import interface_adapter.register.RegisterState;
 import interface_adapter.register.RegisterViewModel;
+import view.panel_makers.LabelTextPanel;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;

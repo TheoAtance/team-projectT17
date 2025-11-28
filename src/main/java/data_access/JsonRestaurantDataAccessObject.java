@@ -3,6 +3,7 @@ package data_access;
 import entity.Restaurant;
 import entity.RestaurantFactory;
 import use_case.filter.IRestaurantDataAccess;
+import use_case.random_restaurant.RandomRestaurantDataAccessInterface;
 import use_case.view_restaurant.ViewRestaurantDataAccessInterface;
 import java.io.*;
 import java.util.*;
@@ -15,8 +16,11 @@ import org.json.JSONObject;
 /**
  * DAO for restaurant data implemented with json file to persist data
  */
-public class JsonRestaurantDataAccessObject implements IRestaurantDataAccess,
-        ViewRestaurantDataAccessInterface {
+public class JsonRestaurantDataAccessObject implements
+        IRestaurantDataAccess,
+        ViewRestaurantDataAccessInterface,
+        RandomRestaurantDataAccessInterface {
+
     private final Map<String, Restaurant> restaurantById = new HashMap<>();
 
     /**
@@ -80,5 +84,13 @@ public class JsonRestaurantDataAccessObject implements IRestaurantDataAccess,
     @Override
     public boolean existById(String id){
         return restaurantById.containsKey(id);
+    }
+
+    @Override
+    public Restaurant getRandom(){
+        List<Restaurant> restaurants = new ArrayList<>(restaurantById.values());
+        Random rand = new Random();
+        int randomIndex = rand.nextInt(restaurants.size());
+        return restaurants.get(randomIndex);
     }
 }

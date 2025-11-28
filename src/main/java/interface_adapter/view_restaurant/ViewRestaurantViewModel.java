@@ -5,7 +5,7 @@ import interface_adapter.ViewModel;
 public class ViewRestaurantViewModel extends ViewModel<ViewRestaurantState>{
 
     public ViewRestaurantViewModel(){
-        super("view restaurant");
+        super("restaurant info");
         setState(new ViewRestaurantState());
     }
 }

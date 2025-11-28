@@ -1,14 +1,14 @@
-package view;
+package view.panel_makers;
 import javax.swing.*;
 import java.awt.*;
 
 /**
  * A rounded panel that acts as a background for singled-lined information
  */
-class RoundedPanel extends JPanel{
+public class RoundedPanel extends JPanel{
     private final int cornerRadius;
 
-    RoundedPanel(int cornerRadius){
+    public RoundedPanel(int cornerRadius){
         this.cornerRadius = cornerRadius;
         setOpaque(false);
 
@@ -30,7 +30,7 @@ class RoundedPanel extends JPanel{
 
 
         // set colour and fill rect
-        g2.setColor(getBackground()); // sets the colour of the rect (set in another panel using this panel)
+        g2.setColor(Color.white); // sets the colour of the rect (set in another panel using this panel)
         g2.fillRoundRect(0,0, getWidth(), getHeight(), cornerRadius, cornerRadius); // draws a filled round rect
 
 

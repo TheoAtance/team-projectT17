@@ -1,5 +1,6 @@
 package interface_adapter.view_restaurant;
 
+import java.awt.image.BufferedImage;
 import java.util.List;
 
 /**
@@ -7,25 +8,27 @@ import java.util.List;
  */
 public class ViewRestaurantState {
     private String name = "";
+    private String id = "";
     private String address = "";
     private String type = "";
     private double rating = 0;
     private int ratingCount = 0;
     private String phoneNumber = "";
     private List<String> openingHours;
-    private List<String> photoIds;
+    private List<BufferedImage> photos;
     private String restaurantDndError;
 
 
     public ViewRestaurantState(ViewRestaurantState copy) {
         name = copy.name;
+        id = copy.id;
         address = copy.address;
         type = copy.type;
         rating = copy.rating;
         ratingCount = copy.ratingCount;
         phoneNumber = copy.phoneNumber;
         openingHours = copy.openingHours;
-        photoIds = copy.photoIds;
+        photos = copy.photos;
         restaurantDndError = copy.restaurantDndError;
     }
 
@@ -39,6 +42,14 @@ public class ViewRestaurantState {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getAddress() {
@@ -89,12 +100,12 @@ public class ViewRestaurantState {
         this.openingHours = openingHours;
     }
 
-    public List<String> getPhotoIds() {
-        return photoIds;
+    public List<BufferedImage> getPhotos() {
+        return photos;
     }
 
-    public void setPhotoIds(List<String> photoIds) {
-        this.photoIds = photoIds;
+    public void setPhotos(List<BufferedImage> photos) {
+        this.photos = photos;
     }
 
     public String getRestaurantDndError() {

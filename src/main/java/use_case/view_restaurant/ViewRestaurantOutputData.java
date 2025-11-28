@@ -1,11 +1,12 @@
 package use_case.view_restaurant;
 import java.util.List;
-
+import java.awt.image.BufferedImage;
 /**
  * Output data for the view restaurant use case
  */
 public class ViewRestaurantOutputData {
     private final String name;
+    private final String id;
     private final String address;
     private final String type;
     private final double rating;
@@ -16,6 +17,7 @@ public class ViewRestaurantOutputData {
 
     public static class Builder{
         private String name;
+        private String id;
         private String address;
         private String type;
         private double rating;
@@ -26,6 +28,11 @@ public class ViewRestaurantOutputData {
 
         public Builder name(String name){
             this.name = name;
+            return this;
+        }
+
+        public Builder id(String id){
+            this.id = id;
             return this;
         }
 
@@ -71,6 +78,7 @@ public class ViewRestaurantOutputData {
 
     public ViewRestaurantOutputData(Builder builder) {
         this.name = builder.name;
+        this.id = builder.id;
         this.address = builder.address;
         this.type = builder.type;
         this.rating = builder.rating;
@@ -82,6 +90,10 @@ public class ViewRestaurantOutputData {
 
     public String getName() {
         return name;
+    }
+
+    public String getId() {
+        return id;
     }
 
     public String getAddress() {
