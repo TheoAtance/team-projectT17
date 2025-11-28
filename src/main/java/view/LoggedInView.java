@@ -8,36 +8,69 @@ import interface_adapter.random_restauarant.RandomRestaurantController;
 import interface_adapter.view_restaurant.ViewRestaurantController;
 import interface_adapter.view_restaurant.ViewRestaurantState;
 import interface_adapter.view_restaurant.ViewRestaurantViewModel;
+import interface_adapter.list_search.ListSearchController;
+import interface_adapter.list_search.ListSearchState;
+import interface_adapter.list_search.ListSearchViewModel;
+import view.RestaurantListView;
+import view.RestaurantPanel;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.text.View;
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * The View displayed after successful login.
- * Shows user information and provides logout functionality.
+ * Shows user information, provides logout functionality, and displays searchable restaurant list.
  */
 public class LoggedInView extends JPanel implements PropertyChangeListener {
     public static final String VIEW_NAME = "logged in";
+
+    // ViewModels for observing changes
     private final LoggedInViewModel loggedInViewModel;
+    private final ListSearchViewModel listSearchViewModel;
+
+    // UI Components for LoggedInView specific elements
     private final JLabel welcomeLabel;
     private final JLabel uidLabel;
     private final JButton logoutButton;
     private final JButton filterViewButton;
     private final JButton randomRestaurantButton;
 
+    // Controllers for actions
     private LogoutController logoutController;
     private ViewRestaurantController viewRestaurantController;
     private RandomRestaurantController randomRestaurantController;
     private ViewManagerModel viewManagerModel;
     private ViewRestaurantViewModel viewRestaurantViewModel;
+    private ListSearchController searchController;
 
-    public LoggedInView(LoggedInViewModel loggedInViewModel) {
+    // UI Components for the search/restaurant list
+    private JTextField searchField;
+    private RestaurantListView restaurantListView;
+
+    private RestaurantPanel.HeartClickListener heartListener;
+
+    private final String filterViewName;
+
+    public LoggedInView(LoggedInViewModel loggedInViewModel,
+                        ListSearchViewModel listSearchViewModel,
+                        RestaurantPanel.HeartClickListener heartListener,
+                        String filterViewName) {
+
         this.loggedInViewModel = loggedInViewModel;
+        this.listSearchViewModel = listSearchViewModel;
+        this.heartListener = heartListener;
+        this.filterViewName = filterViewName;
+
         this.loggedInViewModel.addPropertyChangeListener(this);
+        this.listSearchViewModel.addPropertyChangeListener(this);
 
         final JLabel title = new JLabel(LoggedInViewModel.TITLE_LABEL);
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -66,7 +99,7 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         filterViewButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         filterViewButton.addActionListener(evt -> {
             if (viewManagerModel != null) {
-                viewManagerModel.setState("filter");
+                viewManagerModel.setState(this.filterViewName);
                 viewManagerModel.firePropertyChange();
             } else {
                 JOptionPane.showMessageDialog(this, "View Manager not initialized.");
@@ -107,17 +140,68 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         this.add(Box.createVerticalStrut(10));
         this.add(logoutButton);
 
-        // Initialize with current state
-        updateView(loggedInViewModel.getState());
+        JPanel restaurantSection = new JPanel();
+        restaurantSection.setLayout(new BoxLayout(restaurantSection, BoxLayout.Y_AXIS));
+        restaurantSection.setAlignmentX(Component.CENTER_ALIGNMENT);
+        restaurantSection.setMaximumSize(new Dimension(Integer.MAX_VALUE, 500));
+
+        JPanel searchPanel = new JPanel();
+        searchPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        searchPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+        searchPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel searchLabel = new JLabel("Search:");
+        searchLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        searchPanel.add(searchLabel);
+
+        searchField = new JTextField();
+        int maxFieldWidth = 400;
+        searchField.setPreferredSize(new Dimension(maxFieldWidth, 24));
+        searchField.setMaximumSize(new Dimension(maxFieldWidth, 24));
+        searchPanel.add(searchField);
+
+        searchField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) { triggerSearch(); }
+            @Override
+            public void removeUpdate(DocumentEvent e) { triggerSearch(); }
+            @Override
+            public void changedUpdate(DocumentEvent e) { triggerSearch(); }
+
+            private void triggerSearch() {
+                if (LoggedInView.this.searchController == null) return;
+                String query = searchField.getText().trim();
+                LoggedInView.this.searchController.search(query);
+            }
+        });
+
+        restaurantSection.add(searchPanel);
+        restaurantSection.add(Box.createVerticalStrut(10));
+
+        restaurantListView = new RestaurantListView(new ArrayList<>(), this.heartListener);
+        JScrollPane restaurantScrollPane = restaurantListView.getScrollPane();
+        restaurantScrollPane.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
+        restaurantSection.add(restaurantScrollPane, BorderLayout.CENTER);
+
+        this.add(Box.createVerticalStrut(30));
+        this.add(restaurantSection);
+
+        updateLoggedInView(loggedInViewModel.getState());
+        updateListSearchView(listSearchViewModel.getState());
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        final LoggedInState state = (LoggedInState) evt.getNewValue();
-        updateView(state);
+        if (evt.getSource() == loggedInViewModel) {
+            LoggedInState state = (LoggedInState) evt.getNewValue();
+            updateLoggedInView(state);
+        } else if (evt.getSource() == listSearchViewModel) {
+            ListSearchState state = (ListSearchState) evt.getNewValue();
+            updateListSearchView(state);
+        }
     }
 
-    private void updateView(LoggedInState state) {
+    private void updateLoggedInView(LoggedInState state) {
         if (state.getNickname() != null && !state.getNickname().isEmpty()) {
             welcomeLabel.setText("Welcome, " + state.getNickname() + "!");
         } else {
@@ -131,8 +215,21 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         }
     }
 
+    private void updateListSearchView(ListSearchState state) {
+        if (state.getErrorMessage() != null && !state.getErrorMessage().isEmpty()) {
+            JOptionPane.showMessageDialog(this, state.getErrorMessage());
+            state.setErrorMessage(null);
+        }
+
+        restaurantListView.updateRestaurants(state.getFilteredRestaurants(), this.heartListener);
+    }
+
     public String getViewName() {
         return VIEW_NAME;
+    }
+
+    public RestaurantListView getRestaurantListView() {
+        return restaurantListView;
     }
 
     public void setLogoutController(LogoutController logoutController) {
@@ -159,9 +256,11 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         this.viewRestaurantViewModel = viewRestaurantViewModel;
     }
 
+    public void setSearchController(ListSearchController searchController) {
+        this.searchController = searchController;
+    }
+
     public void setLoadingCursor(){
         setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
     }
-
-
 }

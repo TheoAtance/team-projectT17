@@ -70,6 +70,14 @@ public class JsonRestaurantDataAccessObject implements
                 .toArray(String[]::new);
     }
 
+    /**
+     * Get all restaurants in data JSON.
+     * @return list of restaurant objects.
+     */
+    @Override
+    public List<Restaurant> getAllRestaurants() {
+        return new ArrayList<>(restaurantById.values());
+    }
 
     /**
      * Get restaurant with given id
