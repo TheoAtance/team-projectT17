@@ -1,4 +1,3 @@
-// src/main/java/interface_adapter/translation/TranslationViewModel.java
 package interface_adapter.translation;
 
 import interface_adapter.ViewModel;

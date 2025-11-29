@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * Card-style panel for showing original and translated reviews.
- * Designed to match ReviewPanel / RestaurantPanel visual style.
+ * Designed to match ReviewPanel/RestaurantPanel ui style.
  */
 public class TranslationPanel extends JPanel {
 

@@ -22,7 +22,7 @@ public class TranslationController {
         translationInteractor.execute(inputData);
     }
 
-    // convenience: translate a single review
+    // translate a single review
     public void translateOneReview(Review review, String targetLanguage) {
         List<Review> reviews = new ArrayList<>();
         reviews.add(review);

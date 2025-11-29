@@ -316,37 +316,6 @@ public class AppBuilder {
 
         return this;
     }
-    
-    public AppBuilder addTranslationView() {
-        // ViewModel
-        this.translationViewModel = new TranslationViewModel();
-
-        // Translation service (DeepL)
-        TranslationService translationService =
-                new DeeplTranslationService(System.getenv("DEEPL_API_KEY"), false);
-
-        // Presenter
-        TranslationPresenter translationPresenter =
-                new TranslationPresenter(viewManagerModel, translationViewModel);
-
-        // Interactor
-        TranslationInputBoundary translationInteractor =
-                new TranslationInteractor(translationService, translationPresenter);
-
-        // Controller
-        TranslationController translationController =
-                new TranslationController(translationInteractor);
-
-        // View – back button should go to the restaurant page.
-        String previousViewName = restaurantView.getViewName();  // requires addRestaurantView() called earlier
-        TranslationView translationView = new TranslationView(translationViewModel, viewManagerModel, previousViewName);
-        translationView.setTranslationController(translationController);
-
-        // Register view with CardLayout
-        cardPanel.add(translationView, TranslationView.VIEW_NAME);
-
-        return this;
-    }
 
 
     public AppBuilder addRestaurantUseCase(){

@@ -20,10 +20,6 @@ import java.util.Map;
 
 /**
  * Dedicated page for translating and viewing translated reviews.
- *
- * Thin wrapper around TranslationPanel:
- * - Knows about controllers / view models / navigation.
- * - TranslationPanel handles the actual UI look & feel.
  */
 public class TranslationView extends JPanel implements PropertyChangeListener {
 
