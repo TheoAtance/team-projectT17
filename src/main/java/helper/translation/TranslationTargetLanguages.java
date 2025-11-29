@@ -1,11 +1,18 @@
-package helper;
+package helper.translation;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * Central place to configure which target languages we expose in the UI.
+ *
+ * Keys  = labels shown in the combo box (human-readable).
+ * Values = language codes used by the TranslationService / DeepL wrapper.
+ */
 public final class TranslationTargetLanguages {
 
-    // Preserve insertion order for the dropdown
+    // preserve insertion order for a nice, predictable dropdown
     private static final LinkedHashMap<String, String> LANGUAGE_CODES = new LinkedHashMap<>();
 
     static {
@@ -38,7 +45,7 @@ public final class TranslationTargetLanguages {
         LANGUAGE_CODES.put("Latvian", "LV");
         LANGUAGE_CODES.put("Lithuanian", "LT");
 
-        //others
+        // Others
         LANGUAGE_CODES.put("Russian", "RU");
         LANGUAGE_CODES.put("Turkish", "TR");
         LANGUAGE_CODES.put("Arabic", "AR");
@@ -46,7 +53,7 @@ public final class TranslationTargetLanguages {
         LANGUAGE_CODES.put("Thai", "TH");
         LANGUAGE_CODES.put("Vietnamese", "VI");
         LANGUAGE_CODES.put("Indonesian", "ID");
-        LANGUAGE_CODES.put("Ukrainian", "UK");
+        LANGUAGE_CODES.put("Ukrainian", "UK");   // matches your code choice
 
         // East Asian
         LANGUAGE_CODES.put("Japanese", "JA");
@@ -56,10 +63,14 @@ public final class TranslationTargetLanguages {
     }
 
     private TranslationTargetLanguages() {
+        // utility class
     }
 
+    /**
+     * Map from dropdown label -> language code.
+     * Returned map is unmodifiable; modify {@link #LANGUAGE_CODES} here instead.
+     */
     public static Map<String, String> getLanguageCodes() {
-        // Return an unmodifiable view so callers can’t mess it up
-        return java.util.Collections.unmodifiableMap(LANGUAGE_CODES);
+        return Collections.unmodifiableMap(LANGUAGE_CODES);
     }
 }
