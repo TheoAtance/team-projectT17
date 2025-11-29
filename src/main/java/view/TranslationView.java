@@ -29,10 +29,6 @@ public class TranslationView extends JPanel implements PropertyChangeListener {
 
     public static final String VIEW_NAME = "translation";
 
-    private final TranslationViewModel translationViewModel;
-    private final ViewManagerModel viewManagerModel;
-    private final String previousViewName;
-
     private TranslationController translationController;
     private List<Review> currentReviews;               // reviews to translate
 
@@ -41,16 +37,13 @@ public class TranslationView extends JPanel implements PropertyChangeListener {
 
     // UI
     private final TranslationPanel translationPanel;
-    private final JButton backButton;
+    private final JButton closeButton;
 
     public TranslationView(TranslationViewModel translationViewModel,
                            ViewManagerModel viewManagerModel,
                            String previousViewName) {
-        this.translationViewModel = translationViewModel;
-        this.viewManagerModel = viewManagerModel;
-        this.previousViewName = previousViewName;
 
-        this.translationViewModel.addPropertyChangeListener(this);
+        translationViewModel.addPropertyChangeListener(this);
 
         // language setup from helper
         this.languageCodes =
@@ -95,19 +88,19 @@ public class TranslationView extends JPanel implements PropertyChangeListener {
         center.add(Box.createVerticalGlue());
 
         // Back button row at the bottom
-        backButton = new JButton("Close");
-        backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        closeButton = new JButton("Close");
+        closeButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         JPanel bottom = new JPanel();
         bottom.setLayout(new BoxLayout(bottom, BoxLayout.X_AXIS));
         bottom.setBorder(BorderFactory.createEmptyBorder(10, 20, 20, 20));
         bottom.setOpaque(false);
         bottom.add(Box.createHorizontalGlue());
-        bottom.add(backButton);
+        bottom.add(closeButton);
         bottom.add(Box.createHorizontalGlue());
 
         // Back button(close this window for translation):
-        backButton.addActionListener(e -> {
+        closeButton.addActionListener(e -> {
             Window window = SwingUtilities.getWindowAncestor(TranslationView.this);
             if (window != null) {
                 window.dispose();
@@ -194,16 +187,16 @@ public class TranslationView extends JPanel implements PropertyChangeListener {
         TranslationUILocalization.UILabels labels =
                 TranslationUILocalization.forLanguage(targetLangCode);
 
-        // --- text inside TranslationPanel ---
+        // text inside TranslationPanel
         translationPanel.setTitleText(labels.getTitle());
         translationPanel.setTargetLabelText(labels.getTargetLabel());
         translationPanel.setTranslateButtonText(labels.getTranslateLabel());
         translationPanel.setOriginalLabelText(labels.getOriginalLabel());
         translationPanel.setTranslatedLabelText(labels.getTranslatedLabel());
 
-        // --- back button at the bottom ---
-        backButton.setText(labels.getBackLabel());
-        translationPanel.applyUIFontForText(backButton, labels.getBackLabel());
+        // close button at the bottom
+        closeButton.setText(labels.getBackLabel());
+        translationPanel.applyUIFontForText(closeButton, labels.getBackLabel());
     }
 
 }

@@ -31,7 +31,7 @@ import java.util.List;
  * - Each card's "Translate" button opens an independent TranslationView window
  *   that calls the real DeepL-based translation use case.
  */
-public class ReviewPanelDemo {
+public class ReviewPanelAndTranslationDemo {
 
     /** DTO matching the JSON structure of reviews.json. */
     private static class ReviewDto {
@@ -56,10 +56,6 @@ public class ReviewPanelDemo {
 
                 List<Review> reviews = new ArrayList<>();
                 for (ReviewDto dto : dtos) {
-                    // Match your Review constructor:
-                    // Review(String reviewId, String userId,
-                    //        String restaurantId, String content,
-                    //        String creationDate, int likes)
                     reviews.add(new Review(
                             dto.reviewId,
                             dto.authorId,
@@ -116,9 +112,9 @@ public class ReviewPanelDemo {
 
         /** Build a completely independent translation stack for a single popup window. */
         private void openTranslationWindowFor(Review review) {
-            // 1) Build per-window translation stack
+            // per-window translation to prevent conflict when there are several translation windows
 
-            // Local view manager (we're not switching app-wide views here)
+            // Local view manager
             ViewManagerModel popupViewManager = new ViewManagerModel();
 
             // View model unique to this window
@@ -138,39 +134,37 @@ public class ReviewPanelDemo {
             TranslationController popupController =
                     new TranslationController(interactor);
 
-            // 2) Build TranslationView bound to this window's stack
+            // Build TranslationView
             TranslationView translationView =
                     new TranslationView(popupViewModel, popupViewManager, null);
             translationView.setTranslationController(popupController);
             translationView.setCurrentReviews(List.of(review)); // pre-fill "Original"
 
-            // 3) Show popup window
+            // Show popup window
             JFrame frame = new JFrame("Translate review");
             frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
             frame.setContentPane(translationView);
             frame.pack();
-            frame.setLocationRelativeTo(this);
+            frame.setLocationRelativeTo(null);
             frame.setVisible(true);
         }
     }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            // 1) DeepL API key
+            // DeepL API key
             String key = System.getenv("DEEPL_API_KEY");
             if (key == null || key.isBlank()) {
                 JOptionPane.showMessageDialog(
                         null,
-                        "DEEPL_API_KEY is not set.\n" +
-                                "Set it in your Run Configuration or terminal " +
-                                "to see real translations.",
+                        "DEEPL_API_KEY is not set.",
                         "Missing API key",
                         JOptionPane.ERROR_MESSAGE
                 );
                 return;
             }
 
-            // 2) Load ALL reviews, then take the first 8 for the demo
+            // Load ALL reviews, then take the first 8 for the demo
             List<Review> allReviews = loadAllReviewsFromJson();
             List<Review> demoReviews;
             if (allReviews.size() <= 8) {
@@ -188,7 +182,7 @@ public class ReviewPanelDemo {
                 );
             }
 
-            // 3) Build frame with ReviewPanels
+            // Build frame with ReviewPanels
             JFrame frame = new JFrame("ReviewPanel → TranslationView Demo (first 8 reviews)");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 

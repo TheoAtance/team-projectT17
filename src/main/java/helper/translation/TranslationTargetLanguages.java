@@ -15,11 +15,6 @@ import java.util.Map;
  */
 public final class TranslationTargetLanguages {
 
-    /**
-     * Combo-box label (native name) -> language code.
-     *
-     * LinkedHashMap is used to preserve insertion order for the UI.
-     */
     private static final LinkedHashMap<String, String> LANGUAGE_CODES = new LinkedHashMap<>();
 
     static {

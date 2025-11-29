@@ -11,7 +11,7 @@ import java.util.List;
  */
 public class TranslationPanel extends JPanel {
 
-    // Inner card & margin (same pattern as ReviewPanel)
+    // Inner card & margin
     private final JPanel main;
     private final JPanel margin;
 
@@ -25,7 +25,7 @@ public class TranslationPanel extends JPanel {
     private final JComboBox<String> languageCombo;
     private final JButton translateButton;
 
-    // Section labels (NOW FIELDS + LOCALIZABLE)
+    // Section labels
     private final JLabel originalLabel;
     private final JLabel translatedLabel;
 
@@ -39,7 +39,6 @@ public class TranslationPanel extends JPanel {
     private final Font koreanFont;
     private final Font cjkFont;   // Chinese + Japanese (also ok for Korean)
 
-    /* ======================= CONSTRUCTOR ======================= */
 
     /**
      * @param languageOptions      labels for dropdown (e.g. "English (US)", "Français", "日本語"...)
@@ -50,7 +49,6 @@ public class TranslationPanel extends JPanel {
         setBackground(Color.WHITE);
         setOpaque(true);
 
-        // ==== main card & margin (similar to ReviewPanel) ====
         main = new JPanel();
         main.setLayout(new BoxLayout(main, BoxLayout.Y_AXIS));
         main.setBackground(Color.WHITE);
@@ -67,7 +65,7 @@ public class TranslationPanel extends JPanel {
 
         add(margin);
 
-        // ===== header =====
+        // header
         titleLabel = new JLabel("Translated Reviews");
         titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD, 18f));
         titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -88,7 +86,7 @@ public class TranslationPanel extends JPanel {
         errorLabel.setVisible(false);
         errorLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // ===== font setup for language-dependent components =====
+        // font setup for language-dependent components
         Font base = UIManager.getFont("TextArea.font");
         if (base == null) {
             base = new JTextArea().getFont();
@@ -106,7 +104,7 @@ public class TranslationPanel extends JPanel {
             cjkFont = defaultFont;
         }
 
-        // ===== controls row =====
+        // controls row
         languageCombo = new JComboBox<>(languageOptions);
         languageCombo.setMaximumSize(new Dimension(
                 250, languageCombo.getPreferredSize().height));
@@ -115,7 +113,7 @@ public class TranslationPanel extends JPanel {
             languageCombo.setSelectedItem(defaultLanguageLabel);
         }
 
-        // Renderer: choose font for each item & selected value
+        // Choose font for each item & selected value for displaying text correctly
         languageCombo.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(
@@ -213,7 +211,7 @@ public class TranslationPanel extends JPanel {
         translatedScroll.getViewport().setBackground(new Color(255, 247, 250));
         translatedScroll.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // ===== assemble main card =====
+        // Assemble main card
         main.add(headerRow);
         main.add(Box.createVerticalStrut(4));
         main.add(errorLabel);
@@ -235,8 +233,8 @@ public class TranslationPanel extends JPanel {
         setTranslatedContents(List.of());
     }
 
-    /* ======================= PUBLIC API ======================= */
 
+    // API
     /** Connects the "Translate" button to the controller. */
     public void addTranslateActionListener(ActionListener listener) {
         translateButton.addActionListener(listener);
@@ -344,8 +342,8 @@ public class TranslationPanel extends JPanel {
         translatedArea.setCaretPosition(0);
     }
 
-    /* ======================= INTERNAL HELPERS ======================= */
 
+    // Helpers
     /** Pick a font based on the characters in the given label text. */
     private Font pickFontForText(String text) {
         if (text == null || text.isEmpty()) {
