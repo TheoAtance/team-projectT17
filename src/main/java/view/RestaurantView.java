@@ -1,4 +1,5 @@
 package view;
+import entity.Review;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.add_review.AddReviewController;
 import interface_adapter.add_review.AddReviewViewModel;
@@ -6,9 +7,14 @@ import interface_adapter.display_reviews.DisplayReviewsController;
 import interface_adapter.display_reviews.DisplayReviewsStateList;
 import interface_adapter.display_reviews.DisplayReviewsViewModel;
 import interface_adapter.logged_in.LoggedInViewModel;
+import interface_adapter.translation.TranslationController;
+import interface_adapter.translation.TranslationViewModel;
 import interface_adapter.view_restaurant.ViewRestaurantController;
 import interface_adapter.view_restaurant.ViewRestaurantState;
 import interface_adapter.view_restaurant.ViewRestaurantViewModel;
+import interface_adapter.translation.TranslationController;
+import interface_adapter.translation.TranslationViewModel;
+import view.TranslationView;
 import view.panel_makers.PillIconTextPanel;
 import view.panel_makers.RestaurantTitlePanel;
 import view.panel_makers.ReviewPanel;
@@ -27,6 +33,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 
 public class RestaurantView extends JPanel implements ActionListener, PropertyChangeListener{
@@ -77,6 +85,9 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
     private LoggedInViewModel loggedInViewModel;
     private DisplayReviewsViewModel displayReviewsViewModel = new DisplayReviewsViewModel();
     private DisplayReviewsController displayReviewsController;
+    // translation support
+    private TranslationController translationController;
+    private TranslationViewModel translationViewModel;
 
 
     public RestaurantView(ViewRestaurantViewModel viewRestaurantViewModel){
@@ -355,17 +366,22 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
                         reviewState.getContent()
                 );
 
+                // NEW: when user clicks "Translate" on this card,
+                // open the TranslationView window for this single review.
+                reviewPanel.addTranslateButtonListener(e ->
+                        openTranslationWindowFor(reviewState)
+                );
+
                 reviewsContainer.add(reviewPanel);
 
-                // 1. Get the natural height of the component
                 Dimension preferredSize = reviewPanel.getPreferredSize();
-
                 reviewPanel.setMaximumSize(
                         new Dimension(Integer.MAX_VALUE, preferredSize.height)
                 );
-
             }
+
         }
+
         if ("review status".equals(evt.getPropertyName()) && evt.getPropertyName() != null) {
             ViewRestaurantState state = viewRestaurantViewModel.getState();
             displayReviewsController.execute(state.getId());
@@ -391,6 +407,47 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
         revalidate();
         repaint();
     }
+
+    private void openTranslationWindowFor(DisplayReviewsState reviewState) {
+        // Safety check: make sure translation is wired
+        if (translationController == null || translationViewModel == null) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Translation feature is not available (controller or view model is null).",
+                    "Translation unavailable",
+                    JOptionPane.WARNING_MESSAGE
+            );
+            return;
+        }
+
+        // Build a Review entity from the display state
+        String restaurantId = viewRestaurantViewModel.getState().getId();
+        String reviewId = "inline-" + System.currentTimeMillis(); // temporary id
+
+        // We just reuse the display name as an "author id" here.
+        String authorId = reviewState.getAuthorDisplayName();
+        String creationDate = reviewState.getCreationDate();
+        String content = reviewState.getContent();
+
+        Review review = new Review(reviewId, authorId, restaurantId, creationDate, content);
+        java.util.List<Review> reviews = java.util.Collections.singletonList(review);
+
+        // Create a TranslationView for this window.
+        // We DON'T use ViewManagerModel / previousViewName here, so pass null.
+        TranslationView translationView =
+                new TranslationView(translationViewModel, null, null);
+        translationView.setTranslationController(translationController);
+        translationView.setCurrentReviews(reviews);   // 🔥 pre-fills "Original" area
+
+        // Pop up a separate window containing this TranslationView
+        JFrame frame = new JFrame("Translated review");
+        frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        frame.setContentPane(translationView);
+        frame.pack();
+        frame.setLocationRelativeTo(this);
+        frame.setVisible(true);
+    }
+
 
     public String getViewName() {
         return viewName;
@@ -437,5 +494,15 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
         this.displayReviewsViewModel = displayReviewsViewModel;
         this.displayReviewsViewModel.addPropertyChangeListener(this);
     }
+
+    public void setTranslationViewModel(TranslationViewModel translationViewModel) {
+        this.translationViewModel = translationViewModel;
+        this.translationViewModel.addPropertyChangeListener(this);
+    }
+
+    public void setTranslationController(TranslationController translationController) {
+        this.translationController = translationController;
+    }
+
 
 }

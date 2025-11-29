@@ -38,12 +38,29 @@ public final class TranslationUILocalization {
             this.backLabel = backLabel;
         }
 
-        public String getTitle()            { return title; }
-        public String getTargetLabel()      { return targetLabel; }
-        public String getTranslateLabel()   { return translateLabel; }
-        public String getOriginalLabel()    { return originalLabel; }
-        public String getTranslatedLabel()  { return translatedLabel; }
-        public String getBackLabel()        { return backLabel; }
+        public String getTitle() {
+            return title;
+        }
+
+        public String getTargetLabel(){
+            return targetLabel;
+        }
+
+        public String getTranslateLabel(){
+            return translateLabel;
+        }
+
+        public String getOriginalLabel(){
+            return originalLabel;
+        }
+
+        public String getTranslatedLabel(){
+            return translatedLabel;
+        }
+
+        public String getBackLabel(){
+            return backLabel;
+        }
     }
 
     // Map: langCode -> UILabels
@@ -57,7 +74,7 @@ public final class TranslationUILocalization {
                 "Translate",
                 "Original:",
                 "Translated:",
-                "Back"
+                "Close"
         ));
         LABEL_MAP.put("EN-GB", LABEL_MAP.get("EN-US"));
 
@@ -68,7 +85,7 @@ public final class TranslationUILocalization {
                 "Traduire",
                 "Original :",
                 "Traduction :",
-                "Retour"
+                "Close"
         ));
 
         // Spanish (Spain / Latin America)
@@ -78,7 +95,7 @@ public final class TranslationUILocalization {
                 "Traducir",
                 "Original:",
                 "Traducido:",
-                "Atrás"
+                "Close"
         ));
         LABEL_MAP.put("ES-419", LABEL_MAP.get("ES"));
 
@@ -89,7 +106,7 @@ public final class TranslationUILocalization {
                 "Übersetzen",
                 "Original:",
                 "Übersetzung:",
-                "Zurück"
+                "Close"
         ));
 
         // Italian
@@ -99,7 +116,7 @@ public final class TranslationUILocalization {
                 "Traduci",
                 "Originale:",
                 "Tradotto:",
-                "Indietro"
+                "Close"
         ));
 
         // Portuguese (PT / BR)
@@ -109,7 +126,7 @@ public final class TranslationUILocalization {
                 "Traduzir",
                 "Original:",
                 "Traduzido:",
-                "Voltar"
+                "Close"
         ));
         LABEL_MAP.put("PT-BR", new UILabels(
                 "Avaliações traduzidas",
@@ -117,7 +134,7 @@ public final class TranslationUILocalization {
                 "Traduzir",
                 "Original:",
                 "Traduzido:",
-                "Voltar"
+                "Close"
         ));
 
         // Dutch
@@ -127,7 +144,7 @@ public final class TranslationUILocalization {
                 "Vertalen",
                 "Origineel:",
                 "Vertaald:",
-                "Terug"
+                "Close"
         ));
 
         // Nordic languages
@@ -137,7 +154,7 @@ public final class TranslationUILocalization {
                 "Översätt",
                 "Original:",
                 "Översättning:",
-                "Tillbaka"
+                "Close"
         ));
         LABEL_MAP.put("DA", new UILabels(
                 "Oversatte anmeldelser",
@@ -145,7 +162,7 @@ public final class TranslationUILocalization {
                 "Oversæt",
                 "Original:",
                 "Oversættelse:",
-                "Tilbage"
+                "Close"
         ));
         LABEL_MAP.put("FI", new UILabels(
                 "Käännetyt arvostelut",
@@ -153,7 +170,7 @@ public final class TranslationUILocalization {
                 "Käännä",
                 "Alkuperäinen:",
                 "Käännös:",
-                "Takaisin"
+                "Close"
         ));
         LABEL_MAP.put("NB", new UILabels(
                 "Oversatte anmeldelser",
@@ -161,7 +178,7 @@ public final class TranslationUILocalization {
                 "Oversett",
                 "Original:",
                 "Oversettelse:",
-                "Tilbake"
+                "Close"
         ));
 
         // Central / Eastern Europe
@@ -171,7 +188,7 @@ public final class TranslationUILocalization {
                 "Tłumacz",
                 "Oryginał:",
                 "Tłumaczenie:",
-                "Wstecz"
+                "Close"
         ));
         LABEL_MAP.put("CS", new UILabels(
                 "Přeložené recenze",
@@ -179,7 +196,7 @@ public final class TranslationUILocalization {
                 "Přeložit",
                 "Originál:",
                 "Překlad:",
-                "Zpět"
+                "Close"
         ));
         LABEL_MAP.put("SK", new UILabels(
                 "Preložené recenzie",
@@ -187,7 +204,7 @@ public final class TranslationUILocalization {
                 "Preložiť",
                 "Originál:",
                 "Preklad:",
-                "Späť"
+                "Close"
         ));
         LABEL_MAP.put("SL", new UILabels(
                 "Prevedeni pregledi",
@@ -195,7 +212,7 @@ public final class TranslationUILocalization {
                 "Prevedi",
                 "Izvirnik:",
                 "Prevod:",
-                "Nazaj"
+                "Close"
         ));
         LABEL_MAP.put("RO", new UILabels(
                 "Recenzii traduse",
@@ -203,7 +220,7 @@ public final class TranslationUILocalization {
                 "Tradu",
                 "Original:",
                 "Tradus:",
-                "Înapoi"
+                "Close"
         ));
         LABEL_MAP.put("HU", new UILabels(
                 "Lefordított értékelések",
@@ -211,7 +228,7 @@ public final class TranslationUILocalization {
                 "Fordítás",
                 "Eredeti:",
                 "Fordítás:",
-                "Vissza"
+                "Close"
         ));
         LABEL_MAP.put("BG", new UILabels(
                 "Преведени отзиви",
@@ -219,7 +236,7 @@ public final class TranslationUILocalization {
                 "Преведи",
                 "Оригинал:",
                 "Превод:",
-                "Назад"
+                "Close"
         ));
         LABEL_MAP.put("EL", new UILabels(
                 "Μεταφρασμένες κριτικές",
@@ -227,7 +244,7 @@ public final class TranslationUILocalization {
                 "Μετάφραση",
                 "Πρωτότυπο:",
                 "Μετάφραση:",
-                "Πίσω"
+                "Close"
         ));
         LABEL_MAP.put("ET", new UILabels(
                 "Tõlgitud arvustused",
@@ -235,7 +252,7 @@ public final class TranslationUILocalization {
                 "Tõlgi",
                 "Originaal:",
                 "Tõlge:",
-                "Tagasi"
+                "Close"
         ));
         LABEL_MAP.put("LV", new UILabels(
                 "Tulkotās atsauksmes",
@@ -243,7 +260,7 @@ public final class TranslationUILocalization {
                 "Tulkot",
                 "Oriģināls:",
                 "Tulkojums:",
-                "Atpakaļ"
+                "Close"
         ));
         LABEL_MAP.put("LT", new UILabels(
                 "Išverstos apžvalgos",
@@ -251,7 +268,7 @@ public final class TranslationUILocalization {
                 "Versti",
                 "Originalas:",
                 "Vertimas:",
-                "Atgal"
+                "Close"
         ));
 
         // Others
@@ -261,7 +278,7 @@ public final class TranslationUILocalization {
                 "Перевести",
                 "Оригинал:",
                 "Перевод:",
-                "Назад"
+                "Close"
         ));
         LABEL_MAP.put("TR", new UILabels(
                 "Çevrilmiş yorumlar",
@@ -269,7 +286,7 @@ public final class TranslationUILocalization {
                 "Çevir",
                 "Orijinal:",
                 "Çevrilmiş:",
-                "Geri"
+                "Close"
         ));
         LABEL_MAP.put("AR", new UILabels(
                 "المراجعات المترجمة",
@@ -277,7 +294,7 @@ public final class TranslationUILocalization {
                 "ترجمة",
                 "النص الأصلي:",
                 "الترجمة:",
-                "رجوع"
+                "Close"
         ));
         LABEL_MAP.put("HE", new UILabels(
                 "ביקורות מתורגמות",
@@ -285,7 +302,7 @@ public final class TranslationUILocalization {
                 "תרגם",
                 "מקור:",
                 "מתורגם:",
-                "חזרה"
+                "Close"
         ));
         LABEL_MAP.put("TH", new UILabels(
                 "รีวิวที่แปลแล้ว",
@@ -293,7 +310,7 @@ public final class TranslationUILocalization {
                 "แปล",
                 "ต้นฉบับ:",
                 "ฉบับแปล:",
-                "ย้อนกลับ"
+                "Close"
         ));
         LABEL_MAP.put("VI", new UILabels(
                 "Đánh giá đã dịch",
@@ -301,7 +318,7 @@ public final class TranslationUILocalization {
                 "Dịch",
                 "Bản gốc:",
                 "Bản dịch:",
-                "Quay lại"
+                "Close"
         ));
         LABEL_MAP.put("ID", new UILabels(
                 "Ulasan yang diterjemahkan",
@@ -309,7 +326,7 @@ public final class TranslationUILocalization {
                 "Terjemahkan",
                 "Asli:",
                 "Terjemahan:",
-                "Kembali"
+                "Close"
         ));
         LABEL_MAP.put("UK", new UILabels(
                 "Перекладені відгуки",
@@ -317,7 +334,7 @@ public final class TranslationUILocalization {
                 "Перекласти",
                 "Оригінал:",
                 "Переклад:",
-                "Назад"
+                "Close"
         ));
 
         // East Asian
@@ -327,7 +344,7 @@ public final class TranslationUILocalization {
                 "翻訳",
                 "原文:",
                 "翻訳文:",
-                "戻る"
+                "Close"
         ));
         LABEL_MAP.put("KO", new UILabels(
                 "번역된 리뷰",
@@ -335,7 +352,7 @@ public final class TranslationUILocalization {
                 "번역",
                 "원문:",
                 "번역본:",
-                "뒤로"
+                "Close"
         ));
         LABEL_MAP.put("ZH-HANS", new UILabels(
                 "已翻译的点评",
@@ -343,7 +360,7 @@ public final class TranslationUILocalization {
                 "翻译",
                 "原文：",
                 "译文：",
-                "返回"
+                "Close"
         ));
         LABEL_MAP.put("ZH-HANT", new UILabels(
                 "已翻譯的評論",
@@ -351,9 +368,9 @@ public final class TranslationUILocalization {
                 "翻譯",
                 "原文：",
                 "譯文：",
-                "返回"
+                "Close"
         ));
-    }
+}
 
     private TranslationUILocalization() {
         // utility class

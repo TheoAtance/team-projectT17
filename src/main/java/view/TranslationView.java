@@ -95,7 +95,7 @@ public class TranslationView extends JPanel implements PropertyChangeListener {
         center.add(Box.createVerticalGlue());
 
         // Back button row at the bottom
-        backButton = new JButton("Back");
+        backButton = new JButton("Close");
         backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         JPanel bottom = new JPanel();
