@@ -1,3 +1,7 @@
+package view;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import entity.Review;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.translation.TranslationController;
@@ -7,12 +11,57 @@ import use_case.translation.DeeplTranslationService;
 import use_case.translation.TranslationInputBoundary;
 import use_case.translation.TranslationInteractor;
 import use_case.translation.TranslationService;
-import view.TranslationView;
 
 import javax.swing.*;
+import java.io.BufferedReader;
+import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 public class TranslationViewDemo {
+
+    /** DTO matching the JSON structure in src/main/java/data/reviews.json */
+    private static class ReviewDto {
+        String creationDate;
+        String restaurantId;
+        String authorId;
+        String reviewId;
+        String content;
+        int likes;
+    }
+
+    /** Load reviews from src/main/java/data/reviews.json and build Review entities. */
+    private static List<Review> loadReviewsFromJson() {
+        try {
+            Path path = Path.of("src/main/java/data/reviews.json");
+            try (BufferedReader reader =
+                         Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
+
+                Gson gson = new Gson();
+                Type listType = new TypeToken<List<ReviewDto>>() {}.getType();
+                List<ReviewDto> dtos = gson.fromJson(reader, listType);
+
+                List<Review> reviews = new ArrayList<>();
+                for (ReviewDto dto : dtos) {
+                    // Constructor order: (reviewId, authorId, restaurantId, content, creationDate, likes)
+                    reviews.add(new Review(
+                            dto.reviewId,
+                            dto.authorId,
+                            dto.restaurantId,
+                            dto.content,
+                            dto.creationDate,
+                            dto.likes
+                    ));
+                }
+                return reviews;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load src/main/java/data/reviews.json", e);
+        }
+    }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
@@ -50,16 +99,17 @@ public class TranslationViewDemo {
                     new TranslationView(translationViewModel, viewManagerModel, previousViewName);
             translationView.setTranslationController(controller);
 
-            // Some example reviews to translate
-            Review r1 = new Review("review1", "auth1",
-                    "restaurant1", "April 1, 2025","The food here is amazing!", 3);
-            Review r2 = new Review("review2", "auth2",
-                    "restaurant3", "April 3, 2025","Best service!", 3);
+            // Load some example reviews from JSON
+            List<Review> allReviews = loadReviewsFromJson();
+            // For the demo, just use the first 2 (or all if you like)
+            List<Review> demoReviews = allReviews.size() > 2
+                    ? allReviews.subList(0, 2)
+                    : allReviews;
 
-            translationView.setCurrentReviews(List.of(r1, r2));
+            translationView.setCurrentReviews(demoReviews);
 
             // Initial translation to English so it's not empty:
-            controller.execute(List.of(r1, r2), "en-US");
+            controller.execute(demoReviews, "en-US");  // or "EN-US" if you prefer
 
             // Show in a frame
             JFrame frame = new JFrame("TranslationView Real Demo");
@@ -71,4 +121,3 @@ public class TranslationViewDemo {
         });
     }
 }
-

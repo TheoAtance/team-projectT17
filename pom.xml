@@ -99,6 +99,8 @@
             <artifactId>deepl-java</artifactId>
             <version>1.12.0</version>
         </dependency>
+
+        <!-- JUnit 4.13.1 for testing -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

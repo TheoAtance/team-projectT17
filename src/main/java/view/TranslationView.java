@@ -42,6 +42,12 @@ public class TranslationView extends JPanel implements PropertyChangeListener {
     // dropdown label -> language code
     private final Map<String, String> languageCodes;
 
+    // Fonts for different scripts
+    private final Font defaultFont;
+    private final Font thaiFont;
+    private final Font koreanFont;
+    private final Font cjkFont;   // Chinese + Japanese (and can also handle Korean)
+
     public TranslationView(TranslationViewModel translationViewModel,
                            ViewManagerModel viewManagerModel,
                            String previousViewName) {
@@ -80,18 +86,32 @@ public class TranslationView extends JPanel implements PropertyChangeListener {
         translatedArea.setLineWrap(true);
         translatedArea.setWrapStyleWord(true);
 
-        // Need a font that can display Chinese and other Unicode text
+        // ----- Font setup: choose reasonable defaults per script -----
         Font base = UIManager.getFont("TextArea.font");
         if (base == null) {
             base = new JTextArea().getFont();
         }
-        // Try a common CJK-friendly font on Windows
-        Font cjkCandidate = new Font("Microsoft YaHei", Font.PLAIN, base.getSize());
-        if (cjkCandidate.canDisplay('\u4E2D')) { // '中'
-            translatedArea.setFont(cjkCandidate);
+        int size = base.getSize();
+
+        // Default: good Unicode UI font
+        defaultFont = new Font("Segoe UI", Font.PLAIN, size);
+
+        // Thai: Leelawadee UI or Tahoma are good on Windows
+        thaiFont = new Font("Leelawadee UI", Font.PLAIN, size);
+
+        // Korean: Malgun Gothic is the standard Korean UI font on Windows
+        koreanFont = new Font("Malgun Gothic", Font.PLAIN, size);
+
+        // CJK: try Microsoft YaHei (very common Chinese UI font on Windows)
+        Font cjkCandidate = new Font("Microsoft YaHei", Font.PLAIN, size);
+        if (cjkCandidate.canDisplay('中') && cjkCandidate.canDisplay('日')) { // Chinese + Japanese chars
+            cjkFont = cjkCandidate;
         } else {
-            translatedArea.setFont(base);
+            cjkFont = defaultFont; // fallback
         }
+
+        translatedArea.setFont(defaultFont);
+        // ----------------------------------------------------------------
 
         JScrollPane scrollPane = new JScrollPane(translatedArea);
 
@@ -155,7 +175,6 @@ public class TranslationView extends JPanel implements PropertyChangeListener {
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        // Same pattern as your other views (e.g. FilterView):
         TranslationState state = (TranslationState) evt.getNewValue();
         updateView(state);
     }
@@ -168,6 +187,32 @@ public class TranslationView extends JPanel implements PropertyChangeListener {
         // Update language label if provided
         if (state.getTargetLanguage() != null && !state.getTargetLanguage().isEmpty()) {
             languageLabel.setText("Language: " + state.getTargetLanguage());
+        }
+
+        // Determine orientation + font based on language
+        String lang = state.getTargetLanguage();
+        String upper = (lang == null) ? "" : lang.toUpperCase();
+
+        // RTL for Arabic / Hebrew
+        if ("AR".equals(upper) || "HE".equals(upper) || "IW".equals(upper)) {
+            translatedArea.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+        } else {
+            translatedArea.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
+        }
+
+        // Font per script
+        if ("TH".equals(upper)) {
+            translatedArea.setFont(thaiFont);
+        } else if ("KO".equals(upper)) {
+            translatedArea.setFont(koreanFont);
+        } else if ("JA".equals(upper)
+                || "ZH".equals(upper)
+                || "ZH-HANS".equals(upper)
+                || "ZH-HANT".equals(upper)) {
+            // Japanese + Chinese variants: use CJK font
+            translatedArea.setFont(cjkFont);
+        } else {
+            translatedArea.setFont(defaultFont);
         }
 
         // Handle errors

@@ -12,7 +12,6 @@ public final class TranslationTargetLanguages {
         // English variants
         LANGUAGE_CODES.put("English (US)", "EN-US");
         LANGUAGE_CODES.put("English (UK)", "EN-GB");
-        LANGUAGE_CODES.put("English (generic)", "EN"); // optional
 
         // Major European languages
         LANGUAGE_CODES.put("French", "FR");
@@ -54,7 +53,6 @@ public final class TranslationTargetLanguages {
         LANGUAGE_CODES.put("Korean", "KO");
         LANGUAGE_CODES.put("Chinese (Simplified)", "ZH-HANS");
         LANGUAGE_CODES.put("Chinese (Traditional)", "ZH-HANT");
-        LANGUAGE_CODES.put("Chinese (generic)", "ZH"); // optional
     }
 
     private TranslationTargetLanguages() {

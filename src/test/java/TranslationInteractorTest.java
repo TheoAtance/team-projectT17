@@ -1,8 +1,15 @@
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import entity.Review;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import use_case.translation.*;
 
+import java.io.BufferedReader;
+import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,10 +49,48 @@ class TranslationInteractorTest {
         }
     }
 
-    /* ------------ Helper to build a Review ------------ */
+    /* ------------ Helpers to load Reviews from src/main/java/data/reviews.json ------------ */
 
-    private Review makeReview(String content) {
-        return new Review("review001","user101", "rest222", content,"date");
+    /** DTO matching the JSON structure in reviews.json. */
+    private static class ReviewDto {
+        String creationDate;
+        String restaurantId;
+        String authorId;
+        String reviewId;
+        String content;
+        int likes;
+    }
+
+    /**
+     * Load all reviews from the JSON file at src/main/java/data/reviews.json
+     * and convert them to Review entities.
+     */
+    private List<Review> loadReviewsFromJson() {
+        try {
+            Path path = Path.of("src/main/java/data/reviews.json");
+            try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
+                Gson gson = new Gson();
+                Type listType = new TypeToken<List<ReviewDto>>() {}.getType();
+                List<ReviewDto> dtos = gson.fromJson(reader, listType);
+
+                List<Review> reviews = new ArrayList<>();
+                for (ReviewDto dto : dtos) {
+                    // Use the 6-arg constructor:
+                    // (reviewId, authorId, restaurantId, content, creationDate, likes)
+                    reviews.add(new Review(
+                            dto.reviewId,
+                            dto.authorId,
+                            dto.restaurantId,
+                            dto.content,
+                            dto.creationDate,
+                            dto.likes
+                    ));
+                }
+                return reviews;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load src/main/java/data/reviews.json", e);
+        }
     }
 
     /* ------------ Unit tests (no API calls) ------------ */
@@ -80,8 +125,11 @@ class TranslationInteractorTest {
         RecordingPresenter presenter = new RecordingPresenter();
         TranslationInteractor interactor = new TranslationInteractor(fakeService, presenter);
 
-        Review r1 = makeReview("Hello");
-        Review r2 = makeReview("Goodbye");
+        // Use real-looking reviews loaded from src/main/java/data/reviews.json
+        List<Review> allReviews = loadReviewsFromJson();
+        // Just take the first two for this test
+        Review r1 = allReviews.get(0);
+        Review r2 = allReviews.get(1);
 
         TranslationInputData input =
                 new TranslationInputData(List.of(r1, r2), "EN");
@@ -96,11 +144,11 @@ class TranslationInteractorTest {
 
         List<String> translated = out.getTranslatedContents();
         assertEquals(2, translated.size());
-        assertEquals("X:Hello", translated.get(0));
-        assertEquals("X:Goodbye", translated.get(1));
+        assertEquals("X:" + r1.getContent(), translated.get(0));
+        assertEquals("X:" + r2.getContent(), translated.get(1));
 
         // Service saw the original texts and target language
-        assertEquals(List.of("Hello", "Goodbye"), fakeService.lastTexts);
+        assertEquals(List.of(r1.getContent(), r2.getContent()), fakeService.lastTexts);
         assertEquals("EN", fakeService.lastTargetLanguage);
     }
 
@@ -121,7 +169,16 @@ class TranslationInteractorTest {
         RecordingPresenter presenter = new RecordingPresenter();
         TranslationInteractor interactor = new TranslationInteractor(realService, presenter);
 
-        Review review = makeReview("Hello, world!");
+        // Simple one-off Review for integration test
+        Review review = new Review(
+                "test-review-id",
+                "test-author",
+                "test-restaurant",
+                "Hello, world!",
+                "2025-01-01",
+                0
+        );
+
         TranslationInputData input =
                 new TranslationInputData(List.of(review), "FR");
 
