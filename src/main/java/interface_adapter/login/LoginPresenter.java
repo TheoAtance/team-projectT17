@@ -6,6 +6,9 @@ import interface_adapter.logged_in.LoggedInViewModel;
 import use_case.custom_login.CustomLoginOutputBoundary;
 import use_case.custom_login.CustomLoginOutputData;
 
+// for testing
+import interface_adapter.view_restaurant.ViewRestaurantController;
+
 /**
  * Presenter for Custom (Email/Password) Login ONLY.
  */
@@ -38,7 +41,11 @@ public class LoginPresenter implements CustomLoginOutputBoundary {
         this.loginViewModel.setState(loginState);
 
         // Switch to logged-in view
-        this.viewManagerModel.setState(loggedInViewModel.getViewName());
+        // this.viewManagerModel.setState(loggedInViewModel.getViewName());
+
+
+        //for testing
+        this.viewManagerModel.setState("restaurant info");
         this.viewManagerModel.firePropertyChange();
     }
 

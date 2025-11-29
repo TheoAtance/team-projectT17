@@ -29,6 +29,7 @@ public class FirebaseUserAuth implements IAuthGateway {
     private final String webApiKey;
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper; // For robust JSON handling
+    private String currentUid;
 
     // REST API Endpoints
     private static final String SIGN_UP_URL = "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=";
@@ -57,7 +58,9 @@ public class FirebaseUserAuth implements IAuthGateway {
                 "{\"email\":\"%s\", \"password\":\"%s\", \"returnSecureToken\":true}",
                 email, password);
 
-        return executeAuthRequest(SIGN_IN_URL, jsonPayload, "Login");
+        currentUid = executeAuthRequest(SIGN_IN_URL, jsonPayload, "Login");
+
+        return currentUid;
     }
 
     /**
@@ -70,7 +73,9 @@ public class FirebaseUserAuth implements IAuthGateway {
                 "{\"email\":\"%s\", \"password\":\"%s\", \"returnSecureToken\":true}",
                 email, password);
 
-        return executeAuthRequest(SIGN_UP_URL, jsonPayload, "Registration");
+        currentUid = executeAuthRequest(SIGN_UP_URL, jsonPayload, "Registration");
+
+        return currentUid;
     }
 
     /**
@@ -150,13 +155,23 @@ public class FirebaseUserAuth implements IAuthGateway {
 
             if (response.statusCode() == 200) {
                 // Parse the response to extract uid, email, and display name
-                return extractGoogleAuthResult(response.body());
+                GoogleAuthResult result = extractGoogleAuthResult(response.body());
+                currentUid= result.getUid();
+                return result;
+
             } else {
                 throw parseAuthError(response.body(), "Google Sign-in");
             }
         } catch (IOException | InterruptedException e) {
             throw new AuthFailureException("Google Sign-in failed due to network error: " + e.getMessage());
         }
+
+
+    }
+
+    @Override
+    public String getCurrentUserUid(){
+        return currentUid;
     }
 
     /**

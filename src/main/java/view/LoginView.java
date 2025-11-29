@@ -4,6 +4,7 @@ import interface_adapter.google_login.GoogleLoginController;
 import interface_adapter.login.LoginController;
 import interface_adapter.login.LoginState;
 import interface_adapter.login.LoginViewModel;
+import view.panel_makers.LabelTextPanel;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -173,6 +174,8 @@ public class LoginView extends JPanel implements ActionListener, PropertyChangeL
         this.add(errorLabel);
         this.add(Box.createVerticalStrut(15));
         this.add(buttons);
+
+
     }
 
     @Override

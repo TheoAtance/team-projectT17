@@ -4,10 +4,12 @@ package entity;
  * A entity representing a review on a restaurant. Review has an authorId, restaurantId, content, and number of up votes
  */
 public class Review {
+    private String reviewId;
     private String authorId;
     private String restaurantId;
     private String content;
-    private int upVotes;
+    private String creationDate;
+    private int likes;
 
 
     /**
@@ -17,11 +19,13 @@ public class Review {
      * @param content id of the content of this review
      * @param upVotes the number of upvotes this review has received
      */
-    public Review(String authorId, String restaurantId, String content, int upVotes){
+    public Review(String reviewId, String authorId, String restaurantId, String content, String creationDate, int upVotes){
+        this.reviewId = checkNonEmpty(reviewId, "reviewId");
         this.authorId = checkNonEmpty(authorId, "authorId");
         this.restaurantId = checkNonEmpty(restaurantId, "restaurantId");
         this.content = checkNonEmpty(content, "review content");
-        this.upVotes = upVotes;
+        this.creationDate = checkNonEmpty(creationDate, "creationDate");
+        this.likes = upVotes;
     }
 
     /**
@@ -30,14 +34,20 @@ public class Review {
      * @param restaurantId id of the restaurant this review is associated to
      * @param content id of the content of this review
      */
-    public Review(String authorId, String restaurantId, String content){
+    public Review(String reviewId, String authorId, String restaurantId, String creationDate, String content){
+        this.reviewId = checkNonEmpty(reviewId, "reviewId");
         this.authorId = checkNonEmpty(authorId, "authorId");
         this.restaurantId = checkNonEmpty(restaurantId, "restaurantId");
         this.content = checkNonEmpty(content, "review content");
-        this.upVotes = 0;
+        this.creationDate = checkNonEmpty(creationDate, "creationDate");
+        this.likes = 0;
     }
 
     //============ Getters ==============
+    public String getReviewId() {
+        return reviewId;
+    }
+
     public String getAuthorId(){
         return authorId;
     }
@@ -46,15 +56,23 @@ public class Review {
         return content;
     }
 
+    public String getCreationDate() {
+        return creationDate;
+    }
+
     public String getRestaurantId() {
         return restaurantId;
     }
 
-    public int getUpVotes() {
-        return upVotes;
+    public int getLikes() {
+        return likes;
     }
 
     //============ Setters ==============
+    public void setReviewId(String reviewId) {
+        this.reviewId = reviewId;
+    }
+
     public void setAuthorId(String authorId) {
         this.authorId = authorId;
     }
@@ -67,8 +85,12 @@ public class Review {
         this.content = content;
     }
 
-    public void setUpVotes(int upVotes) {
-        this.upVotes = upVotes;
+    public void setCreationDate(String creationDate) {
+        this.creationDate = creationDate;
+    }
+
+    public void setLikes(int likes) {
+        this.likes = likes;
     }
 
     //============ Helpers ==============

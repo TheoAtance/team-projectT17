@@ -1,19 +1,13 @@
 package data_access;
 
 import com.google.api.core.ApiFuture;
-import com.google.cloud.firestore.DocumentReference;
-import com.google.cloud.firestore.DocumentSnapshot;
-import com.google.cloud.firestore.Firestore;
-import com.google.cloud.firestore.WriteResult;
+import com.google.cloud.firestore.*;
 import entity.User;
 import entity.UserFactory;
 import use_case.IUserRepo;
 import use_case.PersistenceException;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -34,6 +28,10 @@ import java.util.concurrent.ExecutionException;
 public class FirestoreUserRepo implements IUserRepo {
 
     private final Firestore db;
+    private final Map<String, User> usersById = new HashMap<>();
+
+    /** Flag to ensure the cache is loaded only once. */
+    private volatile boolean isCacheLoaded = false;
 
     /**
      * The name of the Firestore collection where user documents are stored.
@@ -114,44 +112,22 @@ public class FirestoreUserRepo implements IUserRepo {
      * resulting in O(1) time complexity. The operation is asynchronous but blocks until
      * the document is retrieved from Firestore.
      *
-     * <p>Usage Example:</p>
-     *
-     * Optional&lt;User&gt; user = userRepo.getUserByUid("tRcfmLH7o1dYrUkm9");
-     * if (user.isPresent()) {
-     *     System.out.println("Found user: " + user.get().getNickname());
-     * } else {
-     *     System.out.println("User not found");
-     * }
-     *
-     *
      * @param uid The unique Firebase Authentication ID of the user
-     * @return An Optional containing the User if found, or Optional.empty() if not found
+     * @return User associated with the uid
      * @throws PersistenceException if a database error occurs during retrieval
      */
     @Override
-    public Optional<User> getUserByUid(String uid) throws PersistenceException {
-        try {
-            // Get reference to the document with ID = uid
-            DocumentReference docRef = db.collection(COLLECTION_NAME).document(uid);
-
-            // Asynchronously fetch the document
-            ApiFuture<DocumentSnapshot> future = docRef.get();
-
-            // Block until the document is retrieved
-            DocumentSnapshot document = future.get();
-
-            if (document.exists()) {
-                // Document found - convert to User entity
-                return Optional.of(documentToUser(document));
-            } else {
-                // Document not found - return empty Optional
-                return Optional.empty();
-            }
-        } catch (InterruptedException | ExecutionException e) {
-            // Wrap checked exceptions in domain-specific exception
-            throw new PersistenceException("Failed to retrieve user " + uid + ": " + e.getMessage());
+    public User getUserByUid(String uid) throws PersistenceException {
+        if(!isCacheLoaded){
+            loadAllUsers();
         }
+
+        User user = usersById.get(uid);
+
+        return user;
     }
+
+
 
     /**
      * Saves a User entity to Firestore, creating a new document or overwriting an existing one.
@@ -196,9 +172,46 @@ public class FirestoreUserRepo implements IUserRepo {
             // Block until write is confirmed (future.get() returns WriteResult with timestamp)
             future.get();
 
+            usersById.put(user.getUid(), user);
+
         } catch (InterruptedException | ExecutionException e) {
             // Wrap checked exceptions in domain-specific exception
             throw new PersistenceException("Failed to save user " + user.getUid() + ": " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void loadAllUsers() throws PersistenceException{
+        if(isCacheLoaded){
+            return;
+        }
+
+        System.out.println("DEBUG: Loading all users from Firestore into cache");
+
+        try {
+            // gets a list containing all user document
+            ApiFuture<QuerySnapshot> future = db.collection(COLLECTION_NAME).get();
+            List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+
+
+            // convert each document into user objects
+            for (QueryDocumentSnapshot document : documents) {
+                try {
+                    User user = documentToUser(document);
+                    if (user != null) {
+                        System.out.println(user.getUid());
+                        usersById.put(user.getUid(), user);
+                    }
+                } catch (PersistenceException e) {
+                    System.err.println("Skipping malformed user document " + document.getId() + ": " + e.getMessage());
+                }
+            }
+
+            isCacheLoaded = true; // Set flag after successful load
+            System.out.println("DEBUG: Cache loaded with " + usersById.size() + " users.");
+
+        } catch (InterruptedException | ExecutionException e) {
+            throw new PersistenceException("Failed to load all users into cache: " + e.getMessage());
         }
     }
 
@@ -301,6 +314,8 @@ public class FirestoreUserRepo implements IUserRepo {
 
             // Block until delete is confirmed
             future.get();
+
+            usersById.remove(uid);
 
         } catch (InterruptedException | ExecutionException e) {
             // Wrap checked exceptions in domain-specific exception

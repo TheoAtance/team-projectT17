@@ -1,5 +1,6 @@
 package use_case.custom_register;
 
+import data_access.CurrentUser;
 import entity.User;
 import use_case.IAuthGateway;
 import use_case.IUserRepo;
@@ -49,6 +50,7 @@ public class RegisterUserInteractor implements RegisterInputBoundary {
 
             try {
                 userRepository.save(newUser);
+
             } catch (RuntimeException e) {
                 // Failed to save profile after successful auth
                 registerPresenter.prepareFailView("Registration failed: Could not save user profile.");
@@ -61,6 +63,13 @@ public class RegisterUserInteractor implements RegisterInputBoundary {
                     true,
                     newUser.getUid()
             );
+
+            userRepository.loadAllUsers();
+
+            CurrentUser test = new CurrentUser(authGateway, userRepository);
+            String curUser = test.getCurrentUser().getNickname();
+            System.out.println("Register User Current User test: " + curUser);
+
             registerPresenter.prepareSuccessView(outputData);
 
         } catch (RuntimeException e) {

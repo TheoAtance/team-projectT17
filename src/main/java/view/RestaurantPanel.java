@@ -1,12 +1,15 @@
-package ui.components;
+package view;
 
-import entity.Restaurant;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Path2D;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 
+/**
+ * A Swing component that displays a restaurant panel with image, name, rating, and discount info.
+ * Clean Architecture compliant - does not depend on entity layer.
+ */
 public class RestaurantPanel extends JPanel {
     private static final int CARD_WIDTH = 280;
     private static final int CARD_HEIGHT = 200;
@@ -14,22 +17,52 @@ public class RestaurantPanel extends JPanel {
     private static final int CORNER_RADIUS = 16;
     private static final int HEART_SIZE = 30;
 
-    private final Restaurant restaurant;
+    private final RestaurantDisplayData displayData;
     private BufferedImage restaurantImage;
     private boolean isFavorite = false;
     private HeartClickListener heartClickListener;
 
-    public interface HeartClickListener {
-        void onHeartClicked(Restaurant restaurant, boolean newFavoriteState);
+    /**
+     * Data class for restaurant display information.
+     * No entity dependencies - just display strings and primitives.
+     */
+    public static class RestaurantDisplayData {
+        private final String id;
+        private final String name;
+        private final String type;
+        private final double rating;
+        private final boolean hasDiscount;
+        private final double discountValue;
+
+        public RestaurantDisplayData(String id, String name, String type, double rating,
+                                     boolean hasDiscount, double discountValue) {
+            this.id = id;
+            this.name = name;
+            this.type = type;
+            this.rating = rating;
+            this.hasDiscount = hasDiscount;
+            this.discountValue = discountValue;
+        }
+
+        public String getId() { return id; }
+        public String getName() { return name; }
+        public String getType() { return type; }
+        public double getRating() { return rating; }
+        public boolean hasDiscount() { return hasDiscount; }
+        public double getDiscountValue() { return discountValue; }
     }
 
-    public RestaurantPanel(Restaurant restaurant) {
-        this.restaurant = restaurant;
+    public interface HeartClickListener {
+        void onHeartClicked(String restaurantId, boolean newFavoriteState);
+    }
+
+    public RestaurantPanel(RestaurantDisplayData displayData) {
+        this.displayData = displayData;
         setupUI();
     }
 
-    public RestaurantPanel(Restaurant restaurant, BufferedImage image) {
-        this.restaurant = restaurant;
+    public RestaurantPanel(RestaurantDisplayData displayData, BufferedImage image) {
+        this.displayData = displayData;
         this.restaurantImage = image;
         setupUI();
     }
@@ -42,17 +75,17 @@ public class RestaurantPanel extends JPanel {
 
         addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent e) {
-                int heartX = CARD_WIDTH - 45;
-                int heartY = 15;
+                final int heartX = CARD_WIDTH - 45;
+                final int heartY = 15;
 
                 if (e.getX() >= heartX && e.getX() <= heartX + HEART_SIZE &&
                         e.getY() >= heartY && e.getY() <= heartY + HEART_SIZE) {
                     toggleFavorite();
                     if (heartClickListener != null) {
-                        heartClickListener.onHeartClicked(restaurant, isFavorite);
+                        heartClickListener.onHeartClicked(displayData.getId(), isFavorite);
                     }
                 } else {
-                    System.out.println("Clicked on: " + restaurant.getName());
+                    System.out.println("Clicked on: " + displayData.getName());
                 }
             }
         });
@@ -66,7 +99,7 @@ public class RestaurantPanel extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        Graphics2D g2 = (Graphics2D) g.create();
+        final Graphics2D g2 = (Graphics2D) g.create();
 
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
@@ -82,7 +115,7 @@ public class RestaurantPanel extends JPanel {
         if (restaurantImage != null) {
             g2.drawImage(restaurantImage, 0, 0, CARD_WIDTH, IMAGE_HEIGHT, null);
         } else {
-            GradientPaint gradient = new GradientPaint(0, 0, new Color(255, 230, 230),
+            final GradientPaint gradient = new GradientPaint(0, 0, new Color(255, 230, 230),
                     0, IMAGE_HEIGHT, new Color(255, 200, 200));
             g2.setPaint(gradient);
             g2.fillRect(0, 0, CARD_WIDTH, IMAGE_HEIGHT);
@@ -91,13 +124,13 @@ public class RestaurantPanel extends JPanel {
         g2.setClip(null);
 
         int badgeY = 15;
-        if (restaurant.getType() != null && !restaurant.getType().isEmpty()) {
-            drawBadge(g2, restaurant.getType(), 15, badgeY, new Color(239, 68, 68));
+        if (displayData.getType() != null && !displayData.getType().isEmpty()) {
+            drawBadge(g2, displayData.getType(), 15, badgeY, new Color(239, 68, 68));
             badgeY += 35;
         }
 
-        if (restaurant.hasStudentDiscount()) {
-            String discountText = (int)(restaurant.getDiscountValue() * 100) + "% off";
+        if (displayData.hasDiscount()) {
+            final String discountText = (int)(displayData.getDiscountValue() * 100) + "% off";
             drawBadge(g2, discountText, 15, badgeY, new Color(236, 72, 153));
         }
 
@@ -108,9 +141,9 @@ public class RestaurantPanel extends JPanel {
 
         g2.setColor(Color.BLACK);
         g2.setFont(new Font("Arial", Font.BOLD, 18));
-        String restaurantName = restaurant.getName();
-        FontMetrics nameMetrics = g2.getFontMetrics();
-        int maxNameWidth = CARD_WIDTH - 30;
+        String restaurantName = displayData.getName();
+        final FontMetrics nameMetrics = g2.getFontMetrics();
+        final int maxNameWidth = CARD_WIDTH - 30;
 
         if (nameMetrics.stringWidth(restaurantName) > maxNameWidth) {
             restaurantName = truncateText(restaurantName, nameMetrics, maxNameWidth);
@@ -119,20 +152,20 @@ public class RestaurantPanel extends JPanel {
 
         g2.setColor(new Color(156, 163, 175));
         g2.setFont(new Font("Arial", Font.PLAIN, 14));
-        String cuisineType = restaurant.getType();
-        FontMetrics cuisineMetrics = g2.getFontMetrics();
-        int maxCuisineWidth = CARD_WIDTH - 30;
+        String cuisineType = displayData.getType();
+        final FontMetrics cuisineMetrics = g2.getFontMetrics();
+        final int maxCuisineWidth = CARD_WIDTH - 30;
 
         if (cuisineMetrics.stringWidth(cuisineType) > maxCuisineWidth) {
             cuisineType = truncateText(cuisineType, cuisineMetrics, maxCuisineWidth);
         }
         g2.drawString(cuisineType, 15, IMAGE_HEIGHT + 48);
 
-        if (restaurant.getRating() > 0) {
+        if (displayData.getRating() > 0) {
             drawStar(g2, CARD_WIDTH - 120, IMAGE_HEIGHT + 20, new Color(251, 191, 36));
             g2.setColor(Color.BLACK);
             g2.setFont(new Font("Arial", Font.BOLD, 14));
-            String ratingText = String.format("%.1f", restaurant.getRating());
+            final String ratingText = String.format("%.1f", displayData.getRating());
             g2.drawString(ratingText, CARD_WIDTH - 98, IMAGE_HEIGHT + 28);
 
             g2.setColor(new Color(156, 163, 175));
@@ -153,15 +186,15 @@ public class RestaurantPanel extends JPanel {
             return text;
         }
 
-        String ellipsis = "...";
-        int ellipsisWidth = metrics.stringWidth(ellipsis);
+        final String ellipsis = "...";
+        final int ellipsisWidth = metrics.stringWidth(ellipsis);
 
         int low = 0;
         int high = text.length();
 
         while (low < high) {
-            int mid = (low + high) / 2;
-            String candidate = text.substring(0, mid) + ellipsis;
+            final int mid = (low + high) / 2;
+            final String candidate = text.substring(0, mid) + ellipsis;
 
             if (metrics.stringWidth(candidate) < maxWidth) {
                 low = mid + 1;
@@ -175,10 +208,10 @@ public class RestaurantPanel extends JPanel {
 
     private void drawBadge(Graphics2D g2, String text, int x, int y, Color color) {
         g2.setColor(color);
-        FontMetrics fm = g2.getFontMetrics(new Font("Arial", Font.BOLD, 12));
-        int padding = 8;
-        int width = fm.stringWidth(text) + padding * 2;
-        int height = 22;
+        final FontMetrics fm = g2.getFontMetrics(new Font("Arial", Font.BOLD, 12));
+        final int padding = 8;
+        final int width = fm.stringWidth(text) + padding * 2;
+        final int height = 22;
 
         g2.fill(new RoundRectangle2D.Double(x, y, width, height, 8, 8));
 
@@ -208,7 +241,7 @@ public class RestaurantPanel extends JPanel {
     }
 
     private void drawSimpleHeart(Graphics2D g2, double centerX, double centerY, double size) {
-        Path2D heart = new Path2D.Double();
+        final Path2D heart = new Path2D.Double();
 
         heart.moveTo(centerX, centerY - size * 0.3);
         heart.curveTo(
@@ -229,20 +262,20 @@ public class RestaurantPanel extends JPanel {
 
     private void drawStar(Graphics2D g2, int x, int y, Color color) {
         g2.setColor(color);
-        int[] xPoints = {x + 8, x + 10, x + 15, x + 11, x + 13, x + 8, x + 3, x + 5, x + 1, x + 6};
-        int[] yPoints = {y, y + 6, y + 6, y + 10, y + 15, y + 12, y + 15, y + 10, y + 6, y + 6};
+        final int[] xPoints = {x + 8, x + 10, x + 15, x + 11, x + 13, x + 8, x + 3, x + 5, x + 1, x + 6};
+        final int[] yPoints = {y, y + 6, y + 6, y + 10, y + 15, y + 12, y + 15, y + 10, y + 6, y + 6};
         g2.fillPolygon(xPoints, yPoints, 10);
     }
 
     private void drawClockIcon(Graphics2D g2, int x, int y, Color color) {
-        int size = 16;
+        final int size = 16;
         g2.setColor(color);
         g2.fillOval(x, y, size, size);
 
         g2.setColor(Color.WHITE);
         g2.setStroke(new BasicStroke(2));
-        int cx = x + size / 2;
-        int cy = y + size / 2;
+        final int cx = x + size / 2;
+        final int cy = y + size / 2;
         g2.drawLine(cx, cy, cx, cy - 4);
         g2.drawLine(cx, cy, cx + 3, cy);
     }
@@ -261,71 +294,11 @@ public class RestaurantPanel extends JPanel {
         repaint();
     }
 
-    public Restaurant getRestaurant() {
-        return restaurant;
+    public RestaurantDisplayData getDisplayData() {
+        return displayData;
     }
 
     public void setHeartClickListener(HeartClickListener listener) {
         this.heartClickListener = listener;
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("Restaurant Panel Demo");
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setLayout(new FlowLayout(FlowLayout.LEFT, 20, 20));
-
-            Restaurant r1 = new Restaurant.Builder()
-                    .id("1")
-                    .name("Sweet Tooth Café")
-                    .location("123 Main St", "https://maps.example.com/1", 43.6532, -79.3832)
-                    .type("Desserts")
-                    .rating(3.6, 150)
-                    .contact("+1-416-555-0101", "https://sweettooth.example.com")
-                    .studentDiscount(true, 0.15)
-                    .openingHours(java.util.List.of("Mon-Fri: 8am-8pm"))
-                    .photoIds(java.util.List.of("photo1a"))
-                    .build();
-
-            Restaurant r2 = new Restaurant.Builder()
-                    .id("2")
-                    .name("Pizza Paradise")
-                    .location("456 Oak Ave", "https://maps.example.com/2", 43.6612, -79.3952)
-                    .type("Italian")
-                    .rating(4.2, 320)
-                    .contact("+1-416-555-0102", "https://pizzaparadise.example.com")
-                    .studentDiscount(true, 0.10)
-                    .openingHours(java.util.List.of("Mon-Sun: 11am-11pm"))
-                    .photoIds(java.util.List.of("photo2a"))
-                    .build();
-
-            Restaurant r3 = new Restaurant.Builder()
-                    .id("3")
-                    .name("Sushi Master")
-                    .location("789 Pine Rd", "https://maps.example.com/3", 43.6482, -79.4012)
-                    .type("Japanese")
-                    .rating(4.8, 520)
-                    .contact("+1-416-555-0103", "https://sushimaster.example.com")
-                    .studentDiscount(false, 0)
-                    .openingHours(java.util.List.of("Tue-Sun: 12pm-10pm"))
-                    .photoIds(java.util.List.of("photo3a"))
-                    .build();
-
-            RestaurantPanel panel1 = new RestaurantPanel(r1);
-            RestaurantPanel panel2 = new RestaurantPanel(r2);
-            RestaurantPanel panel3 = new RestaurantPanel(r3);
-
-            panel1.setHeartClickListener((restaurant, newState) -> {
-                System.out.println(restaurant.getName() + " favorite: " + newState);
-            });
-
-            frame.add(panel1);
-            frame.add(panel2);
-            frame.add(panel3);
-
-            frame.pack();
-            frame.setLocationRelativeTo(null);
-            frame.setVisible(true);
-        });
     }
 }

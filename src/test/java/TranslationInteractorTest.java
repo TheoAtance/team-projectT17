@@ -44,13 +44,8 @@ class TranslationInteractorTest {
 
     /* ------------ Helper to build a Review ------------ */
 
-    /**
-     * Adapt this to match your actual Review constructor / setters.
-     * Here I'm assuming: new Review(String userId, String restaurantId,
-     *                               String content, int rating)
-     */
     private Review makeReview(String content) {
-        return new Review("user101", "rest222", content, 3);
+        return new Review("review001","user101", "rest222", content,"date");
     }
 
     /* ------------ Unit tests (no API calls) ------------ */

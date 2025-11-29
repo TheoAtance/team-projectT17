@@ -1,10 +1,14 @@
 package app;
 
-import data_access.FirebaseUserAuth;
-import data_access.FirestoreUserRepo;
-import data_access.JsonRestaurantDataAccessObject;
+import data_access.*;
 import entity.RestaurantFactory;
 import interface_adapter.ViewManagerModel;
+import interface_adapter.add_review.AddReviewController;
+import interface_adapter.add_review.AddReviewPresenter;
+import interface_adapter.add_review.AddReviewViewModel;
+import interface_adapter.display_reviews.DisplayReviewsController;
+import interface_adapter.display_reviews.DisplayReviewsPresenter;
+import interface_adapter.display_reviews.DisplayReviewsViewModel;
 import interface_adapter.filter.FilterController;
 import interface_adapter.filter.FilterPresenter;
 import interface_adapter.filter.FilterViewModel;
@@ -16,35 +20,48 @@ import interface_adapter.login.LoginPresenter;
 import interface_adapter.login.LoginViewModel;
 import interface_adapter.logout.LogoutController;
 import interface_adapter.logout.LogoutPresenter;
+import interface_adapter.random_restauarant.RandomRestaurantController;
 import interface_adapter.register.RegisterController;
 import interface_adapter.register.RegisterPresenter;
 import interface_adapter.register.RegisterViewModel;
+import interface_adapter.translation.TranslationController;
+import interface_adapter.translation.TranslationPresenter;
+import interface_adapter.view_restaurant.ViewRestaurantController;
+import interface_adapter.view_restaurant.ViewRestaurantPresenter;
 import interface_adapter.view_restaurant.ViewRestaurantViewModel;
+import interface_adapter.translation.TranslationViewModel;
 import use_case.IAuthGateway;
 import use_case.IUserRepo;
+import use_case.add_review.AddReviewInputBoundary;
+import use_case.add_review.AddReviewInteractor;
+import use_case.add_review.AddReviewOutputBoundary;
 import use_case.custom_login.CustomLoginInputBoundary;
 import use_case.custom_login.CustomLoginUserInteractor;
 import use_case.custom_register.RegisterInputBoundary;
 import use_case.custom_register.RegisterUserInteractor;
+import use_case.display_reviews.DisplayReviewsInputBoundary;
+import use_case.display_reviews.DisplayReviewsInteractor;
+import use_case.display_reviews.DisplayReviewsOutputBoundary;
+import use_case.display_reviews.DisplayReviewsOutputData;
 import use_case.filter.FilterInputBoundary;
 import use_case.filter.FilterInteractor;
 import use_case.google_login.GoogleLoginInputBoundary;
 import use_case.google_login.GoogleLoginInteractor;
 import use_case.logout.LogoutInputBoundary;
 import use_case.logout.LogoutUserInteractor;
+
+import use_case.random_restaurant.RandomRestaurantInputBoundary;
+import use_case.random_restaurant.RandomRestaurantInteractor;
+import use_case.translation.DeeplTranslationService;
 import use_case.translation.TranslationInputBoundary;
 import use_case.translation.TranslationInteractor;
-import view.*;
-import interface_adapter.translation.TranslationViewModel;
-import interface_adapter.translation.TranslationController;
-import interface_adapter.translation.TranslationPresenter;
+import use_case.view_restaurant.ViewRestaurantInputBoundary;
+import use_case.view_restaurant.ViewRestaurantInteractor;
+import use_case.view_restaurant.ViewRestaurantOutputBoundary;
 import use_case.translation.TranslationService;
-import use_case.translation.DeeplTranslationService;
-import view.TranslationView;
-import view.RestaurantView;
+import view.*;
 
 import javax.swing.*;
-import javax.swing.text.View;
 import java.awt.*;
 import java.io.IOException;
 
@@ -60,6 +77,8 @@ public class AppBuilder {
 
 
     // ======== View Models ========
+    //Home page
+    private LoggedInView loggedInView;
 
     // Account
     private LoginViewModel loginViewModel;
@@ -70,24 +89,30 @@ public class AppBuilder {
     private FilterViewModel filterViewModel;
 
     // Restaurant info
-    private ViewRestaurantViewModel restaurantViewModel;
+    private ViewRestaurantViewModel viewRestaurantViewModel;
     private RestaurantView restaurantView;
+
+    //Add review
+    private final AddReviewViewModel addReviewViewModel = new AddReviewViewModel();
+
+    //Display Review
+    private final DisplayReviewsViewModel displayReviewsViewModel = new DisplayReviewsViewModel();
 
 
     // Shared data access objects
     private final IAuthGateway authGateway = new FirebaseUserAuth();
-    private final IUserRepo userRepository = new FirestoreUserRepo();;
+    private final IUserRepo userRepository = new FirestoreUserRepo();
+    private final CurrentUser currentUser = new CurrentUser(authGateway, userRepository);
+
     private JsonRestaurantDataAccessObject restaurantDataAccess;
+    private JsonReviewDataAccessObject reviewDataAccess;
+
+    private GooglePlacesGateway googlePlacesGateway = new GooglePlacesGateway();
 
 
     // Shared Google Login Controller
     private GoogleLoginController googleLoginController;
-
-
-    // Translation
     private TranslationViewModel translationViewModel;
-    private TranslationView translationView;
-
 
     public AppBuilder() {
         // tell card panel to use cardLayout to manage its layout.
@@ -100,6 +125,9 @@ public class AppBuilder {
                     "src/main/java/data/restaurant.json",
                     restaurantFactory
             );
+
+            this.reviewDataAccess = new JsonReviewDataAccessObject("src/main/java/data/reviews.json");
+
         } catch (IOException e) {
             System.err.println("Failed to load restaurant data: " + e.getMessage());
         }
@@ -228,16 +256,18 @@ public class AppBuilder {
         // Create Logout Interactor
         LogoutInputBoundary logoutInteractor = new LogoutUserInteractor(
                 authGateway,
-                logoutPresenter
+                logoutPresenter,
+                currentUser
         );
 
         // Create Logout Controller
         LogoutController logoutController = new LogoutController(logoutInteractor);
 
         // Create View
-        LoggedInView loggedInView = new LoggedInView(loggedInViewModel);
+        loggedInView = new LoggedInView(loggedInViewModel);
         loggedInView.setLogoutController(logoutController);
         loggedInView.setViewManagerModel(viewManagerModel);
+        loggedInView.setViewRestaurantViewModel(viewRestaurantViewModel);
 
         // Add to card panel
         cardPanel.add(loggedInView, loggedInView.getViewName());
@@ -269,6 +299,7 @@ public class AppBuilder {
         // Create View
         FilterView filterView = new FilterView(filterViewModel);
         filterView.setFilterController(filterController);
+        filterView.setViewManagerModel(viewManagerModel);
 
         // Add to card panel
         cardPanel.add(filterView, filterView.getViewName());
@@ -277,13 +308,15 @@ public class AppBuilder {
     }
 
     public AppBuilder addRestaurantView(){
-        restaurantViewModel = new ViewRestaurantViewModel();
-        restaurantView = new RestaurantView(restaurantViewModel);
 
+        viewRestaurantViewModel = new ViewRestaurantViewModel();
+        restaurantView = new RestaurantView(viewRestaurantViewModel);
         cardPanel.add(restaurantView, restaurantView.getViewName());
+
+
         return this;
     }
-
+    
     public AppBuilder addTranslationView() {
         // ViewModel
         this.translationViewModel = new TranslationViewModel();
@@ -306,7 +339,7 @@ public class AppBuilder {
 
         // View – back button should go to the restaurant page.
         String previousViewName = restaurantView.getViewName();  // requires addRestaurantView() called earlier
-        translationView = new TranslationView(translationViewModel, viewManagerModel, previousViewName);
+        TranslationView translationView = new TranslationView(translationViewModel, viewManagerModel, previousViewName);
         translationView.setTranslationController(translationController);
 
         // Register view with CardLayout
@@ -316,16 +349,70 @@ public class AppBuilder {
     }
 
 
+    public AppBuilder addRestaurantUseCase(){
+        final ViewRestaurantOutputBoundary viewRestaurantOutputBoundary =
+                new ViewRestaurantPresenter(viewManagerModel, viewRestaurantViewModel, googlePlacesGateway);
 
-    public JFrame build(){
+        final ViewRestaurantInputBoundary viewRestaurantInteractor =
+                new ViewRestaurantInteractor(restaurantDataAccess, viewRestaurantOutputBoundary);
+
+        final RandomRestaurantInputBoundary randomRestaurantInteractor =
+                new RandomRestaurantInteractor(restaurantDataAccess, viewRestaurantOutputBoundary);
+
+        ViewRestaurantController viewRestaurantController = new ViewRestaurantController(viewRestaurantInteractor);
+        RandomRestaurantController randomRestaurantController = new RandomRestaurantController(randomRestaurantInteractor);
+
+        restaurantView.setViewRestaurantController(viewRestaurantController);
+        restaurantView.setLoggedInViewModel(loggedInViewModel);
+        restaurantView.setViewManagerModel(viewManagerModel);
+        restaurantView.setAddReviewViewModel(addReviewViewModel);
+        restaurantView.setDisplayReviewViewModel(displayReviewsViewModel);
+
+        loggedInView.setViewRestaurantController(viewRestaurantController);
+        loggedInView.setRandomRestaurantController(randomRestaurantController);
+
+        return this;
+    }
+
+
+    public AppBuilder addAddReviewUseCase(){
+        final AddReviewOutputBoundary addReviewOutputBoundary =
+                new AddReviewPresenter(viewManagerModel, addReviewViewModel);
+
+        final AddReviewInputBoundary addReviewInteractor =
+                new AddReviewInteractor(addReviewOutputBoundary, reviewDataAccess, currentUser);
+
+        AddReviewController addReviewController = new AddReviewController(addReviewInteractor);
+        restaurantView.setAddReviewController(addReviewController);
+
+        return this;
+    }
+
+    public AppBuilder addDisplayReviewUseCase(){
+        final DisplayReviewsOutputBoundary DisplayReviewPresenter =
+                new DisplayReviewsPresenter(displayReviewsViewModel);
+
+        final DisplayReviewsInputBoundary displayReviewsInteractor =
+                new DisplayReviewsInteractor(reviewDataAccess, DisplayReviewPresenter, userRepository);
+
+        DisplayReviewsController displayReviewsController = new DisplayReviewsController(displayReviewsInteractor);
+        restaurantView.setDisplayReviewController(displayReviewsController);
+
+        return this;
+    }
+
+
+    public JFrame build() throws IOException {
         final JFrame application = new JFrame("UofT Eats - Restaurant Review App");
         application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        application.setSize(600, 500);
 
         application.add(cardPanel);
 
+        viewManager.setApp(application);
+
         viewManagerModel.setState(loginViewModel.getViewName());
         viewManagerModel.firePropertyChange();
+
 
         return application;
     }

@@ -1,5 +1,6 @@
 package use_case.google_login;
 
+import data_access.CurrentUser;
 import entity.User;
 import use_case.GoogleAuthResult;
 import use_case.IAuthGateway;
@@ -57,6 +58,7 @@ public class GoogleLoginInteractor implements GoogleLoginInputBoundary {
 
             try {
                 userRepository.save(user);
+
                 System.out.println("New Google user registered: " + displayName);
             } catch (RuntimeException e) {
                 // Failed to save profile after successful Google auth
@@ -67,16 +69,15 @@ public class GoogleLoginInteractor implements GoogleLoginInputBoundary {
 
         } else {
             // LOGIN Flow: Load existing User Entity from Firestore
-            Optional<User> userProfile = userRepository.getUserByUid(uid);
 
-            if (userProfile.isEmpty()) {
-                // Shouldn't happen (existsByUid returned true), but handle gracefully
-                authGateway.logout();
-                loginPresenter.prepareFailView("Profile data missing after successful Google login.");
-                return;
-            }
+//            if (userProfile.isEmpty()) {
+//                // Shouldn't happen (existsByUid returned true), but handle gracefully
+//                authGateway.logout();
+//                loginPresenter.prepareFailView("Profile data missing after successful Google login.");
+//                return;
+//            }
 
-            user = userProfile.get();
+            user = userRepository.getUserByUid(uid);
             System.out.println("Existing Google user logged in: " + user.getNickname());
         }
 
@@ -86,6 +87,12 @@ public class GoogleLoginInteractor implements GoogleLoginInputBoundary {
                 true,
                 user.getUid()
         );
+
+        userRepository.loadAllUsers();
+
+        CurrentUser test = new CurrentUser(authGateway, userRepository);
+        String curUser = test.getCurrentUser().getNickname();
+        System.out.println("Google Login Current User test: " + curUser);
 
         loginPresenter.prepareSuccessView(outputData);
     }

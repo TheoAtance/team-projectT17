@@ -51,10 +51,10 @@ public class TranslationViewDemo {
             translationView.setTranslationController(controller);
 
             // Some example reviews to translate
-            Review r1 = new Review("user1", "rest1",
-                    "The food here is amazing!", 5);
-            Review r2 = new Review("user2", "rest1",
-                    "Service is a bit slow, but the taste is great.", 4);
+            Review r1 = new Review("review1", "auth1",
+                    "restaurant1", "April 1, 2025","The food here is amazing!", 3);
+            Review r2 = new Review("review2", "auth2",
+                    "restaurant3", "April 3, 2025","Best service!", 3);
 
             translationView.setCurrentReviews(List.of(r1, r2));
 

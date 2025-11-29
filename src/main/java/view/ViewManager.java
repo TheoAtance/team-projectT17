@@ -15,12 +15,14 @@ public class ViewManager implements PropertyChangeListener {
     private final CardLayout cardLayout;
     private final JPanel views;
     private final ViewManagerModel viewManagerModel;
+    private JFrame applicationWindow;
 
     public ViewManager(JPanel views, CardLayout cardLayout, ViewManagerModel viewManagerModel) {
         this.views = views;
         this.cardLayout = cardLayout;
         this.viewManagerModel = viewManagerModel;
         this.viewManagerModel.addPropertyChangeListener(this);
+        this.applicationWindow = new JFrame();
     }
 
     @Override
@@ -28,6 +30,16 @@ public class ViewManager implements PropertyChangeListener {
         if (evt.getPropertyName().equals("state")) {
             final String viewModelName = (String) evt.getNewValue();
             cardLayout.show(views, viewModelName);
+
+            // resize window to fit new view's content
+            applicationWindow.pack();
+
+            // center window to screen
+            applicationWindow.setLocationRelativeTo(null);
         }
+    }
+
+    public void setApp(JFrame applicationWindow){
+        this.applicationWindow = applicationWindow;
     }
 }

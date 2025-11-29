@@ -1,14 +1,21 @@
 package view;
 
 import interface_adapter.ViewManagerModel;
+import interface_adapter.display_reviews.DisplayReviewsController;
 import interface_adapter.logged_in.LoggedInState;
 import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.logout.LogoutController;
+import interface_adapter.random_restauarant.RandomRestaurantController;
+import interface_adapter.view_restaurant.ViewRestaurantController;
+import interface_adapter.view_restaurant.ViewRestaurantState;
+import interface_adapter.view_restaurant.ViewRestaurantViewModel;
 
 import javax.swing.*;
+import javax.swing.text.View;
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.IOException;
 
 /**
  * The View displayed after successful login.
@@ -21,9 +28,13 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
     private final JLabel uidLabel;
     private final JButton logoutButton;
     private final JButton filterViewButton;
+    private final JButton randomRestaurantButton;
 
     private LogoutController logoutController;
+    private ViewRestaurantController viewRestaurantController;
+    private RandomRestaurantController randomRestaurantController;
     private ViewManagerModel viewManagerModel;
+    private ViewRestaurantViewModel viewRestaurantViewModel;
 
     public LoggedInView(LoggedInViewModel loggedInViewModel) {
         this.loggedInViewModel = loggedInViewModel;
@@ -63,6 +74,26 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
             }
         });
 
+        randomRestaurantButton = new JButton("Random Restaurant");
+        randomRestaurantButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        randomRestaurantButton.addActionListener(ect ->{
+            if(viewRestaurantController != null){
+                try {
+                    randomRestaurantController.execute();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            if(viewManagerModel != null){
+                System.out.println("Changing viewManager state to: " + viewRestaurantViewModel.getViewName());
+                viewManagerModel.setState(viewRestaurantViewModel.getViewName());
+                viewManagerModel.firePropertyChange();
+            }
+            else{
+                JOptionPane.showMessageDialog(this, "ViewManager not initialized");
+            }
+        });
+
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         this.add(Box.createVerticalStrut(50));
         this.add(title);
@@ -72,6 +103,8 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         this.add(uidLabel);
         this.add(Box.createVerticalStrut(30));
         this.add(filterViewButton);
+        this.add(Box.createVerticalStrut(10));
+        this.add(randomRestaurantButton);
         this.add(Box.createVerticalStrut(10));
         this.add(logoutButton);
 
@@ -107,7 +140,28 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         this.logoutController = logoutController;
     }
 
+    public void setViewRestaurantController(ViewRestaurantController viewRestaurantController){
+        this.viewRestaurantController = viewRestaurantController;
+    }
+
+    public void setRandomRestaurantController(RandomRestaurantController randomRestaurantController) {
+        this.randomRestaurantController = randomRestaurantController;
+    }
+
+
+    public ViewRestaurantController getViewRestaurantController(){
+        return viewRestaurantController;
+    }
+
     public void setViewManagerModel(ViewManagerModel viewManagerModel) {
         this.viewManagerModel = viewManagerModel;
     }
+
+    public void setViewRestaurantViewModel(ViewRestaurantViewModel viewRestaurantViewModel){
+        this.viewRestaurantViewModel = viewRestaurantViewModel;
+    }
+
+
+
+
 }
