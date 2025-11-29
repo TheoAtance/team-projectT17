@@ -28,7 +28,7 @@ import java.util.List;
  * - Reads src/main/java/data/reviews.json.
  * - Builds Review entities.
  * - Uses the FIRST 8 reviews as example cards.
- * - Each card's "Translate" button opens a TranslationView window
+ * - Each card's "Translate" button opens an independent TranslationView window
  *   that calls the real DeepL-based translation use case.
  */
 public class ReviewPanelDemo {
@@ -80,10 +80,10 @@ public class ReviewPanelDemo {
     /** Panel listing ReviewPanel cards for the given reviews. */
     private static class ReviewListPanel extends JPanel {
 
-        public ReviewListPanel(List<Review> reviews,
-                               TranslationViewModel translationViewModel,
-                               TranslationController translationController,
-                               ViewManagerModel viewManagerModel) {
+        private final String apiKey;
+
+        public ReviewListPanel(List<Review> reviews, String apiKey) {
+            this.apiKey = apiKey;
 
             setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
             setBackground(new Color(249, 250, 251));
@@ -102,21 +102,8 @@ public class ReviewPanelDemo {
                 ReviewPanel reviewPanel =
                         new ReviewPanel(authorDisplayName, date, content);
 
-                // Translate button → open TranslationView window for THIS review
-                reviewPanel.addTranslateButtonListener(e -> {
-                    TranslationView translationView =
-                            new TranslationView(translationViewModel, viewManagerModel, null);
-                    translationView.setTranslationController(translationController);
-                    translationView.setCurrentReviews(List.of(review)); // pre-fill Original
-
-                    JFrame frame = new JFrame("Translate review");
-                    frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-                    frame.setContentPane(translationView);
-                    frame.pack();
-                    frame.setLocationRelativeTo(ReviewListPanel.this);
-                    frame.setVisible(true);
-                    // User clicks Translate inside that window to hit DeepL.
-                });
+                // Translate button → open an INDEPENDENT TranslationView window for THIS review
+                reviewPanel.addTranslateButtonListener(e -> openTranslationWindowFor(review));
 
                 Dimension preferredSize = reviewPanel.getPreferredSize();
                 reviewPanel.setMaximumSize(
@@ -125,6 +112,45 @@ public class ReviewPanelDemo {
 
                 add(reviewPanel);
             }
+        }
+
+        /** Build a completely independent translation stack for a single popup window. */
+        private void openTranslationWindowFor(Review review) {
+            // 1) Build per-window translation stack
+
+            // Local view manager (we're not switching app-wide views here)
+            ViewManagerModel popupViewManager = new ViewManagerModel();
+
+            // View model unique to this window
+            TranslationViewModel popupViewModel = new TranslationViewModel();
+
+            // Presenter bound only to this view model
+            TranslationPresenter presenter =
+                    new TranslationPresenter(popupViewManager, popupViewModel);
+
+            // Service + interactor for this window
+            TranslationService translationService =
+                    new DeeplTranslationService(apiKey, false);
+            TranslationInputBoundary interactor =
+                    new TranslationInteractor(translationService, presenter);
+
+            // Controller for this window
+            TranslationController popupController =
+                    new TranslationController(interactor);
+
+            // 2) Build TranslationView bound to this window's stack
+            TranslationView translationView =
+                    new TranslationView(popupViewModel, popupViewManager, null);
+            translationView.setTranslationController(popupController);
+            translationView.setCurrentReviews(List.of(review)); // pre-fill "Original"
+
+            // 3) Show popup window
+            JFrame frame = new JFrame("Translate review");
+            frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+            frame.setContentPane(translationView);
+            frame.pack();
+            frame.setLocationRelativeTo(this);
+            frame.setVisible(true);
         }
     }
 
@@ -144,18 +170,7 @@ public class ReviewPanelDemo {
                 return;
             }
 
-            // 2) Translation stack (same as real app)
-            ViewManagerModel viewManagerModel = new ViewManagerModel();
-            TranslationViewModel translationViewModel = new TranslationViewModel();
-            TranslationPresenter presenter =
-                    new TranslationPresenter(viewManagerModel, translationViewModel);
-            TranslationService translationService =
-                    new DeeplTranslationService(key, false);
-            TranslationInputBoundary interactor =
-                    new TranslationInteractor(translationService, presenter);
-            TranslationController controller = new TranslationController(interactor);
-
-            // 3) Load ALL reviews, then take the first 8 for the demo
+            // 2) Load ALL reviews, then take the first 8 for the demo
             List<Review> allReviews = loadAllReviewsFromJson();
             List<Review> demoReviews;
             if (allReviews.size() <= 8) {
@@ -173,12 +188,12 @@ public class ReviewPanelDemo {
                 );
             }
 
-            // 4) Build frame with ReviewPanels
+            // 3) Build frame with ReviewPanels
             JFrame frame = new JFrame("ReviewPanel → TranslationView Demo (first 8 reviews)");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
             ReviewListPanel reviewListPanel =
-                    new ReviewListPanel(demoReviews, translationViewModel, controller, viewManagerModel);
+                    new ReviewListPanel(demoReviews, key);
 
             JScrollPane scrollPane = new JScrollPane(reviewListPanel);
             scrollPane.setBorder(null);
