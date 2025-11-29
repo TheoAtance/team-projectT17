@@ -2,6 +2,7 @@ package view;
 
 import entity.Review;
 import helper.translation.TranslationTargetLanguages;
+import helper.translation.TranslationUILocalization;
 
 import interface_adapter.ViewManagerModel;
 import interface_adapter.translation.TranslationController;
@@ -105,38 +106,49 @@ public class TranslationView extends JPanel implements PropertyChangeListener {
         bottom.add(backButton);
         bottom.add(Box.createHorizontalGlue());
 
-        // Back behaviour:
-        // - In main app: go back to previous view via ViewManagerModel
-        // - In standalone demo: close the window
+        // Back button(close this window for translation):
         backButton.addActionListener(e -> {
-            if (viewManagerModel != null && previousViewName != null) {
-                // Same pattern as FilterView / LoggedInView
-                viewManagerModel.setState(previousViewName);
-                viewManagerModel.firePropertyChange();
-            } else {
-                // Standalone demo fallback: just close the window
-                Window window = SwingUtilities.getWindowAncestor(TranslationView.this);
-                if (window != null) {
-                    window.dispose();
-                }
+            Window window = SwingUtilities.getWindowAncestor(TranslationView.this);
+            if (window != null) {
+                window.dispose();
             }
         });
+
 
         add(center, BorderLayout.CENTER);
         add(bottom, BorderLayout.SOUTH);
 
         // Initial placeholder text
         translationPanel.setTranslatedContents(List.of());
+
+        // Initial localization (default EN-US)
+        applyLocalization("EN-US");
     }
 
-    /** Called from AppBuilder to hook up controller. */
+    /**
+     * Called from AppBuilder to hook up controller.
+     */
     public void setTranslationController(TranslationController controller) {
         this.translationController = controller;
     }
 
-    /** Called when you open this page, so we know which reviews to translate. */
+    /**
+     * Called when you open this page, so we know which reviews to translate.
+     */
     public void setCurrentReviews(List<Review> reviews) {
         this.currentReviews = reviews;
+
+        // Push originals into the panel
+        if (reviews != null && !reviews.isEmpty()) {
+            java.util.List<String> originals = new java.util.ArrayList<>();
+            for (Review r : reviews) {
+                // adjust if your getter name is different
+                originals.add(r.getContent());
+            }
+            translationPanel.setOriginalContents(originals);
+        } else {
+            translationPanel.setOriginalContents(List.of());
+        }
     }
 
     public String getViewName() {
@@ -157,6 +169,9 @@ public class TranslationView extends JPanel implements PropertyChangeListener {
         // Update language label + orientation / fonts inside the panel
         translationPanel.setTargetLanguageCode(state.getTargetLanguage());
 
+        // Localize static UI text for this target language
+        applyLocalization(state.getTargetLanguage());
+
         // Handle errors
         if (state.getErrorMessage() != null && !state.getErrorMessage().isEmpty()) {
             translationPanel.setErrorMessage(state.getErrorMessage());
@@ -170,4 +185,25 @@ public class TranslationView extends JPanel implements PropertyChangeListener {
         List<String> texts = state.getTranslatedContents();
         translationPanel.setTranslatedContents(texts);
     }
+
+    /**
+     * Apply localized UI labels (title, "Target language:", Back)
+     * for the given language code.
+     */
+    private void applyLocalization(String targetLangCode) {
+        TranslationUILocalization.UILabels labels =
+                TranslationUILocalization.forLanguage(targetLangCode);
+
+        // --- text inside TranslationPanel ---
+        translationPanel.setTitleText(labels.getTitle());
+        translationPanel.setTargetLabelText(labels.getTargetLabel());
+        translationPanel.setTranslateButtonText(labels.getTranslateLabel());
+        translationPanel.setOriginalLabelText(labels.getOriginalLabel());
+        translationPanel.setTranslatedLabelText(labels.getTranslatedLabel());
+
+        // --- back button at the bottom ---
+        backButton.setText(labels.getBackLabel());
+        translationPanel.applyUIFontForText(backButton, labels.getBackLabel());
+    }
+
 }
