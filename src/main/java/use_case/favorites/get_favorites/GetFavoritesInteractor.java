@@ -47,11 +47,13 @@ public class GetFavoritesInteractor implements GetFavoritesInputBoundary {
                         restaurant.getType(),
                         restaurant.getRating(),
                         restaurant.hasStudentDiscount(),
-                        restaurant.getDiscountValue()
+                        restaurant.getDiscountValue(),
+                        restaurant.getPhotoIds()
                 ));
             }
 
             final GetFavoritesOutputData outputData = new GetFavoritesOutputData(
+                    user.getUid(),  // NEW: Pass user ID
                     user.getNickname(),
                     restaurantDataList
             );

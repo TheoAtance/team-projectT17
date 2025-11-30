@@ -8,12 +8,18 @@ import java.util.List;
  */
 public class GetFavoritesOutputData {
 
+    private final String userId;  // NEW
     private final String username;
     private final List<FavoriteRestaurantData> restaurants;
 
-    public GetFavoritesOutputData(String username, List<FavoriteRestaurantData> restaurants) {
+    public GetFavoritesOutputData(String userId, String username, List<FavoriteRestaurantData> restaurants) {  // UPDATED
+        this.userId = userId;  // NEW
         this.username = username;
         this.restaurants = restaurants;
+    }
+
+    public String getUserId() {  // NEW
+        return userId;
     }
 
     public String getUsername() {
@@ -35,15 +41,17 @@ public class GetFavoritesOutputData {
         private final double rating;
         private final boolean hasDiscount;
         private final double discountValue;
+        private final List<String> photoIds;
 
         public FavoriteRestaurantData(String id, String name, String type, double rating,
-                                      boolean hasDiscount, double discountValue) {
+                                      boolean hasDiscount, double discountValue, List<String> photoIds) {
             this.id = id;
             this.name = name;
             this.type = type;
             this.rating = rating;
             this.hasDiscount = hasDiscount;
             this.discountValue = discountValue;
+            this.photoIds = photoIds;
         }
 
         public String getId() { return id; }
@@ -52,5 +60,6 @@ public class GetFavoritesOutputData {
         public double getRating() { return rating; }
         public boolean hasDiscount() { return hasDiscount; }
         public double getDiscountValue() { return discountValue; }
+        public List<String> getPhotoIds() { return photoIds; }
     }
 }

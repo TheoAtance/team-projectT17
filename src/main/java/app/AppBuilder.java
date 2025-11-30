@@ -9,6 +9,10 @@ import interface_adapter.add_review.AddReviewViewModel;
 import interface_adapter.display_reviews.DisplayReviewsController;
 import interface_adapter.display_reviews.DisplayReviewsPresenter;
 import interface_adapter.display_reviews.DisplayReviewsViewModel;
+import interface_adapter.favorites.FavoritesPresenter;
+import interface_adapter.favorites.FavoritesViewModel;
+import interface_adapter.favorites.GetFavoritesController;
+import interface_adapter.favorites.RemoveFavoriteController;
 import interface_adapter.filter.FilterController;
 import interface_adapter.filter.FilterPresenter;
 import interface_adapter.filter.FilterViewModel;
@@ -39,19 +43,26 @@ import use_case.custom_register.RegisterUserInteractor;
 import use_case.display_reviews.DisplayReviewsInputBoundary;
 import use_case.display_reviews.DisplayReviewsInteractor;
 import use_case.display_reviews.DisplayReviewsOutputBoundary;
-import use_case.display_reviews.DisplayReviewsOutputData;
+import use_case.favorites.get_favorites.GetFavoritesInputBoundary;
+import use_case.favorites.get_favorites.GetFavoritesInteractor;
+import use_case.favorites.remove_favorite.RemoveFavoriteInputBoundary;
+import use_case.favorites.remove_favorite.RemoveFavoriteInteractor;
 import use_case.filter.FilterInputBoundary;
 import use_case.filter.FilterInteractor;
 import use_case.google_login.GoogleLoginInputBoundary;
 import use_case.google_login.GoogleLoginInteractor;
 import use_case.logout.LogoutInputBoundary;
 import use_case.logout.LogoutUserInteractor;
-
 import use_case.random_restaurant.RandomRestaurantInputBoundary;
 import use_case.random_restaurant.RandomRestaurantInteractor;
 import use_case.view_restaurant.ViewRestaurantInputBoundary;
 import use_case.view_restaurant.ViewRestaurantInteractor;
 import use_case.view_restaurant.ViewRestaurantOutputBoundary;
+import interface_adapter.favorites.AddFavoriteController;
+import interface_adapter.favorites.AddFavoritePresenter;
+import use_case.favorites.add_favorite.AddFavoriteInputBoundary;
+import use_case.favorites.add_favorite.AddFavoriteInteractor;
+import interface_adapter.favorites.RemoveFavoritePresenter;
 import view.*;
 
 import javax.swing.*;
@@ -363,6 +374,80 @@ public class AppBuilder {
         return this;
     }
 
+    /**
+     * Adds the Favorites use case to the application.
+     * Handles both viewing and removing favorites.
+     *
+     * @return this AppBuilder for method chaining
+     */
+    public AppBuilder addFavoritesUseCase() {
+        // Create View Model
+        FavoritesViewModel favoritesViewModel = new FavoritesViewModel();
+
+        // Create unified Presenter with circular dependency resolution
+        GetFavoritesInputBoundary getFavoritesInteractor;
+        FavoritesPresenter favoritesPresenter;
+
+        // Step 1: Create temporary presenter
+        favoritesPresenter = new FavoritesPresenter(
+                favoritesViewModel,
+                googlePlacesGateway,
+                null  // Temporarily null
+        );
+
+        // Step 2: Create Get Favorites Interactor
+        getFavoritesInteractor = new GetFavoritesInteractor(
+                (UserDataAccessInterface) userRepository,
+                favoritesPresenter
+        );
+
+        // Step 3: Recreate presenter with interactor
+        favoritesPresenter = new FavoritesPresenter(
+                favoritesViewModel,
+                googlePlacesGateway,
+                getFavoritesInteractor
+        );
+
+        // Step 4: Recreate Get Favorites Interactor with new presenter
+        getFavoritesInteractor = new GetFavoritesInteractor(
+                (UserDataAccessInterface) userRepository,
+                favoritesPresenter
+        );
+
+        // Step 5: Create Remove Favorite Interactor
+        RemoveFavoriteInputBoundary removeFavoriteInteractor = new RemoveFavoriteInteractor(
+                (UserDataAccessInterface) userRepository,
+                favoritesPresenter
+        );
+
+        // Create Controllers
+        GetFavoritesController getFavoritesController = new GetFavoritesController(getFavoritesInteractor);
+        RemoveFavoriteController removeFavoriteController = new RemoveFavoriteController(removeFavoriteInteractor);
+
+        // Create View
+        FavoritesView favoritesView = new FavoritesView(favoritesViewModel);
+        favoritesView.setGetFavoritesController(getFavoritesController);
+        favoritesView.setRemoveFavoriteController(removeFavoriteController);
+
+        // NEW - Set navigation dependencies so clicking restaurants works
+        if (viewRestaurantViewModel != null && restaurantView != null) {
+            favoritesView.setViewRestaurantController(restaurantView.getViewRestaurantController());
+            favoritesView.setViewManagerModel(viewManagerModel);
+            favoritesView.setViewRestaurantViewModel(viewRestaurantViewModel);
+        }
+
+        // Add to card panel
+        cardPanel.add(favoritesView, favoritesView.getViewName());
+
+        // Wire up favorites to LoggedInView
+        if (loggedInView != null) {
+            loggedInView.setFavoritesViewModel(favoritesViewModel);
+            loggedInView.setGetFavoritesController(getFavoritesController);
+        }
+
+        return this;
+    }
+
 
     public JFrame build() throws IOException {
         final JFrame application = new JFrame("UofT Eats - Restaurant Review App");
@@ -411,5 +496,43 @@ public class AppBuilder {
 
         // Create Google Login Controller
         googleLoginController = new GoogleLoginController(googleLoginInteractor);
+    }
+    public AppBuilder addAddFavoriteToRestaurantView() {
+        if (restaurantView == null) {
+            throw new IllegalStateException("Restaurant view must be created first");
+        }
+
+        // Create shared view model
+        FavoritesViewModel favoritesViewModel = new FavoritesViewModel();
+
+        // Create AddFavorite presenter
+        AddFavoritePresenter addFavoritePresenter = new AddFavoritePresenter(favoritesViewModel);
+
+        // Create AddFavorite interactor
+        AddFavoriteInputBoundary addFavoriteInteractor = new AddFavoriteInteractor(
+                (UserDataAccessInterface) userRepository,
+                addFavoritePresenter
+        );
+
+        // Create AddFavorite controller
+        AddFavoriteController addFavoriteController = new AddFavoriteController(addFavoriteInteractor);
+
+        // Create RemoveFavorite presenter
+        RemoveFavoritePresenter removeFavoritePresenter = new RemoveFavoritePresenter(favoritesViewModel);
+
+        // Create RemoveFavorite interactor
+        RemoveFavoriteInputBoundary removeFavoriteInteractor = new RemoveFavoriteInteractor(
+                (UserDataAccessInterface) userRepository,
+                removeFavoritePresenter
+        );
+
+        // Create RemoveFavorite controller
+        RemoveFavoriteController removeFavoriteController = new RemoveFavoriteController(removeFavoriteInteractor);
+
+        // Set both controllers on restaurant view
+        restaurantView.setAddFavoriteController(addFavoriteController);
+        restaurantView.setRemoveFavoriteController(removeFavoriteController);
+
+        return this;
     }
 }

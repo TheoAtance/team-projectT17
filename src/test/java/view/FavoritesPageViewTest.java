@@ -1,96 +1,112 @@
 package view;
 
-import interface_adapter.favorites.FavoritesState;
+import data_access.FirebaseService;
+import data_access.FirestoreUserRepo;
+import data_access.GooglePlacesGateway;
+import data_access.UserDataAccessInterface;
+import interface_adapter.favorites.FavoritesPresenter;
 import interface_adapter.favorites.FavoritesViewModel;
 import interface_adapter.favorites.GetFavoritesController;
 import interface_adapter.favorites.RemoveFavoriteController;
 import use_case.favorites.get_favorites.GetFavoritesInputBoundary;
-import use_case.favorites.get_favorites.GetFavoritesInputData;
-import use_case.favorites.remove_favorite.RemoveFavoriteInputBoundary;
-import use_case.favorites.remove_favorite.RemoveFavoriteInputData;
-import view.FavoritesPageView;
+import use_case.favorites.get_favorites.GetFavoritesInteractor;
+import use_case.favorites.remove_favorite.RemoveFavoriteInteractor;
 
 import javax.swing.*;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
- * Test to display FavoritesPageView with RestaurantPanel components
+ * Test to display FavoritesView with real data from Firebase and Google Places API
  */
-class FavoritesPageViewTest {
-
-    // This simulates the user's actual favorites list
-    private static List<FavoritesState.RestaurantDisplayData> userFavorites = new ArrayList<>();
+class FavoritesViewTest {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             try {
-                // Create the view model
-                FavoritesViewModel viewModel = new FavoritesViewModel();
-                FavoritesState state = viewModel.getState();
+                // Initialize Firebase
+                System.out.println("Initializing Firebase...");
+                FirebaseService.getInstance();
+                System.out.println("Firebase initialized successfully.");
 
-                // Set username
-                state.setUsername("Test User");
+                // Create data access objects
+                UserDataAccessInterface userRepo = new FirestoreUserRepo();
+                GooglePlacesGateway imageGateway = new GooglePlacesGateway();
 
-                // Initialize user's favorites
-                userFavorites.clear();
-                userFavorites.add(new FavoritesState.RestaurantDisplayData("1", "Pizza Palace", "Italian", "4.5", true, "15% off"));
-                userFavorites.add(new FavoritesState.RestaurantDisplayData("2", "Burger Barn", "American", "4.2", false, ""));
-                userFavorites.add(new FavoritesState.RestaurantDisplayData("3", "Sushi Zen", "Japanese", "4.8", true, "20% off"));
-                userFavorites.add(new FavoritesState.RestaurantDisplayData("4", "Taco Fiesta", "Mexican", "4.3", true, "10% off"));
-                userFavorites.add(new FavoritesState.RestaurantDisplayData("5", "Green Leaf Cafe", "Vegetarian", "4.6", false, ""));
-                userFavorites.add(new FavoritesState.RestaurantDisplayData("6", "Dragon Garden", "Chinese", "4.4", true, "25% off"));
+                // Create view model
+                FavoritesViewModel favoritesViewModel = new FavoritesViewModel();
 
-                // Create the favorites page
-                FavoritesPageView favoritesView = new FavoritesPageView(viewModel, "testuser123");
+                // Create presenter with circular dependency resolution
+                GetFavoritesInputBoundary getFavoritesInteractor;
+                FavoritesPresenter presenter;
 
-                // Create mock GetFavoritesInputBoundary that returns the user's current favorites
-                GetFavoritesInputBoundary mockGetInteractor = new GetFavoritesInputBoundary() {
-                    @Override
-                    public void execute(GetFavoritesInputData inputData) {
-                        System.out.println("Getting favorites for user: " + inputData.getUserId());
-                        // Return the current user favorites
-                        FavoritesState currentState = viewModel.getState();
-                        currentState.setRestaurants(new ArrayList<>(userFavorites));
-                        viewModel.firePropertyChanged(); // Use firePropertyChanged to ensure update
-                    }
-                };
+                // Step 1: Create temporary presenter
+                presenter = new FavoritesPresenter(
+                        favoritesViewModel,
+                        imageGateway,
+                        null
+                );
 
-                // Create mock RemoveFavoriteInputBoundary that actually removes from user's favorites
-                RemoveFavoriteInputBoundary mockRemoveInteractor = new RemoveFavoriteInputBoundary() {
-                    @Override
-                    public void execute(RemoveFavoriteInputData inputData) {
-                        System.out.println("Removing restaurant " + inputData.getRestaurantId() +
-                                " from user's favorites: " + inputData.getUserId());
+                // Step 2: Create Get Favorites Interactor
+                getFavoritesInteractor = new GetFavoritesInteractor(
+                        userRepo,
+                        presenter
+                );
 
-                        // Remove from the user's favorites list
-                        userFavorites.removeIf(restaurant -> restaurant.getId().equals(inputData.getRestaurantId()));
+                // Step 3: Recreate presenter with interactor
+                presenter = new FavoritesPresenter(
+                        favoritesViewModel,
+                        imageGateway,
+                        getFavoritesInteractor
+                );
 
-                        // Update state to reflect the change
-                        FavoritesState currentState = viewModel.getState();
-                        currentState.setRestaurants(new ArrayList<>(userFavorites));
-                        currentState.setSuccessMessage("Restaurant removed from favorites successfully!");
-                        viewModel.firePropertyChanged(); // Use firePropertyChanged to ensure update
-                    }
-                };
+                // Step 4: Recreate Get Favorites Interactor with new presenter
+                getFavoritesInteractor = new GetFavoritesInteractor(
+                        userRepo,
+                        presenter
+                );
+
+                // Step 5: Create Remove Favorite Interactor
+                RemoveFavoriteInteractor removeFavoriteInteractor = new RemoveFavoriteInteractor(
+                        userRepo,
+                        presenter
+                );
 
                 // Create controllers
-                GetFavoritesController getController = new GetFavoritesController(mockGetInteractor);
-                RemoveFavoriteController removeController = new RemoveFavoriteController(mockRemoveInteractor);
+                GetFavoritesController getFavoritesController = new GetFavoritesController(
+                        getFavoritesInteractor
+                );
+
+                RemoveFavoriteController removeFavoriteController = new RemoveFavoriteController(
+                        removeFavoriteInteractor
+                );
+
+                // IMPORTANT: Use a real user ID from your Firebase
+                String testUserId = "HQOx2etUGVWQw5lhPqVFibiIzT22";
+
+                // Create the favorites view (now a JPanel)
+                FavoritesView favoritesView = new FavoritesView(favoritesViewModel);
 
                 // Set controllers
-                favoritesView.setGetFavoritesController(getController);
-                favoritesView.setRemoveFavoriteController(removeController);
+                favoritesView.setGetFavoritesController(getFavoritesController);
+                favoritesView.setRemoveFavoriteController(removeFavoriteController);
 
-                // Make the window visible
-                favoritesView.setVisible(true);
+                // Create a JFrame to hold the panel
+                JFrame frame = new JFrame("Favorites Test");
+                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                frame.setSize(900, 600);
+                frame.setLocationRelativeTo(null);
+                frame.add(favoritesView);
+                frame.setVisible(true);
 
-                // Set initial restaurants in state and trigger display
-                state.setRestaurants(new ArrayList<>(userFavorites));
-                viewModel.firePropertyChanged(); // This triggers the property change to display restaurants
+                // Set the userId in the state before loading
+                favoritesViewModel.getState().setUserId(testUserId);
 
-                System.out.println("Displaying " + userFavorites.size() + " restaurant panels");
+                // Load favorites from Firebase
+                favoritesView.loadFavorites();
+
+                System.out.println("Favorites page loaded successfully!");
+                System.out.println("User ID: " + testUserId);
                 System.out.println("Click the heart icons to remove from favorites");
+                System.out.println("Images will be fetched from Google Places API");
 
             } catch (Exception e) {
                 e.printStackTrace();

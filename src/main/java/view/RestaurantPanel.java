@@ -21,6 +21,7 @@ public class RestaurantPanel extends JPanel {
     private BufferedImage restaurantImage;
     private boolean isFavorite = false;
     private HeartClickListener heartClickListener;
+    private RestaurantClickListener clickListener;
 
     /**
      * Data class for restaurant display information.
@@ -56,6 +57,10 @@ public class RestaurantPanel extends JPanel {
         void onHeartClicked(String restaurantId, boolean newFavoriteState);
     }
 
+    public interface RestaurantClickListener {
+        void onRestaurantClicked(String restaurantId, RestaurantDisplayData restaurantData);
+    }
+
     public RestaurantPanel(RestaurantDisplayData displayData) {
         this.displayData = displayData;
         setupUI();
@@ -85,7 +90,10 @@ public class RestaurantPanel extends JPanel {
                         heartClickListener.onHeartClicked(displayData.getId(), isFavorite);
                     }
                 } else {
-                    System.out.println("Clicked on: " + displayData.getName());
+                    // Clicked somewhere other than the heart - trigger restaurant click
+                    if (clickListener != null) {
+                        clickListener.onRestaurantClicked(displayData.getId(), displayData);
+                    }
                 }
             }
         });
@@ -300,5 +308,9 @@ public class RestaurantPanel extends JPanel {
 
     public void setHeartClickListener(HeartClickListener listener) {
         this.heartClickListener = listener;
+    }
+
+    public void setRestaurantClickListener(RestaurantClickListener listener) {
+        this.clickListener = listener;
     }
 }

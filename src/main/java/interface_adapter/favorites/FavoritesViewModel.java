@@ -5,6 +5,7 @@ import java.beans.PropertyChangeSupport;
 
 public class FavoritesViewModel {
     public static final String TITLE_LABEL = "Favorites View";
+    public static final String VIEW_NAME = "favorites";  // NEW
 
     private final PropertyChangeSupport support = new PropertyChangeSupport(this);
     private FavoritesState state = new FavoritesState();
@@ -28,5 +29,10 @@ public class FavoritesViewModel {
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         support.addPropertyChangeListener(listener);
+    }
+
+    // NEW - Add this method
+    public String getViewName() {
+        return VIEW_NAME;
     }
 }

@@ -1,6 +1,8 @@
 package view;
 
 import interface_adapter.ViewManagerModel;
+import interface_adapter.favorites.FavoritesViewModel;
+import interface_adapter.favorites.GetFavoritesController;
 import interface_adapter.display_reviews.DisplayReviewsController;
 import interface_adapter.logged_in.LoggedInState;
 import interface_adapter.logged_in.LoggedInViewModel;
@@ -29,12 +31,15 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
     private final JButton logoutButton;
     private final JButton filterViewButton;
     private final JButton randomRestaurantButton;
+    private final JButton favoritesButton;  // NEW
 
     private LogoutController logoutController;
     private ViewRestaurantController viewRestaurantController;
     private RandomRestaurantController randomRestaurantController;
     private ViewManagerModel viewManagerModel;
     private ViewRestaurantViewModel viewRestaurantViewModel;
+    private FavoritesViewModel favoritesViewModel;  // NEW
+    private GetFavoritesController getFavoritesController;  // NEW
 
     public LoggedInView(LoggedInViewModel loggedInViewModel) {
         this.loggedInViewModel = loggedInViewModel;
@@ -94,6 +99,28 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
             }
         });
 
+        // NEW - Favorites button
+        favoritesButton = new JButton("My Favorites");
+        favoritesButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        favoritesButton.addActionListener(evt -> {
+            if (getFavoritesController != null && viewManagerModel != null && favoritesViewModel != null) {
+                // Get current user ID from logged in state
+                String userId = loggedInViewModel.getState().getUid();
+
+                // Set user ID in favorites state
+                favoritesViewModel.getState().setUserId(userId);
+
+                // Load favorites
+                getFavoritesController.execute(userId);
+
+                // Navigate to favorites view
+                viewManagerModel.setState(favoritesViewModel.getViewName());
+                viewManagerModel.firePropertyChange();
+            } else {
+                JOptionPane.showMessageDialog(this, "Favorites not initialized.");
+            }
+        });
+
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         this.add(Box.createVerticalStrut(50));
         this.add(title);
@@ -105,6 +132,8 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         this.add(filterViewButton);
         this.add(Box.createVerticalStrut(10));
         this.add(randomRestaurantButton);
+        this.add(Box.createVerticalStrut(10));
+        this.add(favoritesButton);  // NEW - Added favorites button
         this.add(Box.createVerticalStrut(10));
         this.add(logoutButton);
 
@@ -148,7 +177,6 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         this.randomRestaurantController = randomRestaurantController;
     }
 
-
     public ViewRestaurantController getViewRestaurantController(){
         return viewRestaurantController;
     }
@@ -161,7 +189,12 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         this.viewRestaurantViewModel = viewRestaurantViewModel;
     }
 
+    // NEW - Setters for favorites
+    public void setFavoritesViewModel(FavoritesViewModel favoritesViewModel) {
+        this.favoritesViewModel = favoritesViewModel;
+    }
 
-
-
+    public void setGetFavoritesController(GetFavoritesController getFavoritesController) {
+        this.getFavoritesController = getFavoritesController;
+    }
 }

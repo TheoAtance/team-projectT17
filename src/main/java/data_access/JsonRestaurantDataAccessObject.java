@@ -32,15 +32,40 @@ public class JsonRestaurantDataAccessObject implements
     public JsonRestaurantDataAccessObject(String jsonPath, RestaurantFactory restaurantFactory) throws IOException {
         try {
             JSONArray restaurantData = new JSONArray(Files.readString(Path.of(jsonPath)));
-            // Map id to their respective restaurant obj
+            // Map CID to their respective restaurant obj
             for (int i = 0; i < restaurantData.length(); i++) {
                 JSONObject curObj = restaurantData.getJSONObject(i);
-                String restaurantId = curObj.getString("name");
+
+                // Extract CID from placeUri instead of using name
+                String placeUri = curObj.getJSONObject("googleMapsLinks").getString("placeUri");
+                String restaurantId = extractCidFromPlaceUri(placeUri);
+
                 Restaurant restaurant = restaurantFactory.create(curObj);
                 restaurantById.put(restaurantId, restaurant);
             }
         } catch (IOException e) {
             throw new IOException(e);
+        }
+    }
+
+    /**
+     * Extracts the CID parameter from a Google Maps placeUri.
+     * Example: "https://maps.google.com/?cid=5193387586656989408&..." -> "5193387586656989408"
+     */
+    private String extractCidFromPlaceUri(String placeUri) {
+        int cidStart = placeUri.indexOf("cid=");
+        if (cidStart == -1) {
+            throw new IllegalArgumentException("No CID found in placeUri: " + placeUri);
+        }
+
+        cidStart += 4; // Move past "cid="
+        int cidEnd = placeUri.indexOf('&', cidStart);
+
+        if (cidEnd == -1) {
+            // CID is at the end of the URL
+            return placeUri.substring(cidStart);
+        } else {
+            return placeUri.substring(cidStart, cidEnd);
         }
     }
 
@@ -72,9 +97,9 @@ public class JsonRestaurantDataAccessObject implements
 
 
     /**
-     * Get restaurant with given id
-     * @param id id of the restaurant to look up
-     * @return restaurant that corresponds to given id
+     * Get restaurant with given id (CID)
+     * @param id CID of the restaurant to look up
+     * @return restaurant that corresponds to given CID
      */
     @Override
     public Restaurant get(String id) {

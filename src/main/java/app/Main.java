@@ -31,6 +31,8 @@ public class Main {
                 .addLoggedInView()
                 .addFilterView()
                 .addRestaurantUseCase()
+                .addFavoritesUseCase()
+                .addAddFavoriteToRestaurantView()  // NEW - Add this line after addFavoritesUseCase()
                 .addAddReviewUseCase()
                 .addDisplayReviewUseCase()
                 .build();

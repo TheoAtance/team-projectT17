@@ -6,6 +6,12 @@ import entity.User;
 import entity.UserFactory;
 import use_case.IUserRepo;
 import use_case.PersistenceException;
+import entity.Restaurant;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -25,13 +31,22 @@ import java.util.concurrent.ExecutionException;
  * @see User
  * @see PersistenceException
  */
-public class FirestoreUserRepo implements IUserRepo {
+public class FirestoreUserRepo implements IUserRepo, UserDataAccessInterface {
 
     private final Firestore db;
     private final Map<String, User> usersById = new HashMap<>();
 
     /** Flag to ensure the cache is loaded only once. */
     private volatile boolean isCacheLoaded = false;
+
+    /** Cache for restaurants loaded from JSON file. */
+    private final Map<String, Restaurant> restaurantsById = new HashMap<>();
+
+    /** Flag to ensure the restaurant cache is loaded only once. */
+    private volatile boolean isRestaurantCacheLoaded = false;
+
+    /** Path to the restaurant data JSON file. */
+    private static final String RESTAURANT_JSON_PATH = "src/main/java/data/restaurant.json";
 
     /**
      * The name of the Firestore collection where user documents are stored.
@@ -156,6 +171,8 @@ public class FirestoreUserRepo implements IUserRepo {
     @Override
     public void save(User user) throws PersistenceException {
         try {
+            System.out.println("DEBUG: Saving user " + user.getUid() + " with favorites: " + user.getFavoriteRestaurantIds());
+
             // Get reference to document with ID = user's UID
             DocumentReference docRef = db.collection(COLLECTION_NAME).document(user.getUid());
 
@@ -173,6 +190,8 @@ public class FirestoreUserRepo implements IUserRepo {
             future.get();
 
             usersById.put(user.getUid(), user);
+
+            System.out.println("DEBUG: User saved successfully. Cache updated with favorites: " + user.getFavoriteRestaurantIds());
 
         } catch (InterruptedException | ExecutionException e) {
             // Wrap checked exceptions in domain-specific exception
@@ -321,5 +340,231 @@ public class FirestoreUserRepo implements IUserRepo {
             // Wrap checked exceptions in domain-specific exception
             throw new PersistenceException("Failed to delete user " + uid + ": " + e.getMessage());
         }
+    }
+
+    // ========= UserDataAccessInterface Implementation =========
+
+    @Override
+    public User getUser(String userId) {
+        try {
+            return getUserByUid(userId);
+        } catch (PersistenceException e) {
+            System.err.println("Error getting user: " + e.getMessage());
+            return null;
+        }
+    }
+
+    @Override
+    public void saveUser(User user) {
+        try {
+            save(user);
+        } catch (PersistenceException e) {
+            System.err.println("Error saving user: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Loads all restaurants from the restaurant.json file into memory cache.
+     * This method is called lazily on first access to restaurant data.
+     *
+     * @throws RuntimeException if the JSON file cannot be read or parsed
+     */
+    private void loadRestaurantsFromJson() {
+        if (isRestaurantCacheLoaded) {
+            return;
+        }
+
+        System.out.println("DEBUG: Loading restaurants from " + RESTAURANT_JSON_PATH);
+
+        try {
+            // Read the entire JSON file as a string
+            String jsonContent = new String(Files.readAllBytes(Paths.get(RESTAURANT_JSON_PATH)));
+
+            // Parse as JSON array
+            JSONArray restaurantsArray = new JSONArray(jsonContent);
+
+            // Convert each JSON object to a Restaurant entity
+            for (int i = 0; i < restaurantsArray.length(); i++) {
+                JSONObject restaurantJson = restaurantsArray.getJSONObject(i);
+
+                try {
+                    Restaurant restaurant = jsonToRestaurant(restaurantJson);
+                    restaurantsById.put(restaurant.getId(), restaurant);
+                } catch (Exception e) {
+                    System.err.println("Skipping malformed restaurant at index " + i + ": " + e.getMessage());
+                }
+            }
+
+            isRestaurantCacheLoaded = true;
+            System.out.println("DEBUG: Restaurant cache loaded with " + restaurantsById.size() + " restaurants.");
+
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read restaurant.json: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Converts a JSON object to a Restaurant entity using the Builder pattern.
+     * Extracts all available data from the Google Places API JSON format.
+     *
+     * Expected JSON structure:
+     * {
+     *   "displayName": { "text": "Restaurant Name", "languageCode": "en" },
+     *   "googleMapsLinks": {
+     *     "placeUri": "https://maps.google.com/?cid=5193387586656989408&...",
+     *     "directionsUri": "https://..."
+     *   },
+     *   "location": { "latitude": 43.6532, "longitude": -79.3832 },
+     *   "formattedAddress": "123 Street Name, City, Province",
+     *   "rating": 4.5,
+     *   "userRatingCount": 150,
+     *   "primaryTypeDisplayName": { "text": "Cafe", "languageCode": "en-US" },
+     *   "nationalPhoneNumber": "+1 416-555-1234",
+     *   "websiteUri": "https://example.com",
+     *   "regularOpeningHours": { "weekdayDescriptions": ["Monday: 9:00 AM – 5:00 PM", ...] },
+     *   "photos": [
+     *     { "name": "places/.../photos/photo_id_1" }
+     *   ]
+     * }
+     *
+     * @param json The JSON object representing a restaurant
+     * @return A Restaurant entity
+     */
+    private Restaurant jsonToRestaurant(JSONObject json) {
+        Restaurant.Builder builder = new Restaurant.Builder();
+
+        // Extract CID from placeUri (required)
+        String placeUri = json.getJSONObject("googleMapsLinks").getString("placeUri");
+        String cid = extractCidFromPlaceUri(placeUri);
+        builder.id(cid);
+
+        // Extract name (required)
+        String name = json.getJSONObject("displayName").getString("text");
+        builder.name(name);
+
+        // Extract location data (address, mapUri, latitude, longitude)
+        String address = json.optString("formattedAddress", "Address not available");
+        String mapUri = json.getJSONObject("googleMapsLinks").optString("directionsUri", "");
+        double latitude = 0.0;
+        double longitude = 0.0;
+        if (json.has("location")) {
+            JSONObject location = json.getJSONObject("location");
+            latitude = location.optDouble("latitude", 0.0);
+            longitude = location.optDouble("longitude", 0.0);
+        }
+        builder.location(address, mapUri, latitude, longitude);
+
+        // Extract type
+        String type = "Restaurant"; // Default
+        if (json.has("primaryTypeDisplayName")) {
+            type = json.getJSONObject("primaryTypeDisplayName").optString("text", "Restaurant");
+        }
+        builder.type(type);
+
+        // Extract rating and count
+        double rating = json.optDouble("rating", 0.0);
+        int ratingCount = json.optInt("userRatingCount", 0);
+        builder.rating(rating, ratingCount);
+
+        // Extract contact info
+        String phoneNumber = json.optString("nationalPhoneNumber", "");
+        String websiteUri = json.optString("websiteUri", "");
+        builder.contact(phoneNumber, websiteUri);
+
+        // Extract opening hours
+        List<String> openingHours = new ArrayList<>();
+        if (json.has("regularOpeningHours")) {
+            JSONObject hoursObj = json.getJSONObject("regularOpeningHours");
+            if (hoursObj.has("weekdayDescriptions")) {
+                JSONArray hoursArray = hoursObj.getJSONArray("weekdayDescriptions");
+                for (int i = 0; i < hoursArray.length(); i++) {
+                    openingHours.add(hoursArray.getString(i));
+                }
+            }
+        }
+        builder.openingHours(openingHours);
+
+        // Extract student discount (default to no discount since Google Places doesn't have this)
+        builder.studentDiscount(false, 0.0);
+
+        // Extract photo IDs - KEEP THE FULL PATH
+        List<String> photoIds = new ArrayList<>();
+        if (json.has("photos")) {
+            JSONArray photosArray = json.getJSONArray("photos");
+            for (int i = 0; i < photosArray.length(); i++) {
+                JSONObject photo = photosArray.getJSONObject(i);
+                if (photo.has("name")) {
+                    // Keep the FULL photo name including places/ChIJ.../photos/...
+                    String photoName = photo.getString("name");
+                    System.out.println("DEBUG FirestoreUserRepo: Extracted photo name: " + photoName);
+                    photoIds.add(photoName);  // Use full path, not just the ID!
+                }
+            }
+        }
+        builder.photoIds(photoIds);
+
+        return builder.build();
+    }
+
+    /**
+     * Extracts the CID parameter from a Google Maps placeUri.
+     * Example: "https://maps.google.com/?cid=5193387586656989408&..." -> "5193387586656989408"
+     *
+     * @param placeUri The Google Maps place URI
+     * @return The CID string
+     * @throws IllegalArgumentException if no CID is found in the URI
+     */
+    private String extractCidFromPlaceUri(String placeUri) {
+        int cidStart = placeUri.indexOf("cid=");
+        if (cidStart == -1) {
+            throw new IllegalArgumentException("No CID found in placeUri: " + placeUri);
+        }
+
+        cidStart += 4; // Move past "cid="
+        int cidEnd = placeUri.indexOf('&', cidStart);
+
+        if (cidEnd == -1) {
+            // CID is at the end of the URL
+            return placeUri.substring(cidStart);
+        } else {
+            return placeUri.substring(cidStart, cidEnd);
+        }
+    }
+
+    @Override
+    public Restaurant getRestaurantById(String restaurantId) {
+        if (!isRestaurantCacheLoaded) {
+            loadRestaurantsFromJson();
+        }
+
+        Restaurant restaurant = restaurantsById.get(restaurantId);
+
+        if (restaurant == null) {
+            System.err.println("Restaurant not found: " + restaurantId);
+        }
+
+        return restaurant;
+    }
+
+    @Override
+    public List<Restaurant> getRestaurantsByIds(List<String> restaurantIds) {
+        if (!isRestaurantCacheLoaded) {
+            loadRestaurantsFromJson();
+        }
+
+        List<Restaurant> restaurants = new ArrayList<>();
+
+        for (String id : restaurantIds) {
+            Restaurant restaurant = restaurantsById.get(id);
+            if (restaurant != null) {
+                restaurants.add(restaurant);
+            } else {
+                System.err.println("Restaurant not found: " + id);
+            }
+        }
+
+        System.out.println("DEBUG: Loaded " + restaurants.size() + " restaurants out of " + restaurantIds.size() + " requested IDs");
+
+        return restaurants;
     }
 }

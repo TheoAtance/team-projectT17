@@ -16,7 +16,6 @@ public class RestaurantFactory {
      */
     public Restaurant create(JSONObject restaurant){
 
-
         String id = restaurant.getString("name");
         String name = restaurant.getJSONObject("displayName").getString("text");
         String address = restaurant.getString("formattedAddress");
@@ -46,9 +45,10 @@ public class RestaurantFactory {
             JSONArray jsonPhotos = restaurant.getJSONArray("photos");
 
             for(int i = 0;i < jsonPhotos.length();i++){
-                photoIds.add(jsonPhotos.getJSONObject(i).getString("name"));
+                String photoName = jsonPhotos.getJSONObject(i).getString("name");
+                System.out.println("DEBUG RestaurantFactory: Extracted photo name: " + photoName);
+                photoIds.add(photoName);
             }
-
         }
 
 
@@ -64,5 +64,4 @@ public class RestaurantFactory {
                 .photoIds(photoIds)
                 .build();
     }
-
 }
