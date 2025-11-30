@@ -62,10 +62,10 @@ UofT-Eats uses the [Google Places API](https://developers.google.com/maps/docume
 data on the restaurants and the [DeepL API](https://www.deepl.com/pro-api) for help translating the reviews.
 ## Screenshots
 ### Log In
-![Log In](./src/main//resources/images/log_in_screen.png)
+![Log In](src/main/resources/images/log_in_screen.png)
 ### Main Page
-![Main Page](./src/main//resources/images/main_screen.png)
+![Main Page](src/main/resources/images/main_screen.png)
 ### Filter
-![Filter](./src/main//resources/images/filter_screen.png)
+![Filter](src/main/resources/images/filter_screen.png)
 ### Restaurant
-![Filter](./src/main//resources/images/restaurant_screen.png)
+![Filter](src/main/resources/images/restaurant_screen.png)
