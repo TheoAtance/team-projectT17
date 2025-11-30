@@ -8,7 +8,7 @@ public class ViewRestaurantTest {
     @Test
     public void getRestaurantTest() throws Exception {
         JsonRestaurantDataAccessObject dao = new JsonRestaurantDataAccessObject(
-                        "src/main/test/test_data/single_restaurant.json",
+                        "src/test/test_data/single_restaurant.json",
                         new RestaurantFactory()
                 );
 

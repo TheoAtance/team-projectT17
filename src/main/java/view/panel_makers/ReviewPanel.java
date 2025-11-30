@@ -2,6 +2,7 @@ package view.panel_makers;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
 
 public class ReviewPanel extends JPanel {
     private final JPanel titlePanel;
@@ -83,4 +84,18 @@ public class ReviewPanel extends JPanel {
     public void setCreationDate(String date){
         creationDateLabel.setText(date);
     }
+
+    //** Let other views hook into this card's Translate button. */
+    public void addTranslateButtonListener(ActionListener listener) {
+        translateButton.addActionListener(listener);
+    }
+
+    public String getContent() {
+        return contentText.getText();
+    }
+
+    public String getCreationDate() {
+        return creationDateLabel.getText();
+    }
+
 }
