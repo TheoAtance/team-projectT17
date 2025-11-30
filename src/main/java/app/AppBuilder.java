@@ -24,12 +24,9 @@ import interface_adapter.random_restauarant.RandomRestaurantController;
 import interface_adapter.register.RegisterController;
 import interface_adapter.register.RegisterPresenter;
 import interface_adapter.register.RegisterViewModel;
-import interface_adapter.translation.TranslationController;
-import interface_adapter.translation.TranslationPresenter;
 import interface_adapter.view_restaurant.ViewRestaurantController;
 import interface_adapter.view_restaurant.ViewRestaurantPresenter;
 import interface_adapter.view_restaurant.ViewRestaurantViewModel;
-import interface_adapter.translation.TranslationViewModel;
 import use_case.IAuthGateway;
 import use_case.IUserRepo;
 import use_case.add_review.AddReviewInputBoundary;
@@ -52,13 +49,9 @@ import use_case.logout.LogoutUserInteractor;
 
 import use_case.random_restaurant.RandomRestaurantInputBoundary;
 import use_case.random_restaurant.RandomRestaurantInteractor;
-import use_case.translation.DeeplTranslationService;
-import use_case.translation.TranslationInputBoundary;
-import use_case.translation.TranslationInteractor;
 import use_case.view_restaurant.ViewRestaurantInputBoundary;
 import use_case.view_restaurant.ViewRestaurantInteractor;
 import use_case.view_restaurant.ViewRestaurantOutputBoundary;
-import use_case.translation.TranslationService;
 import view.*;
 
 import javax.swing.*;
@@ -112,7 +105,6 @@ public class AppBuilder {
 
     // Shared Google Login Controller
     private GoogleLoginController googleLoginController;
-    private TranslationViewModel translationViewModel;
 
     public AppBuilder() {
         // tell card panel to use cardLayout to manage its layout.
@@ -316,6 +308,7 @@ public class AppBuilder {
 
         return this;
     }
+
 
 
     public AppBuilder addRestaurantUseCase(){
