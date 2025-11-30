@@ -1,46 +1,43 @@
 package interface_adapter.display_reviews;
 
-import use_case.display_reviews.DisplayReviewsInputBoundary;
+import java.util.ArrayList;
+import java.util.List;
 import use_case.display_reviews.DisplayReviewsOutputBoundary;
 import use_case.display_reviews.DisplayReviewsOutputData;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class DisplayReviewsPresenter implements DisplayReviewsOutputBoundary {
 
-   private DisplayReviewsViewModel displayReviewsViewModel;
+  private final DisplayReviewsViewModel displayReviewsViewModel;
 
-    public DisplayReviewsPresenter(DisplayReviewsViewModel displayReviewsViewModel) {
-        this.displayReviewsViewModel = displayReviewsViewModel;
+  public DisplayReviewsPresenter(DisplayReviewsViewModel displayReviewsViewModel) {
+    this.displayReviewsViewModel = displayReviewsViewModel;
+  }
+
+  @Override
+  public void prepareSuccessView(List<DisplayReviewsOutputData> displayReviewsOutputDataList) {
+    ArrayList<DisplayReviewsState> newStates = new ArrayList<>();
+
+    for (DisplayReviewsOutputData data : displayReviewsOutputDataList) {
+      DisplayReviewsState state = new DisplayReviewsState();
+
+      state.setAuthorDisplayName(data.getAuthorDisplayName());
+      state.setContent(data.getContent());
+      state.setCreationDate(data.getCreationDate());
+
+      newStates.add(state);
     }
 
-    @Override
-    public void prepareSuccessView(List<DisplayReviewsOutputData> displayReviewsOutputDataList){
-       ArrayList<DisplayReviewsState> newStates = new ArrayList<>();
+    DisplayReviewsStateList displayReviewsStateList = new DisplayReviewsStateList();
+    displayReviewsStateList.setDisplayReviewsStateList(newStates);
 
-       for(DisplayReviewsOutputData data : displayReviewsOutputDataList){
-           DisplayReviewsState state = new DisplayReviewsState();
+    displayReviewsViewModel.setState(displayReviewsStateList);
+    displayReviewsViewModel.firePropertyChange("display reviews");
+  }
 
-           state.setAuthorDisplayName(data.getAuthorDisplayName());
-           state.setContent(data.getContent());
-           state.setCreationDate(data.getCreationDate());
-
-           newStates.add(state);
-       }
-
-       DisplayReviewsStateList displayReviewsStateList = new DisplayReviewsStateList();
-       displayReviewsStateList.setDisplayReviewsStateList(newStates);
-
-
-       displayReviewsViewModel.setState(displayReviewsStateList);
-       displayReviewsViewModel.firePropertyChange("display reviews");
-   }
-
-   @Override
-    public void prepareFailView(String errorMessage){
-       displayReviewsViewModel.getState().setErrorMessage(errorMessage);
-   }
+  @Override
+  public void prepareFailView(String errorMessage) {
+    displayReviewsViewModel.getState().setErrorMessage(errorMessage);
+  }
 
 
 }

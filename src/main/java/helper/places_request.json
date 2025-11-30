@@ -4,7 +4,10 @@
   "pageSize": 120,
   "locationBias": {
     "circle": {
-      "center": { "latitude": 43.664387, "longitude": -79.392294 },
+      "center": {
+        "latitude": 43.664387,
+        "longitude": -79.392294
+      },
       "radius": 1100.0
     }
   }

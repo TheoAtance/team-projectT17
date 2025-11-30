@@ -7,15 +7,17 @@ import java.io.IOException;
  */
 public interface ViewRestaurantOutputBoundary {
 
-    /**
-     * Prepare the success view for the view restaurant use case
-     * @param outputData the output data
-     */
-    void prepareSuccessView(ViewRestaurantOutputData outputData) throws IOException;
+  /**
+   * Prepare the success view for the view restaurant use case
+   *
+   * @param outputData the output data
+   */
+  void prepareSuccessView(ViewRestaurantOutputData outputData) throws IOException;
 
-    /**
-     * Prepares the failure view for the view restaurant use case
-     * @param errorMessage the explanation for failure
-     */
-    void prepareFailView(String errorMessage);
+  /**
+   * Prepares the failure view for the view restaurant use case
+   *
+   * @param errorMessage the explanation for failure
+   */
+  void prepareFailView(String errorMessage);
 }

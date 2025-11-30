@@ -1,44 +1,44 @@
 package interface_adapter.logged_in;
 
 /**
- * The state for the Logged In View.
- * Represents the user session after successful authentication.
+ * The state for the Logged In View. Represents the user session after successful authentication.
  */
 public class LoggedInState {
-    private String uid = "";
-    private String nickname = "";
-    private String email = "";
 
-    public LoggedInState(LoggedInState copy) {
-        this.uid = copy.uid;
-        this.nickname = copy.nickname;
-        this.email = copy.email;
-    }
+  private String uid = "";
+  private String nickname = "";
+  private String email = "";
 
-    public LoggedInState() {
-    }
+  public LoggedInState(LoggedInState copy) {
+    this.uid = copy.uid;
+    this.nickname = copy.nickname;
+    this.email = copy.email;
+  }
 
-    public String getUid() {
-        return uid;
-    }
+  public LoggedInState() {
+  }
 
-    public void setUid(String uid) {
-        this.uid = uid;
-    }
+  public String getUid() {
+    return uid;
+  }
 
-    public String getNickname() {
-        return nickname;
-    }
+  public void setUid(String uid) {
+    this.uid = uid;
+  }
 
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
-    }
+  public String getNickname() {
+    return nickname;
+  }
 
-    public String getEmail() {
-        return email;
-    }
+  public void setNickname(String nickname) {
+    this.nickname = nickname;
+  }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+  public String getEmail() {
+    return email;
+  }
+
+  public void setEmail(String email) {
+    this.email = email;
+  }
 }

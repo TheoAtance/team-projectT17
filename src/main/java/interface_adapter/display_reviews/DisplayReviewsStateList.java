@@ -4,25 +4,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DisplayReviewsStateList {
-    List<DisplayReviewsState> displayReviewsStateList = new ArrayList<DisplayReviewsState>();
-    private String errorMessage;
 
-    public DisplayReviewsStateList() {
-    }
+  List<DisplayReviewsState> displayReviewsStateList = new ArrayList<DisplayReviewsState>();
+  private String errorMessage;
 
-    public List<DisplayReviewsState> getDisplayReviewsStateList() {
-        return displayReviewsStateList;
-    }
+  public DisplayReviewsStateList() {
+  }
 
-    public void setDisplayReviewsStateList(List<DisplayReviewsState> displayReviewsStateList) {
-        this.displayReviewsStateList = displayReviewsStateList;
-    }
+  public List<DisplayReviewsState> getDisplayReviewsStateList() {
+    return displayReviewsStateList;
+  }
 
-    public String getErrorMessage() {
-        return errorMessage;
-    }
+  public void setDisplayReviewsStateList(List<DisplayReviewsState> displayReviewsStateList) {
+    this.displayReviewsStateList = displayReviewsStateList;
+  }
 
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
-    }
+  public String getErrorMessage() {
+    return errorMessage;
+  }
+
+  public void setErrorMessage(String errorMessage) {
+    this.errorMessage = errorMessage;
+  }
 }
