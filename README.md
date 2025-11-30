@@ -1,17 +1,9 @@
 # Team Project
-
-Please keep this up-to-date with information about your project throughout the term.
-
-The readme should include information such as:
-- a summary of what your application is all about
-- a list of the user stories, along with who is responsible for each one
-- information about the API(s) that your project uses 
-- screenshots or animations demonstrating current functionality
-
-By keeping this README up-to-date,
-your team will find it easier to prepare for the final presentation
-at the end of the term.
-
+## Summary
+Welcome to UofT-Eats, a restaurant review guide catered to University of Toronto Students. Users can create accounts 
+through Google, browse different restaurants around campus, quickly filter for what they are feeling, review other 
+restaurants, and create a personal list of favourites. Our program also offers accessibility options such as translation 
+for students less familiar with English so they can still enjoy the app.
 ## DeepL API setup
 
 Our translation feature uses the [DeepL API](https://www.deepl.com/pro-api).  
@@ -30,7 +22,7 @@ To enable it, you need a DeepL API key and must expose it as an environment vari
 
 Set the environment variable so the application can read it at runtime.
 
-#### On Windows (PowerShell) 
+#### On Windows (PowerShell)
 
 ```powershell
 # Set for the current terminal session
@@ -44,3 +36,36 @@ $env:DEEPL_API_KEY = "your-deepl-auth-key-here"
 
    ```bash
    export DEEPL_API_KEY="your-deepl-auth-key-here"
+## User Stories
+### Kenshin
+As a user, I want to register an account using a username and password or a Google account, so that my 
+personal restaurant data is saved securely.
+
+As a user, I want to be able to log in and log out using my Google account or a username and password, so 
+that I can log in on different devices and my account remains secure.
+### Theo
+As a user, I want to browse all the restaurants within a given radius around University of Toronto, so 
+that I can find restaurants close to campus.
+### Prabeer
+As a user, I want to filter restaurants organized in a list based on categories I'm in the mood for that I 
+can find what I want quickly.
+### Raymond
+As a user, I want to be able to add a review to a restaurant so that I can share my opinion on the best 
+and worst restaurants around campus.
+### Dean
+As a user, I want to save my favorite restaurants into a list, so I can access them later.
+### Justin
+As a user I want to translate any given review into a language I'm more familiar with, so I can interact with the 
+diverse student body at UofT.
+## APIs
+UofT-Eats uses the [Google Places API](https://developers.google.com/maps/documentation/places/web-service/overview) for 
+data on the restaurants and the [DeepL API](https://www.deepl.com/pro-api) for help translating the reviews.
+## Screenshots
+### Log In
+![Log In](./src/main//resources/images/log_in_screen.png)
+### Main Page
+![Main Page](./src/main//resources/images/main_screen.png)
+### Filter
+![Filter](./src/main//resources/images/filter_screen.png)
+### Restaurant
+![Filter](./src/main//resources/images/restaurant_screen.png)
