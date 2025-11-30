@@ -269,15 +269,15 @@ public class AppBuilder {
         };
 
         // Create View
-        loggedInView = new LoggedInView(
-                loggedInViewModel,
-                listSearchViewModel,
-                heartListener,
-                FilterView.VIEW_NAME
-        );
+        loggedInView = new LoggedInView(loggedInViewModel);
         loggedInView.setLogoutController(logoutController);
         loggedInView.setViewManagerModel(viewManagerModel);
         loggedInView.setViewRestaurantViewModel(viewRestaurantViewModel);
+
+        // Set list search dependencies using setters
+        loggedInView.setListSearchViewModel(listSearchViewModel);
+        loggedInView.setHeartListener(heartListener);
+        loggedInView.setFilterViewName(FilterView.VIEW_NAME);
 
         // Create ListSearch components
         ListSearchPresenter listSearchPresenter = new ListSearchPresenter(listSearchViewModel);

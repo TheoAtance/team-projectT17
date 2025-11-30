@@ -35,7 +35,7 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
 
     // ViewModels for observing changes
     private final LoggedInViewModel loggedInViewModel;
-    private final ListSearchViewModel listSearchViewModel;
+    private ListSearchViewModel listSearchViewModel;
 
     // UI Components for LoggedInView specific elements
     private final JLabel welcomeLabel;
@@ -58,20 +58,11 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
 
     private RestaurantPanel.HeartClickListener heartListener;
 
-    private final String filterViewName;
+    private String filterViewName;
 
-    public LoggedInView(LoggedInViewModel loggedInViewModel,
-                        ListSearchViewModel listSearchViewModel,
-                        RestaurantPanel.HeartClickListener heartListener,
-                        String filterViewName) {
-
+    public LoggedInView(LoggedInViewModel loggedInViewModel) {
         this.loggedInViewModel = loggedInViewModel;
-        this.listSearchViewModel = listSearchViewModel;
-        this.heartListener = heartListener;
-        this.filterViewName = filterViewName;
-
         this.loggedInViewModel.addPropertyChangeListener(this);
-        this.listSearchViewModel.addPropertyChangeListener(this);
 
         final JLabel title = new JLabel(LoggedInViewModel.TITLE_LABEL);
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -99,7 +90,7 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         filterViewButton = new JButton("Filter Restaurants");
         filterViewButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         filterViewButton.addActionListener(evt -> {
-            if (viewManagerModel != null) {
+            if (viewManagerModel != null && filterViewName != null) {
                 viewManagerModel.setState(this.filterViewName);
                 viewManagerModel.firePropertyChange();
             } else {
@@ -179,7 +170,7 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         restaurantSection.add(searchPanel);
         restaurantSection.add(Box.createVerticalStrut(10));
 
-        restaurantListView = new RestaurantListView(new ArrayList<>(), this.heartListener);
+        restaurantListView = new RestaurantListView(new ArrayList<>(), null);
         JScrollPane restaurantScrollPane = restaurantListView.getScrollPane();
         restaurantScrollPane.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
         restaurantSection.add(restaurantScrollPane, BorderLayout.CENTER);
@@ -188,7 +179,6 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         this.add(restaurantSection);
 
         updateLoggedInView(loggedInViewModel.getState());
-        updateListSearchView(listSearchViewModel.getState());
     }
 
     @Override
@@ -222,7 +212,9 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
             state.setErrorMessage(null);
         }
 
-        restaurantListView.updateRestaurants(state.getFilteredRestaurants(), this.heartListener);
+        if (restaurantListView != null && heartListener != null) {
+            restaurantListView.updateRestaurants(state.getFilteredRestaurants(), this.heartListener);
+        }
     }
 
     public String getViewName() {
@@ -245,7 +237,6 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         this.randomRestaurantController = randomRestaurantController;
     }
 
-
     public ViewRestaurantController getViewRestaurantController(){
         return viewRestaurantController;
     }
@@ -260,6 +251,28 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
 
     public void setSearchController(ListSearchController searchController) {
         this.searchController = searchController;
+    }
+
+    public void setListSearchViewModel(ListSearchViewModel listSearchViewModel) {
+        this.listSearchViewModel = listSearchViewModel;
+        if (this.listSearchViewModel != null) {
+            this.listSearchViewModel.addPropertyChangeListener(this);
+            updateListSearchView(listSearchViewModel.getState());
+        }
+    }
+
+    public void setHeartListener(RestaurantPanel.HeartClickListener heartListener) {
+        this.heartListener = heartListener;
+        if (restaurantListView != null && this.heartListener != null) {
+            restaurantListView.updateRestaurants(
+                    listSearchViewModel != null ? listSearchViewModel.getState().getFilteredRestaurants() : new ArrayList<>(),
+                    this.heartListener
+            );
+        }
+    }
+
+    public void setFilterViewName(String filterViewName) {
+        this.filterViewName = filterViewName;
     }
 
     public void setLoadingCursor(){
