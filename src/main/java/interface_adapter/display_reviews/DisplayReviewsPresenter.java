@@ -11,7 +11,11 @@ public class DisplayReviewsPresenter implements DisplayReviewsOutputBoundary {
 
    private DisplayReviewsViewModel displayReviewsViewModel;
 
-   @Override
+    public DisplayReviewsPresenter(DisplayReviewsViewModel displayReviewsViewModel) {
+        this.displayReviewsViewModel = displayReviewsViewModel;
+    }
+
+    @Override
     public void prepareSuccessView(List<DisplayReviewsOutputData> displayReviewsOutputDataList){
        ArrayList<DisplayReviewsState> newStates = new ArrayList<>();
 
@@ -27,6 +31,7 @@ public class DisplayReviewsPresenter implements DisplayReviewsOutputBoundary {
 
        DisplayReviewsStateList displayReviewsStateList = new DisplayReviewsStateList();
        displayReviewsStateList.setDisplayReviewsStateList(newStates);
+
 
        displayReviewsViewModel.setState(displayReviewsStateList);
        displayReviewsViewModel.firePropertyChange("display reviews");

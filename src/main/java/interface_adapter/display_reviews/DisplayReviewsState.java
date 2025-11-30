@@ -1,9 +1,9 @@
 package interface_adapter.display_reviews;
 
 public class DisplayReviewsState {
-    private String authorDisplayName;
-    private String content;
-    private String creationDate;
+    private String authorDisplayName ;
+    private String content = "";
+    private String creationDate = "";
     private String errorMessage;
 
     public DisplayReviewsState() {

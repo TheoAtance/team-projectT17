@@ -2,15 +2,19 @@ package view;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.add_review.AddReviewController;
 import interface_adapter.add_review.AddReviewViewModel;
+import interface_adapter.display_reviews.DisplayReviewsController;
+import interface_adapter.display_reviews.DisplayReviewsStateList;
+import interface_adapter.display_reviews.DisplayReviewsViewModel;
 import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.view_restaurant.ViewRestaurantController;
 import interface_adapter.view_restaurant.ViewRestaurantState;
 import interface_adapter.view_restaurant.ViewRestaurantViewModel;
-import use_case.add_review.AddReviewInputBoundary;
-import use_case.add_review.AddReviewOutputBoundary;
 import view.panel_makers.PillIconTextPanel;
 import view.panel_makers.RestaurantTitlePanel;
+import view.panel_makers.ReviewPanel;
 import view.panel_makers.RoundedPanel;
+
+import interface_adapter.display_reviews.DisplayReviewsState;
 
 import javax.swing.*;
 import java.awt.*;
@@ -31,8 +35,6 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
     private ViewRestaurantController viewRestaurantController;
     private AddReviewViewModel addReviewViewModel;
     private AddReviewController addReviewController;
-
-
 
 
     private final RestaurantTitlePanel titlePanel;
@@ -65,15 +67,23 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
     private final JScrollPane rightScroll;
 
     private final JScrollPane reviewBox;
-    private final JTextArea multiLineBox = new JTextArea(5, 25);
+    private final JTextArea multiLineBox = new JTextArea(7, 35);
+
+
+    private final JPanel reviewsContainer = new JPanel();
+
+
     private ViewManagerModel viewManagerModel;
     private LoggedInViewModel loggedInViewModel;
+    private DisplayReviewsViewModel displayReviewsViewModel = new DisplayReviewsViewModel();
+    private DisplayReviewsController displayReviewsController;
 
 
-    public RestaurantView(ViewRestaurantViewModel viewRestaurantViewModel, AddReviewViewModel addReviewViewModel){
+    public RestaurantView(ViewRestaurantViewModel viewRestaurantViewModel){
         this.viewRestaurantViewModel = viewRestaurantViewModel;
-        this.addReviewViewModel = addReviewViewModel;
         ViewRestaurantState state = viewRestaurantViewModel.getState();
+        DisplayReviewsStateList displayReviewStates = displayReviewsViewModel.getState();
+
         viewRestaurantViewModel.addPropertyChangeListener(this);
 
 
@@ -82,7 +92,10 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
         leftPanel.setLayout(new BorderLayout());
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
         imageAndInfoPanel.setLayout(new BoxLayout(imageAndInfoPanel, BoxLayout.Y_AXIS));
+
+        rightPanel.setLayout(new BorderLayout());
         addReviewPanel.setLayout(new BoxLayout(addReviewPanel, BoxLayout.Y_AXIS));
+        reviewsContainer.setLayout(new BoxLayout(reviewsContainer, BoxLayout.Y_AXIS));
 
 
         addReviewTitle.setFont(addReviewTitle.getFont().deriveFont(Font.BOLD, 20f));
@@ -98,11 +111,7 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
 //        titlePanel.setBackground(Color.green);
 //        infoPanel.setBackground(Color.black);
 
-
-
         // align content to the left
-
-
         imageAndInfoPanel.add(createImageLabel(state));
         imageAndInfoPanel.add(Box.createVerticalStrut(8));
         imageAndInfoPanel.add(createInfoPanel());
@@ -128,7 +137,10 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
         buttonContainer.add(submitReview);                       // The actual button
         buttonContainer.add(Box.createHorizontalGlue());         // Pushes button from right
 
+
+
         //addReviewTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
+        addReviewPanel.add(Box.createVerticalStrut(12));
         addReviewPanel.add(addReviewTitle);
         addReviewPanel.add(Box.createVerticalStrut(12));
         addReviewPanel.add(reviewBox);
@@ -136,17 +148,22 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
         addReviewPanel.add(buttonContainer);
         addReviewPanel.add(Box.createVerticalStrut(16));
 
-        addReviewPanel.setBorder(BorderFactory.createEmptyBorder( 0, 10, 0, 10));
+        addReviewPanel.setBorder(BorderFactory.createEmptyBorder( 0, 20, 0, 20));
 
 
 
         // add everything into a scrollable container
         leftScroll = new JScrollPane(imageAndInfoPanel);
-        rightScroll = new JScrollPane(addReviewPanel);
+        rightScroll = new JScrollPane(reviewsContainer);
+
+        rightPanel.add(rightScroll, BorderLayout.CENTER);
+        rightPanel.add(addReviewPanel, BorderLayout.SOUTH);
 
         leftScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         leftScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         leftScroll.setBorder(null);
+
+        rightScroll.setBorder(null);
 
 
 //        leftPanel.add(leftScroll, BorderLayout.NORTH);
@@ -154,7 +171,7 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
 
         add(titlePanel, BorderLayout.NORTH);
         add(leftScroll, BorderLayout.WEST);
-        add(rightScroll, BorderLayout.CENTER);
+        add(rightPanel, BorderLayout.CENTER);
     }
 
     private JPanel createInfoPanel() {
@@ -210,7 +227,7 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
         // get the image and save it in a label
 
 
-        if(state.getPhotos() != null) {
+        if(state.getPhotos() != null && !state.getPhotos().isEmpty()) {
             ImageIcon shortestIcon = new ImageIcon(state.getPhotos().get(0));
 
             for (BufferedImage image : state.getPhotos()) {
@@ -265,7 +282,7 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
         titlePanel.getExitPill().addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                System.out.println("Button clicked");
+
                 if (viewManagerModel != null) {
                     viewManagerModel.setState(loggedInViewModel.getViewName());
                     viewManagerModel.firePropertyChange();
@@ -285,46 +302,79 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
     public void propertyChange(PropertyChangeEvent evt) {
         System.out.println("RestaurantView.propertyChange fired: " + evt.getPropertyName());
 
-        // Optionally filter by property name if you use multiple
-        if (!"restaurant info".equals(evt.getPropertyName()) && evt.getPropertyName() != null) {
-            return;
-        }
-
-        ViewRestaurantState state = viewRestaurantViewModel.getState();
-
-        // Now update title panel
-        titlePanel.setRestaurantName(state.getName());
-        titlePanel.setRating(state.getRating(), state.getRatingCount());
-        titlePanel.setType(state.getType());
-
         addReviewListener();
         addExitListener();
-        // update image
 
-        imageLabel = createImageLabel(state);
 
-        // update address and phone number
-        address.setText(state.getAddress());
-        phone.setText(state.getPhoneNumber());
+        // Optionally filter by property name if you use multiple
+        if ("restaurant info".equals(evt.getPropertyName()) && evt.getPropertyName() != null) {
+            ViewRestaurantState state = viewRestaurantViewModel.getState();
 
-        // update opening hours
-        openingHours.clear();
-        openingHours.addAll(state.getOpeningHours());
+            displayReviewsController.execute(state.getId());
+            // Now update title panel
+            titlePanel.setRestaurantName(state.getName());
+            titlePanel.setRating(state.getRating(), state.getRatingCount());
+            titlePanel.setType(state.getType());
 
-        hoursInfo.removeAll();
-        for (String d : openingHours) {
-            JLabel dayLabel = new JLabel(d);
-            dayLabel.setFont(dayLabel.getFont().deriveFont(Font.PLAIN, 14f));
-            dayLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-            hoursInfo.add(dayLabel);
-            hoursInfo.add(Box.createVerticalStrut(4));
+            // update image
+
+            imageLabel = createImageLabel(state);
+
+            // update address and phone number
+            address.setText(state.getAddress());
+            phone.setText(state.getPhoneNumber());
+
+            // update opening hours
+            openingHours.clear();
+            openingHours.addAll(state.getOpeningHours());
+
+            hoursInfo.removeAll();
+            for (String d : openingHours) {
+                JLabel dayLabel = new JLabel(d);
+                dayLabel.setFont(dayLabel.getFont().deriveFont(Font.PLAIN, 14f));
+                dayLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+                hoursInfo.add(dayLabel);
+                hoursInfo.add(Box.createVerticalStrut(4));
+            }
+
+            hoursCard.setMaximumSize(new Dimension(350, 350));
+
+
+            title.setText("\uD83D\uDD52 Opening Hours:");
         }
 
-        hoursCard.setMaximumSize(new Dimension(350, 350));
+        if ("display reviews".equals(evt.getPropertyName()) && evt.getPropertyName() != null) {
+            DisplayReviewsStateList state = displayReviewsViewModel.getState();
+            reviewsContainer.removeAll();
+
+            for (DisplayReviewsState reviewState : state.getDisplayReviewsStateList()) {
+
+                ReviewPanel reviewPanel = new ReviewPanel(
+                        reviewState.getAuthorDisplayName(),
+                        reviewState.getCreationDate(),
+                        reviewState.getContent()
+                );
+
+                reviewsContainer.add(reviewPanel);
+
+                // 1. Get the natural height of the component
+                Dimension preferredSize = reviewPanel.getPreferredSize();
+
+                reviewPanel.setMaximumSize(
+                        new Dimension(Integer.MAX_VALUE, preferredSize.height)
+                );
+
+            }
+        }
+        if ("review status".equals(evt.getPropertyName()) && evt.getPropertyName() != null) {
+            ViewRestaurantState state = viewRestaurantViewModel.getState();
+            displayReviewsController.execute(state.getId());
+        }
+
+
+
         hoursInfo.revalidate();
         hoursInfo.repaint();
-
-        title.setText("\uD83D\uDD52 Opening Hours:");
 
         title.validate();
         title.repaint();
@@ -337,7 +387,6 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
 
         imageAndInfoPanel.revalidate();
         imageAndInfoPanel.repaint();
-
 
         revalidate();
         repaint();
@@ -367,7 +416,26 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
         this.viewManagerModel = viewManagerModel;
     }
 
+    public void setAddReviewViewModel(AddReviewViewModel addReviewViewModel){
+        this.addReviewViewModel = addReviewViewModel;
+        this.addReviewViewModel.addPropertyChangeListener(this);
+    }
+
     public void setLoggedInViewModel(LoggedInViewModel loggedInViewModel){
         this.loggedInViewModel = loggedInViewModel;
     }
+
+    public void setDisplayReviewController(DisplayReviewsController displayReviewsController) {
+        this.displayReviewsController = displayReviewsController;
+    }
+
+    public DisplayReviewsController getDisplayReviewController() {
+        return displayReviewsController;
+    }
+
+    public void setDisplayReviewViewModel(DisplayReviewsViewModel displayReviewsViewModel) {
+        this.displayReviewsViewModel = displayReviewsViewModel;
+        this.displayReviewsViewModel.addPropertyChangeListener(this);
+    }
+
 }

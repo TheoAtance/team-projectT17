@@ -7,7 +7,6 @@ import use_case.IAuthGateway;
 import use_case.IUserRepo;
 
 import java.io.IOException;
-import java.util.Optional;
 
 /**
  * Interactor for the Google Login/Registration Use Case (OAuth).
@@ -68,15 +67,7 @@ public class GoogleLoginInteractor implements GoogleLoginInputBoundary {
             }
 
         } else {
-            // LOGIN Flow: Load existing User Entity from Firestore
-
-//            if (userProfile.isEmpty()) {
-//                // Shouldn't happen (existsByUid returned true), but handle gracefully
-//                authGateway.logout();
-//                loginPresenter.prepareFailView("Profile data missing after successful Google login.");
-//                return;
-//            }
-
+            // LOGIN Flow: Retrieve existing User Entity from database
             user = userRepository.getUserByUid(uid);
             System.out.println("Existing Google user logged in: " + user.getNickname());
         }
@@ -90,6 +81,7 @@ public class GoogleLoginInteractor implements GoogleLoginInputBoundary {
 
         userRepository.loadAllUsers();
 
+        // Debugging
         CurrentUser test = new CurrentUser(authGateway, userRepository);
         String curUser = test.getCurrentUser().getNickname();
         System.out.println("Google Login Current User test: " + curUser);
