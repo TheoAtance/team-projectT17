@@ -27,6 +27,9 @@ import interface_adapter.register.RegisterViewModel;
 import interface_adapter.view_restaurant.ViewRestaurantController;
 import interface_adapter.view_restaurant.ViewRestaurantPresenter;
 import interface_adapter.view_restaurant.ViewRestaurantViewModel;
+import interface_adapter.list_search.ListSearchController;
+import interface_adapter.list_search.ListSearchPresenter;
+import interface_adapter.list_search.ListSearchViewModel;
 import use_case.IAuthGateway;
 import use_case.IUserRepo;
 import use_case.add_review.AddReviewInputBoundary;
@@ -46,7 +49,8 @@ import use_case.google_login.GoogleLoginInputBoundary;
 import use_case.google_login.GoogleLoginInteractor;
 import use_case.logout.LogoutInputBoundary;
 import use_case.logout.LogoutUserInteractor;
-
+import use_case.list_search.ListSearchInputBoundary;
+import use_case.list_search.ListSearchInteractor;
 import use_case.random_restaurant.RandomRestaurantInputBoundary;
 import use_case.random_restaurant.RandomRestaurantInteractor;
 import use_case.view_restaurant.ViewRestaurantInputBoundary;
@@ -77,6 +81,7 @@ public class AppBuilder {
     private LoginViewModel loginViewModel;
     private RegisterViewModel registerViewModel;
     private LoggedInViewModel loggedInViewModel;
+    private ListSearchViewModel listSearchViewModel;
 
     // Filter
     private FilterViewModel filterViewModel;
@@ -238,6 +243,9 @@ public class AppBuilder {
             loggedInViewModel = new LoggedInViewModel();
         }
 
+        // Create ListSearchViewModel
+        listSearchViewModel = new ListSearchViewModel();
+
         // Create Logout Presenter
         LogoutPresenter logoutPresenter = new LogoutPresenter(
                 loginViewModel,
@@ -255,11 +263,29 @@ public class AppBuilder {
         // Create Logout Controller
         LogoutController logoutController = new LogoutController(logoutInteractor);
 
+        // Create HeartClickListener
+        RestaurantPanel.HeartClickListener heartListener = (restaurantId, newState) -> {
+            System.out.println("Heart toggled for: " + restaurantId + " → " + newState);
+        };
+
         // Create View
         loggedInView = new LoggedInView(loggedInViewModel);
         loggedInView.setLogoutController(logoutController);
         loggedInView.setViewManagerModel(viewManagerModel);
         loggedInView.setViewRestaurantViewModel(viewRestaurantViewModel);
+
+        // Set list search dependencies using setters
+        loggedInView.setListSearchViewModel(listSearchViewModel);
+        loggedInView.setHeartListener(heartListener);
+        loggedInView.setFilterViewName(FilterView.VIEW_NAME);
+
+        // Create ListSearch components
+        ListSearchPresenter listSearchPresenter = new ListSearchPresenter(listSearchViewModel);
+        ListSearchInputBoundary listSearchInteractor = new ListSearchInteractor(restaurantDataAccess, listSearchPresenter);
+        ListSearchController listSearchController = new ListSearchController(listSearchInteractor);
+
+        loggedInView.setSearchController(listSearchController);
+        listSearchController.search("");
 
         // Add to card panel
         cardPanel.add(loggedInView, loggedInView.getViewName());
@@ -274,7 +300,9 @@ public class AppBuilder {
      */
     public AppBuilder addFilterView() {
         // Create View Model
-        filterViewModel = new FilterViewModel();
+        if (filterViewModel == null) {
+            filterViewModel = new FilterViewModel();
+        }
 
         // Create Presenter
         FilterPresenter filterPresenter = new FilterPresenter(filterViewModel);

@@ -168,6 +168,15 @@ public class FilterInteractorTest {
             return new String[]{"Italian Restaurant", "Chinese Restaurant", "Japanese Restaurant"};
         }
 
+        @Override
+        public List<Restaurant> getAllRestaurants() {
+            List<Restaurant> allRestaurants = new ArrayList<>();
+            allRestaurants.addAll(getRestaurantsByType("Italian Restaurant"));
+            allRestaurants.addAll(getRestaurantsByType("Chinese Restaurant"));
+            allRestaurants.addAll(getRestaurantsByType("Japanese Restaurant"));
+            return allRestaurants;
+        }
+
         private Restaurant createRestaurant(String id, String name, String type) {
             return new Restaurant.Builder()
                     .id(id)
