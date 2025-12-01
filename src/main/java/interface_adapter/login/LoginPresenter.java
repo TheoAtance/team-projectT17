@@ -37,7 +37,6 @@ public class LoginPresenter implements CustomLoginOutputBoundary {
     loginState.setLoginError(null);
     this.loginViewModel.setState(loginState);
 
-
     this.viewManagerModel.setState(loggedInViewModel.getViewName());
     this.viewManagerModel.firePropertyChange();
   }
