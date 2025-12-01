@@ -22,6 +22,7 @@ public class JsonRestaurantDataAccessObject implements
         RandomRestaurantDataAccessInterface {
 
     private final Map<String, Restaurant> restaurantById = new HashMap<>();
+    private final Map<String, String> placesIdToCid = new HashMap<>(); // NEW: Maps places/ChIJ... to CID
 
     /**
      * Construct DAO for saving to and reading from a local json file
@@ -36,13 +37,30 @@ public class JsonRestaurantDataAccessObject implements
             for (int i = 0; i < restaurantData.length(); i++) {
                 JSONObject curObj = restaurantData.getJSONObject(i);
 
-                // Extract CID from placeUri instead of using name
+                // Extract CID from placeUri
                 String placeUri = curObj.getJSONObject("googleMapsLinks").getString("placeUri");
-                String restaurantId = extractCidFromPlaceUri(placeUri);
+                String cid = extractCidFromPlaceUri(placeUri);
+
+                // Extract Google Places ID from the first photo's name
+                if (curObj.has("photos") && curObj.getJSONArray("photos").length() > 0) {
+                    JSONObject firstPhoto = curObj.getJSONArray("photos").getJSONObject(0);
+                    if (firstPhoto.has("name")) {
+                        String photoName = firstPhoto.getString("name");
+                        // Extract "places/ChIJ..." from "places/ChIJ.../photos/..."
+                        String placesId = extractPlacesIdFromPhotoName(photoName);
+                        if (placesId != null) {
+                            placesIdToCid.put(placesId, cid);
+                            System.out.println("DEBUG JsonRestaurantDAO: Mapped " + placesId + " -> " + cid);
+                        }
+                    }
+                }
 
                 Restaurant restaurant = restaurantFactory.create(curObj);
-                restaurantById.put(restaurantId, restaurant);
+                restaurantById.put(cid, restaurant);
             }
+
+            System.out.println("DEBUG JsonRestaurantDAO: Loaded " + restaurantById.size() + " restaurants");
+            System.out.println("DEBUG JsonRestaurantDAO: Created " + placesIdToCid.size() + " Places ID mappings");
         } catch (IOException e) {
             throw new IOException(e);
         }
@@ -67,6 +85,41 @@ public class JsonRestaurantDataAccessObject implements
         } else {
             return placeUri.substring(cidStart, cidEnd);
         }
+    }
+
+    /**
+     * Extracts the Google Places ID from a photo name.
+     * Example: "places/ChIJs_Gr4rE0K4gR4PCci36eEkg/photos/AWn5..." -> "places/ChIJs_Gr4rE0K4gR4PCci36eEkg"
+     */
+    private String extractPlacesIdFromPhotoName(String photoName) {
+        if (photoName != null && photoName.startsWith("places/")) {
+            int photosIndex = photoName.indexOf("/photos/");
+            if (photosIndex != -1) {
+                return photoName.substring(0, photosIndex);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Converts a Google Places ID to CID if needed.
+     * If the ID is already a CID, returns it as-is.
+     * @param id Either a CID or a Google Places ID (places/ChIJ...)
+     * @return The corresponding CID
+     */
+    private String normalizeId(String id) {
+        // If it's a Google Places ID format, convert to CID
+        if (id != null && id.startsWith("places/")) {
+            String cid = placesIdToCid.get(id);
+            if (cid != null) {
+                System.out.println("DEBUG JsonRestaurantDAO: Converted " + id + " -> " + cid);
+                return cid;
+            }
+            System.err.println("WARNING JsonRestaurantDAO: No CID mapping found for " + id);
+            return id; // Return as-is if no mapping found
+        }
+        // Already a CID
+        return id;
     }
 
     /**
@@ -95,20 +148,21 @@ public class JsonRestaurantDataAccessObject implements
                 .toArray(String[]::new);
     }
 
-
     /**
-     * Get restaurant with given id (CID)
-     * @param id CID of the restaurant to look up
-     * @return restaurant that corresponds to given CID
+     * Get restaurant with given id (supports both CID and Google Places ID)
+     * @param id CID or Google Places ID of the restaurant to look up
+     * @return restaurant that corresponds to given ID
      */
     @Override
     public Restaurant get(String id) {
-        return restaurantById.get(id);
+        String cid = normalizeId(id);
+        return restaurantById.get(cid);
     }
 
     @Override
     public boolean existById(String id){
-        return restaurantById.containsKey(id);
+        String cid = normalizeId(id);
+        return restaurantById.containsKey(cid);
     }
 
     @Override

@@ -388,19 +388,56 @@ public class FirestoreUserRepo implements IUserRepo, UserDataAccessInterface {
                 JSONObject restaurantJson = restaurantsArray.getJSONObject(i);
 
                 try {
+                    // Extract CID from placeUri
+                    String placeUri = restaurantJson.getJSONObject("googleMapsLinks").getString("placeUri");
+                    String cid = extractCidFromPlaceUri(placeUri);
+
+                    // Extract Google Places ID from first photo
+                    String placesId = null;
+                    if (restaurantJson.has("photos") && restaurantJson.getJSONArray("photos").length() > 0) {
+                        JSONObject firstPhoto = restaurantJson.getJSONArray("photos").getJSONObject(0);
+                        if (firstPhoto.has("name")) {
+                            String photoName = firstPhoto.getString("name");
+                            placesId = extractPlacesIdFromPhotoName(photoName);
+                        }
+                    }
+
                     Restaurant restaurant = jsonToRestaurant(restaurantJson);
-                    restaurantsById.put(restaurant.getId(), restaurant);
+
+                    // Store by CID
+                    restaurantsById.put(cid, restaurant);
+
+                    // ALSO store by Google Places ID if we found one
+                    if (placesId != null) {
+                        restaurantsById.put(placesId, restaurant);
+                        System.out.println("DEBUG FirestoreUserRepo: Mapped both " + cid + " and " + placesId);
+                    }
+
                 } catch (Exception e) {
                     System.err.println("Skipping malformed restaurant at index " + i + ": " + e.getMessage());
                 }
             }
 
             isRestaurantCacheLoaded = true;
-            System.out.println("DEBUG: Restaurant cache loaded with " + restaurantsById.size() + " restaurants.");
+            System.out.println("DEBUG: Restaurant cache loaded with " + restaurantsById.size() + " entries.");
 
         } catch (IOException e) {
             throw new RuntimeException("Failed to read restaurant.json: " + e.getMessage(), e);
         }
+    }
+
+    /**
+     * Extracts the Google Places ID from a photo name.
+     * Example: "places/ChIJs_Gr4rE0K4gR4PCci36eEkg/photos/AWn5..." -> "places/ChIJs_Gr4rE0K4gR4PCci36eEkg"
+     */
+    private String extractPlacesIdFromPhotoName(String photoName) {
+        if (photoName != null && photoName.startsWith("places/")) {
+            int photosIndex = photoName.indexOf("/photos/");
+            if (photosIndex != -1) {
+                return photoName.substring(0, photosIndex);
+            }
+        }
+        return null;
     }
 
     /**

@@ -9,6 +9,10 @@ import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.view_restaurant.ViewRestaurantController;
 import interface_adapter.view_restaurant.ViewRestaurantState;
 import interface_adapter.view_restaurant.ViewRestaurantViewModel;
+import interface_adapter.favorites.AddFavoriteController;
+import interface_adapter.favorites.RemoveFavoriteController;
+import data_access.UserDataAccessInterface;
+import entity.User;
 import view.panel_makers.PillIconTextPanel;
 import view.panel_makers.RestaurantTitlePanel;
 import view.panel_makers.ReviewPanel;
@@ -36,6 +40,10 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
     private AddReviewViewModel addReviewViewModel;
     private AddReviewController addReviewController;
 
+    // Favorite controllers
+    private AddFavoriteController addFavoriteController;
+    private RemoveFavoriteController removeFavoriteController;
+    private UserDataAccessInterface userDataAccess;
 
     private final RestaurantTitlePanel titlePanel;
 
@@ -45,7 +53,9 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
     private JLabel imageLabel = new JLabel();
     private JPanel addReviewPanel = new JPanel();
 
-
+    // Favorite button
+    private JButton favoriteButton;
+    private boolean isFavorite = false;
 
     private final JPanel leftPanel = new JPanel();
     private final JPanel rightPanel = new JPanel();
@@ -69,9 +79,7 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
     private final JScrollPane reviewBox;
     private final JTextArea multiLineBox = new JTextArea(7, 35);
 
-
     private final JPanel reviewsContainer = new JPanel();
-
 
     private ViewManagerModel viewManagerModel;
     private LoggedInViewModel loggedInViewModel;
@@ -86,8 +94,6 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
 
         viewRestaurantViewModel.addPropertyChangeListener(this);
 
-
-
         setLayout(new BorderLayout());
         leftPanel.setLayout(new BorderLayout());
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
@@ -97,19 +103,13 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
         addReviewPanel.setLayout(new BoxLayout(addReviewPanel, BoxLayout.Y_AXIS));
         reviewsContainer.setLayout(new BoxLayout(reviewsContainer, BoxLayout.Y_AXIS));
 
-
         addReviewTitle.setFont(addReviewTitle.getFont().deriveFont(Font.BOLD, 20f));
 
         titlePanel = new RestaurantTitlePanel(state.getName(), state.getType(), state.getRating(), state.getRatingCount());
-        //titlePanel.setPreferredSize(new Dimension(500, 80));
-       // titlePanel.setPreferredSize(new Dimension(400, 100));
 
-        // set layout of each panel
-        // set background colour for testing purposes
-//        leftPanel.setBackground(Color.blue);
-//        imageAndInfoPanel.setBackground(Color.black);
-//        titlePanel.setBackground(Color.green);
-//        infoPanel.setBackground(Color.black);
+        // Create favorite button and add to title panel
+        createFavoriteButton();
+        titlePanel.add(favoriteButton);
 
         // align content to the left
         imageAndInfoPanel.add(createImageLabel(state));
@@ -117,29 +117,22 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
         imageAndInfoPanel.add(createInfoPanel());
         imageAndInfoPanel.add(Box.createVerticalGlue());
 
-
         // 1. Create the text area
-         // 5 rows high, 30 columns wide
-        multiLineBox.setLineWrap(true);               // Wraps text to the next line
-        multiLineBox.setWrapStyleWord(true);          // Wraps at whole words
+        multiLineBox.setLineWrap(true);
+        multiLineBox.setWrapStyleWord(true);
 
         // 2. Wrap the text area in a JScrollPane to add scroll bars
         reviewBox = new JScrollPane(multiLineBox);
         reviewBox.setBorder(null);
-
         reviewBox.setAlignmentX(Component.LEFT_ALIGNMENT);
-
 
         submitReview.setCursor(new Cursor(Cursor.HAND_CURSOR));
         Box buttonContainer = Box.createHorizontalBox();
-        buttonContainer.setAlignmentX(Component.LEFT_ALIGNMENT); // <--- MUST BE LEFT to match the Title!
-        buttonContainer.add(Box.createHorizontalGlue());         // Pushes button from left
-        buttonContainer.add(submitReview);                       // The actual button
-        buttonContainer.add(Box.createHorizontalGlue());         // Pushes button from right
+        buttonContainer.setAlignmentX(Component.LEFT_ALIGNMENT);
+        buttonContainer.add(Box.createHorizontalGlue());
+        buttonContainer.add(submitReview);
+        buttonContainer.add(Box.createHorizontalGlue());
 
-
-
-        //addReviewTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
         addReviewPanel.add(Box.createVerticalStrut(12));
         addReviewPanel.add(addReviewTitle);
         addReviewPanel.add(Box.createVerticalStrut(12));
@@ -149,8 +142,6 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
         addReviewPanel.add(Box.createVerticalStrut(16));
 
         addReviewPanel.setBorder(BorderFactory.createEmptyBorder( 0, 20, 0, 20));
-
-
 
         // add everything into a scrollable container
         leftScroll = new JScrollPane(imageAndInfoPanel);
@@ -165,13 +156,94 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
 
         rightScroll.setBorder(null);
 
-
-//        leftPanel.add(leftScroll, BorderLayout.NORTH);
-//        leftPanel.add(titlePanel, BorderLayout.CENTER);
-
         add(titlePanel, BorderLayout.NORTH);
         add(leftScroll, BorderLayout.WEST);
         add(rightPanel, BorderLayout.CENTER);
+    }
+
+    private void createFavoriteButton() {
+        favoriteButton = new JButton("♡");
+        favoriteButton.setFont(new Font("Arial", Font.PLAIN, 32));
+        favoriteButton.setForeground(new Color(236, 72, 153)); // Pink color
+        favoriteButton.setContentAreaFilled(false);
+        favoriteButton.setBorderPainted(false);
+        favoriteButton.setFocusPainted(false);
+        favoriteButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        favoriteButton.setToolTipText("Add to favorites");
+
+        favoriteButton.addActionListener(e -> toggleFavorite());
+    }
+
+    private void toggleFavorite() {
+        // Check if user is logged in
+        if (loggedInViewModel == null || loggedInViewModel.getState().getUid().isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "Please log in to add favorites",
+                    "Login Required",
+                    JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        String userId = loggedInViewModel.getState().getUid();
+        String restaurantId = viewRestaurantViewModel.getState().getId();
+
+        // DEBUG STATEMENTS
+        System.out.println("======== TOGGLE FAVORITE ========");
+        System.out.println("Restaurant ID: " + restaurantId);
+        System.out.println("Current isFavorite state: " + isFavorite);
+
+        if (isFavorite) {
+            System.out.println("Action: REMOVING from favorites");
+            removeFavoriteController.execute(userId, restaurantId);
+            setFavoriteState(false);
+            System.out.println("UI state set to: NOT FAVORITE");
+        } else {
+            System.out.println("Action: ADDING to favorites");
+            addFavoriteController.execute(userId, restaurantId);
+            setFavoriteState(true);
+            System.out.println("UI state set to: FAVORITE");
+        }
+        System.out.println("=================================");
+    }
+
+    private void setFavoriteState(boolean favorite) {
+        isFavorite = favorite;
+        if (favorite) {
+            favoriteButton.setText("♥"); // Filled heart
+            favoriteButton.setToolTipText("Remove from favorites");
+        } else {
+            favoriteButton.setText("♡"); // Empty heart
+            favoriteButton.setToolTipText("Add to favorites");
+        }
+    }
+
+    private void checkIfFavorite() {
+        // Check if the current restaurant is in user's favorites
+        if (loggedInViewModel == null || loggedInViewModel.getState().getUid().isEmpty()) {
+            setFavoriteState(false);
+            return;
+        }
+
+        if (userDataAccess == null) {
+            System.err.println("UserDataAccess not set in RestaurantView");
+            setFavoriteState(false);
+            return;
+        }
+
+        String userId = loggedInViewModel.getState().getUid();
+        String restaurantId = viewRestaurantViewModel.getState().getId();
+
+        try {
+            User user = userDataAccess.getUser(userId);
+            if (user != null && user.getFavoriteRestaurantIds().contains(restaurantId)) {
+                setFavoriteState(true);
+            } else {
+                setFavoriteState(false);
+            }
+        } catch (Exception e) {
+            System.err.println("Error checking favorite status: " + e.getMessage());
+            setFavoriteState(false);
+        }
     }
 
     private JPanel createInfoPanel() {
@@ -193,9 +265,6 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
     }
 
     private RoundedPanel createHoursPanel() {
-        // ========= make a rounded card to display restaurant operation hours (should be extracted into a panel maker
-        // to increase readability, but I got lazy so maybe later... :) =========
-
         hoursCard.setLayout(new BoxLayout(hoursCard, BoxLayout.Y_AXIS));
         hoursCard.setBackground(Color.WHITE);
         title.setFont(title.getFont().deriveFont(Font.BOLD, 16f));
@@ -220,13 +289,10 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
         hoursCard.setBorder(
                 BorderFactory.createEmptyBorder(12, 18, 16, 18));
 
-    return hoursCard;
+        return hoursCard;
     }
 
     private JLabel createImageLabel(ViewRestaurantState state) {
-        // get the image and save it in a label
-
-
         if(state.getPhotos() != null && !state.getPhotos().isEmpty()) {
             ImageIcon shortestIcon = new ImageIcon(state.getPhotos().get(0));
 
@@ -246,34 +312,27 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
             imageLabel.setIcon(shortestIcon);
         }
 
-
         imageLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         imageLabel.setHorizontalAlignment(JLabel.LEFT);
         imageLabel.setVerticalAlignment(JLabel.TOP);
         imageLabel.setBorder(BorderFactory.createLineBorder(Color.WHITE, 35, true));
 
-        
         return imageLabel;
     }
-
 
     private void addReviewListener(){
         submitReview.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-
                 String reviewText = multiLineBox.getText();
 
                 try {
-
                     addReviewController.execute(viewRestaurantViewModel.getState().getId(), reviewText);
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
                 }
 
                 multiLineBox.setText("");
-
-                // Example: viewRestaurantController.executeAddReview(reviewText);
             }
         });
     }
@@ -282,7 +341,6 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
         titlePanel.getExitPill().addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-
                 if (viewManagerModel != null) {
                     viewManagerModel.setState(loggedInViewModel.getViewName());
                     viewManagerModel.firePropertyChange();
@@ -295,7 +353,6 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
 
     @Override
     public void actionPerformed(ActionEvent evt) {
-
     }
 
     @Override
@@ -305,19 +362,20 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
         addReviewListener();
         addExitListener();
 
-
-        // Optionally filter by property name if you use multiple
         if ("restaurant info".equals(evt.getPropertyName()) && evt.getPropertyName() != null) {
             ViewRestaurantState state = viewRestaurantViewModel.getState();
 
             displayReviewsController.execute(state.getId());
+
+            // Check if this restaurant is favorited
+            checkIfFavorite();
+
             // Now update title panel
             titlePanel.setRestaurantName(state.getName());
             titlePanel.setRating(state.getRating(), state.getRatingCount());
             titlePanel.setType(state.getType());
 
             // update image
-
             imageLabel = createImageLabel(state);
 
             // update address and phone number
@@ -338,8 +396,6 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
             }
 
             hoursCard.setMaximumSize(new Dimension(350, 350));
-
-
             title.setText("\uD83D\uDD52 Opening Hours:");
         }
 
@@ -348,7 +404,6 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
             reviewsContainer.removeAll();
 
             for (DisplayReviewsState reviewState : state.getDisplayReviewsStateList()) {
-
                 ReviewPanel reviewPanel = new ReviewPanel(
                         reviewState.getAuthorDisplayName(),
                         reviewState.getCreationDate(),
@@ -357,21 +412,17 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
 
                 reviewsContainer.add(reviewPanel);
 
-                // 1. Get the natural height of the component
                 Dimension preferredSize = reviewPanel.getPreferredSize();
-
                 reviewPanel.setMaximumSize(
                         new Dimension(Integer.MAX_VALUE, preferredSize.height)
                 );
-
             }
         }
+
         if ("review status".equals(evt.getPropertyName()) && evt.getPropertyName() != null) {
             ViewRestaurantState state = viewRestaurantViewModel.getState();
             displayReviewsController.execute(state.getId());
         }
-
-
 
         hoursInfo.revalidate();
         hoursInfo.repaint();
@@ -438,4 +489,16 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
         this.displayReviewsViewModel.addPropertyChangeListener(this);
     }
 
+    // NEW SETTERS for favorite functionality
+    public void setAddFavoriteController(AddFavoriteController addFavoriteController) {
+        this.addFavoriteController = addFavoriteController;
+    }
+
+    public void setRemoveFavoriteController(RemoveFavoriteController removeFavoriteController) {
+        this.removeFavoriteController = removeFavoriteController;
+    }
+
+    public void setUserDataAccess(UserDataAccessInterface userDataAccess) {
+        this.userDataAccess = userDataAccess;
+    }
 }

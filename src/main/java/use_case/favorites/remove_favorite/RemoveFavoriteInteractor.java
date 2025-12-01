@@ -27,25 +27,48 @@ public class RemoveFavoriteInteractor implements RemoveFavoriteInputBoundary {
     @Override
     public void execute(RemoveFavoriteInputData inputData) {
         try {
+            System.out.println("DEBUG RemoveFavoriteInteractor: Attempting to remove restaurant " + inputData.getRestaurantId());
+
             final User user = userDataAccess.getUser(inputData.getUserId());
             if (user == null) {
+                System.out.println("DEBUG RemoveFavoriteInteractor: User not found");
                 presenter.presentError("User not found");
                 return;
             }
 
-            final Restaurant restaurant = userDataAccess.getRestaurantById(inputData.getRestaurantId());
-            if (restaurant == null) {
-                presenter.presentError("Restaurant not found");
+            System.out.println("DEBUG RemoveFavoriteInteractor: User found: " + user.getNickname());
+            System.out.println("DEBUG RemoveFavoriteInteractor: Current favorites: " + user.getFavoriteRestaurantIds());
+            System.out.println("DEBUG RemoveFavoriteInteractor: Checking if favorites contains: " + inputData.getRestaurantId());
+            System.out.println("DEBUG RemoveFavoriteInteractor: Contains? " + user.getFavoriteRestaurantIds().contains(inputData.getRestaurantId()));
+
+            // Check if the restaurant is actually in favorites
+            if (!user.getFavoriteRestaurantIds().contains(inputData.getRestaurantId())) {
+                presenter.presentError("Restaurant is not in favorites");
                 return;
             }
 
+            // Try to get restaurant name for the success message, but don't fail if not found
+            String restaurantName = "Restaurant";
+            try {
+                final Restaurant restaurant = userDataAccess.getRestaurantById(inputData.getRestaurantId());
+                if (restaurant != null) {
+                    restaurantName = restaurant.getName();
+                }
+            } catch (Exception e) {
+                // If we can't get the restaurant, just use generic name
+                System.err.println("Could not fetch restaurant details: " + e.getMessage());
+            }
+
+            // Remove from favorites
             user.removeFavoriteRestaurantId(inputData.getRestaurantId());
+            System.out.println("DEBUG RemoveFavoriteInteractor: After removal, favorites: " + user.getFavoriteRestaurantIds());
+
             userDataAccess.saveUser(user);
 
             final RemoveFavoriteOutputData outputData = new RemoveFavoriteOutputData(
-                    restaurant.getName(),
+                    restaurantName,
                     true,
-                    restaurant.getName() + " removed from favorites!"
+                    restaurantName + " removed from favorites!"
             );
 
             presenter.presentSuccess(outputData);

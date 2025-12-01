@@ -5,7 +5,9 @@ import entity.Restaurant;
 import entity.User;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Interactor for the Get Favorites use case.
@@ -39,21 +41,34 @@ public class GetFavoritesInteractor implements GetFavoritesInputBoundary {
             final List<String> favoriteIds = user.getFavoriteRestaurantIds();
             final List<Restaurant> favoriteRestaurants = userDataAccess.getRestaurantsByIds(favoriteIds);
 
-            final List<GetFavoritesOutputData.FavoriteRestaurantData> restaurantDataList = new ArrayList<>();
+            // Create a map of restaurant CID -> Restaurant for easy lookup
+            Map<String, Restaurant> restaurantMap = new HashMap<>();
             for (Restaurant restaurant : favoriteRestaurants) {
-                restaurantDataList.add(new GetFavoritesOutputData.FavoriteRestaurantData(
-                        restaurant.getId(),
-                        restaurant.getName(),
-                        restaurant.getType(),
-                        restaurant.getRating(),
-                        restaurant.hasStudentDiscount(),
-                        restaurant.getDiscountValue(),
-                        restaurant.getPhotoIds()
-                ));
+                restaurantMap.put(restaurant.getId(), restaurant);
+            }
+
+            final List<GetFavoritesOutputData.FavoriteRestaurantData> restaurantDataList = new ArrayList<>();
+
+            // IMPORTANT: Iterate through favoriteIds to preserve the original ID format
+            for (String favoriteId : favoriteIds) {
+                Restaurant restaurant = userDataAccess.getRestaurantById(favoriteId);
+
+                if (restaurant != null) {
+                    // Use the ORIGINAL favoriteId (Google Places format), not restaurant.getId() (CID)
+                    restaurantDataList.add(new GetFavoritesOutputData.FavoriteRestaurantData(
+                            favoriteId,  // ← CHANGED: Use original ID from favorites list
+                            restaurant.getName(),
+                            restaurant.getType(),
+                            restaurant.getRating(),
+                            restaurant.hasStudentDiscount(),
+                            restaurant.getDiscountValue(),
+                            restaurant.getPhotoIds()
+                    ));
+                }
             }
 
             final GetFavoritesOutputData outputData = new GetFavoritesOutputData(
-                    user.getUid(),  // NEW: Pass user ID
+                    user.getUid(),
                     user.getNickname(),
                     restaurantDataList
             );

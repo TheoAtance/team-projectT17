@@ -80,8 +80,18 @@ public class FavoritesView extends JPanel implements PropertyChangeListener {
 
         add(headerPanel, BorderLayout.NORTH);
 
-        restaurantsContainer = new JPanel();
-        restaurantsContainer.setLayout(new GridLayout(0, 3, 20, 20));
+        // Create a custom panel that respects viewport width for wrapping
+        restaurantsContainer = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 20)) {
+            @Override
+            public Dimension getPreferredSize() {
+                Dimension d = super.getPreferredSize();
+                Container parent = getParent();
+                if (parent instanceof JViewport) {
+                    d.width = parent.getWidth();
+                }
+                return d;
+            }
+        };
         restaurantsContainer.setBackground(new Color(249, 250, 251));
         restaurantsContainer.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
@@ -144,7 +154,7 @@ public class FavoritesView extends JPanel implements PropertyChangeListener {
             showEmptyState();
         } else {
             titleLabel.setText("Favorite Restaurants (" + state.getRestaurants().size() + ")");
-            restaurantsContainer.setLayout(new GridLayout(0, 3, 20, 20));
+            // Keep the FlowLayout we already set
             restaurantsContainer.setBackground(new Color(249, 250, 251));
 
             for (FavoritesState.RestaurantDisplayData restaurantData : state.getRestaurants()) {
@@ -167,12 +177,13 @@ public class FavoritesView extends JPanel implements PropertyChangeListener {
         // Set as favorite since we're in favorites page
         restaurantPanel.setFavorite(true);
 
-        // Set up heart click listener to handle removal
+        // Set up heart click listener - in favorites, clicking heart removes it
         restaurantPanel.setHeartClickListener((restaurantId, newFavoriteState) -> {
             if (!newFavoriteState) {
-                handleRemoveFavorite(restaurantData);
+                // User clicked to unfavorite - show confirmation
+                handleRemoveFavorite(restaurantData, restaurantPanel);
             } else {
-                // If somehow they favorite it again, just keep it as favorite
+                // Shouldn't happen, but if it does, keep it favorited
                 restaurantPanel.setFavorite(true);
             }
         });
@@ -183,6 +194,28 @@ public class FavoritesView extends JPanel implements PropertyChangeListener {
         });
 
         return restaurantPanel;
+    }
+
+    private void handleRemoveFavorite(FavoritesState.RestaurantDisplayData restaurantData, RestaurantPanel panel) {
+        final int result = JOptionPane.showConfirmDialog(
+                this,
+                "Remove " + restaurantData.getName() + " from favorites?",
+                "Remove Favorite",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE
+        );
+
+        if (result == JOptionPane.YES_OPTION) {
+            if (removeFavoriteController != null) {
+                String userId = favoritesViewModel.getState().getUserId();
+
+                // Remove from backend - presenter will handle reload automatically
+                removeFavoriteController.execute(userId, restaurantData.getId());
+            }
+        } else {
+            // User cancelled - revert the heart icon back to filled
+            panel.setFavorite(true);
+        }
     }
 
     private void navigateToRestaurantView(String restaurantId) {
@@ -239,41 +272,6 @@ public class FavoritesView extends JPanel implements PropertyChangeListener {
                 data.hasDiscount(),
                 discountValue
         );
-    }
-
-    private void handleRemoveFavorite(FavoritesState.RestaurantDisplayData restaurantData) {
-        final int result = JOptionPane.showConfirmDialog(
-                this,
-                "Remove " + restaurantData.getName() + " from favorites?",
-                "Remove Favorite",
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.QUESTION_MESSAGE
-        );
-
-        if (result == JOptionPane.YES_OPTION) {
-            if (removeFavoriteController != null) {
-                String userId = favoritesViewModel.getState().getUserId();
-                // Call the controller to remove from backend
-                removeFavoriteController.execute(userId, restaurantData.getId());
-                // Don't call loadFavorites() - let the state update trigger the refresh automatically
-            } else {
-                JOptionPane.showMessageDialog(this,
-                        "Remove Favorite Controller not initialized.",
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE);
-            }
-        } else {
-            // User cancelled - revert the heart icon back to filled
-            for (Component component : restaurantsContainer.getComponents()) {
-                if (component instanceof RestaurantPanel) {
-                    RestaurantPanel panel = (RestaurantPanel) component;
-                    if (panel.getDisplayData().getId().equals(restaurantData.getId())) {
-                        panel.setFavorite(true);
-                        break;
-                    }
-                }
-            }
-        }
     }
 
     private void showEmptyState() {

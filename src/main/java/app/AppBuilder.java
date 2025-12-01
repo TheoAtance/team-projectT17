@@ -529,9 +529,10 @@ public class AppBuilder {
         // Create RemoveFavorite controller
         RemoveFavoriteController removeFavoriteController = new RemoveFavoriteController(removeFavoriteInteractor);
 
-        // Set both controllers on restaurant view
+        // Set controllers and data access on restaurant view
         restaurantView.setAddFavoriteController(addFavoriteController);
         restaurantView.setRemoveFavoriteController(removeFavoriteController);
+        restaurantView.setUserDataAccess((UserDataAccessInterface) userRepository); // NEW LINE
 
         return this;
     }

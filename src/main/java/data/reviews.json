@@ -526,5 +526,13 @@
     "reviewId": "23a1a980-04e3-466c-944f-b64953c82d49",
     "content": "A great place to grab high-quality ingredients. Their imported cheese and fresh pasta counter is fantastic. More than just a restaurant, it's an experience.",
     "likes": 0
+  },
+  {
+    "creationDate": "11/30/2025",
+    "restaurantId": "places/ChIJ4z32eu81K4gRWBnHwAoH0vk",
+    "authorId": "wVSxSoA1heOQiNwglI35SJo9eqf2",
+    "reviewId": "9a2d68d1-2fbd-4159-9fb1-000a2463a4d1",
+    "content": "Kinda mid ngl",
+    "likes": 0
   }
 ]

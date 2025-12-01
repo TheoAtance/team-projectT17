@@ -147,11 +147,15 @@ public class RestaurantPanel extends JPanel {
         g2.setColor(Color.WHITE);
         g2.fillRect(0, IMAGE_HEIGHT, CARD_WIDTH, CARD_HEIGHT - IMAGE_HEIGHT);
 
+        // Draw restaurant name - FIXED: Account for rating space
         g2.setColor(Color.BLACK);
         g2.setFont(new Font("Arial", Font.BOLD, 18));
         String restaurantName = displayData.getName();
         final FontMetrics nameMetrics = g2.getFontMetrics();
-        final int maxNameWidth = CARD_WIDTH - 30;
+
+        // Rating starts at CARD_WIDTH - 120, so name should end before that
+        // Name starts at x=15, rating starts at ~160, so max width = 160 - 15 - 10 (padding) = 135
+        final int maxNameWidth = 135;
 
         if (nameMetrics.stringWidth(restaurantName) > maxNameWidth) {
             restaurantName = truncateText(restaurantName, nameMetrics, maxNameWidth);
