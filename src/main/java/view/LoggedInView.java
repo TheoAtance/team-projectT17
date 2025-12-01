@@ -6,6 +6,9 @@ import entity.Restaurant;
 import entity.User;
 import interface_adapter.ImageDataAccessInterface;
 import interface_adapter.ViewManagerModel;
+import interface_adapter.chat.ChatController;
+import interface_adapter.chat.ChatState;
+import interface_adapter.chat.ChatViewModel;
 import interface_adapter.favorites.AddFavoriteController;
 import interface_adapter.favorites.FavoritesViewModel;
 import interface_adapter.favorites.GetFavoritesController;
@@ -80,9 +83,28 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
 
     private String filterViewName;
 
+    private final JTextField chatInputField;
+    private final JButton sendChatButton;
+    private final JTextArea chatResponseArea;
+    private ChatController chatController;
+    private ChatViewModel chatViewModel;
+
     public LoggedInView(LoggedInViewModel loggedInViewModel) {
         this.loggedInViewModel = loggedInViewModel;
         this.loggedInViewModel.addPropertyChangeListener(this);
+
+        // 初始化聊天组件
+        chatInputField = new JTextField();
+        chatInputField.setPreferredSize(new Dimension(400, 28));
+        sendChatButton = new JButton("Send");
+        sendChatButton.setPreferredSize(new Dimension(80, 28)); // 固定Send按钮大小
+        filterViewButton = new JButton("Filter Restaurants");
+        filterViewButton.setPreferredSize(new Dimension(150, 28)); // 固定筛选按钮大小
+        chatResponseArea = new JTextArea(5, 50);
+        chatResponseArea.setEditable(false);
+        chatResponseArea.setLineWrap(true);
+        chatResponseArea.setWrapStyleWord(true);
+        JScrollPane chatScroll = new JScrollPane(chatResponseArea);
 
         // Get API key from environment
         this.apiKey = System.getenv("PLACES_API_TOKEN");
@@ -123,7 +145,7 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
             }
         });
 
-        filterViewButton = new JButton("Filter Restaurants");
+//        filterViewButton = new JButton("Filter Restaurants");
         filterViewButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         filterViewButton.addActionListener(evt -> {
             if (viewManagerModel != null && filterViewName != null) {
@@ -187,6 +209,36 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
           }
         });
 
+        JPanel chatButtonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
+        chatButtonPanel.setBackground(Color.WHITE);
+        chatButtonPanel.add(sendChatButton); // 先加Send按钮
+        chatButtonPanel.add(filterViewButton); // 再加筛选按钮（放在Send旁边）
+
+        JPanel chatPanel = new JPanel();
+        chatPanel.setLayout(new BorderLayout(10, 10));
+        chatPanel.setBackground(Color.WHITE);
+        chatPanel.setBorder(BorderFactory.createTitledBorder("AI Restaurant Recommendation"));
+
+        JPanel chatInputPanel = new JPanel(new BorderLayout(5, 5));
+        chatInputPanel.add(chatInputField, BorderLayout.CENTER);
+        chatInputPanel.add(chatButtonPanel, BorderLayout.EAST); // 替换原来的sendChatButton为按钮面板
+
+        chatPanel.add(chatScroll, BorderLayout.CENTER);
+        chatPanel.add(chatInputPanel, BorderLayout.SOUTH);
+
+
+        // 初始化聊天发送按钮监听
+        sendChatButton.addActionListener(evt -> {
+            String query = chatInputField.getText().trim();
+            if (!query.isEmpty() && chatController != null) {
+                chatController.sendQuery(query);
+                chatInputField.setText("");
+            }
+        });
+
+        // 按Enter键发送消息
+        chatInputField.addActionListener(evt -> sendChatButton.doClick());
+
         // Search panel
         JPanel searchPanel = new JPanel();
         searchPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
@@ -225,9 +277,13 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         topPanel.add(Box.createVerticalStrut(15));
         topPanel.add(welcomeLabel);
         topPanel.add(Box.createVerticalStrut(5));
+
+        topPanel.add(Box.createVerticalStrut(15));
+        topPanel.add(chatPanel);
+
         topPanel.add(uidLabel);
         topPanel.add(Box.createVerticalStrut(20));
-        topPanel.add(filterViewButton);
+//        topPanel.add(filterViewButton);
         topPanel.add(Box.createVerticalStrut(8));
         topPanel.add(randomRestaurantButton);
         topPanel.add(Box.createVerticalStrut(8));
@@ -263,6 +319,20 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
         add(restaurantScrollPane, BorderLayout.CENTER);
 
         updateLoggedInView(loggedInViewModel.getState());
+    }
+
+    public void setChatViewModel(ChatViewModel chatViewModel) {
+        this.chatViewModel = chatViewModel;
+        this.chatViewModel.addPropertyChangeListener(evt -> {
+            if ("state".equals(evt.getPropertyName())) {
+                ChatState state = (ChatState) evt.getNewValue();
+                chatResponseArea.setText(state.getResponse());
+            }
+        });
+    }
+
+    public void setChatController(ChatController chatController) {
+        this.chatController = chatController;
     }
 
     /**
