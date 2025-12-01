@@ -1,0 +1,113 @@
+package data_access;
+
+import entity.Restaurant;
+import entity.RestaurantFactory;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.stream.Collectors;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import use_case.filter.IRestaurantDataAccess;
+import use_case.random_restaurant.RandomRestaurantDataAccessInterface;
+import use_case.view_restaurant.ViewRestaurantDataAccessInterface;
+
+/**
+ * DAO for restaurant data implemented with json file to persist data
+ */
+public class JsonRestaurantDataAccessObject implements
+    IRestaurantDataAccess,
+    ViewRestaurantDataAccessInterface,
+    RandomRestaurantDataAccessInterface {
+
+  private final Map<String, Restaurant> restaurantById = new HashMap<>();
+
+  /**
+   * Construct DAO for saving to and reading from a local json file
+   *
+   * @param jsonPath          the json file path to extract data from
+   * @param restaurantFactory factory for creating restaurant objects
+   * @throws IOException throws IOException
+   */
+  public JsonRestaurantDataAccessObject(String jsonPath, RestaurantFactory restaurantFactory)
+      throws IOException {
+    try {
+      JSONArray restaurantData = new JSONArray(Files.readString(Path.of(jsonPath)));
+      // Map id to their respective restaurant obj
+      for (int i = 0; i < restaurantData.length(); i++) {
+        JSONObject curObj = restaurantData.getJSONObject(i);
+        String restaurantId = curObj.getString("name");
+        Restaurant restaurant = restaurantFactory.create(curObj);
+        restaurantById.put(restaurantId, restaurant);
+      }
+    } catch (IOException e) {
+      throw new IOException(e);
+    }
+  }
+
+  /**
+   * Get all restaurants of a specific type.
+   *
+   * @param type the restaurant type to filter by
+   * @return list of restaurants matching the type
+   */
+  @Override
+  public List<Restaurant> getRestaurantsByType(String type) {
+    return restaurantById.values().stream()
+        .filter(restaurant -> restaurant.getType().equals(type))
+        .collect(Collectors.toList());
+  }
+
+  /**
+   * Get all unique restaurant types available. Limited to 5 types for now.
+   *
+   * @return array of unique restaurant types
+   */
+  @Override
+  public String[] getAllRestaurantTypes() {
+    return restaurantById.values().stream()
+        .map(Restaurant::getType)
+        .distinct()
+        .limit(5)
+        .toArray(String[]::new);
+  }
+
+  /**
+   * Get all restaurants in data JSON.
+   *
+   * @return list of restaurant objects.
+   */
+  @Override
+  public List<Restaurant> getAllRestaurants() {
+    return new ArrayList<>(restaurantById.values());
+  }
+
+  /**
+   * Get restaurant with given id
+   *
+   * @param id id of the restaurant to look up
+   * @return restaurant that corresponds to given id
+   */
+  @Override
+  public Restaurant get(String id) {
+    return restaurantById.get(id);
+  }
+
+  @Override
+  public boolean existById(String id) {
+    return restaurantById.containsKey(id);
+  }
+
+  @Override
+  public Restaurant getRandom() {
+    List<Restaurant> restaurants = new ArrayList<>(restaurantById.values());
+    Random rand = new Random();
+    int randomIndex = rand.nextInt(restaurants.size());
+    return restaurants.get(randomIndex);
+  }
+}
