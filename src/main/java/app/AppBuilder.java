@@ -6,6 +6,8 @@ import interface_adapter.ViewManagerModel;
 import interface_adapter.add_review.AddReviewController;
 import interface_adapter.add_review.AddReviewPresenter;
 import interface_adapter.add_review.AddReviewViewModel;
+import interface_adapter.chat.ChatController;
+import interface_adapter.chat.ChatViewModel;
 import interface_adapter.display_reviews.DisplayReviewsController;
 import interface_adapter.display_reviews.DisplayReviewsPresenter;
 import interface_adapter.display_reviews.DisplayReviewsViewModel;
@@ -37,6 +39,7 @@ import interface_adapter.register.RegisterViewModel;
 import interface_adapter.view_restaurant.ViewRestaurantController;
 import interface_adapter.view_restaurant.ViewRestaurantPresenter;
 import interface_adapter.view_restaurant.ViewRestaurantViewModel;
+import service.ChatGPTService;
 import use_case.IAuthGateway;
 import use_case.IUserRepo;
 import use_case.add_review.AddReviewInputBoundary;
@@ -275,6 +278,12 @@ public class AppBuilder {
         RestaurantPanel.HeartClickListener heartListener = (restaurantId, newState) ->
                 System.out.println("Heart toggled for: " + restaurantId + " → " + newState);
 
+        ChatGPTService chatGPTService = new ChatGPTService();
+        ChatViewModel chatViewModel = new ChatViewModel();
+        ChatController chatController = new ChatController(chatGPTService, chatViewModel);
+
+
+
         // Create View
         loggedInView = new LoggedInView(loggedInViewModel);
         loggedInView.setLogoutController(logoutController);
@@ -289,6 +298,10 @@ public class AppBuilder {
         // Set restaurant data access and image access for loading images
         loggedInView.setRestaurantDataAccess(restaurantDataAccess);
         loggedInView.setImageDataAccess(googlePlacesGateway);
+
+        // 配置LoggedInView的聊天功能
+        loggedInView.setChatViewModel(chatViewModel);
+        loggedInView.setChatController(chatController);
 
         // Create ListSearch components
         ListSearchPresenter listSearchPresenter = new ListSearchPresenter(listSearchViewModel);
