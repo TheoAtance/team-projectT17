@@ -1,0 +1,281 @@
+[
+  {
+    "displayName": {
+      "text": "Cafe 85",
+      "languageCode": "en"
+    },
+    "googleMapsLinks": {
+      "writeAReviewUri": "https://www.google.com/maps/place//data=!4m3!3m2!1s0x882b35004b0b194b:0x9b611d3b381cbd33!12e1?g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+      "placeUri": "https://maps.google.com/?cid=11196262288801447219&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+      "reviewsUri": "https://www.google.com/maps/place//data=!4m4!3m3!1s0x882b35004b0b194b:0x9b611d3b381cbd33!9m1!1b1?g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+      "photosUri": "https://www.google.com/maps/place//data=!4m3!3m2!1s0x882b35004b0b194b:0x9b611d3b381cbd33!10e5?g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+      "directionsUri": "https://www.google.com/maps/dir//''/data=!4m7!4m6!1m1!4e2!1m2!1m1!1s0x882b35004b0b194b:0x9b611d3b381cbd33!3e0?g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA"
+    },
+    "rating": 0,
+    "primaryTypeDisplayName": {
+      "text": "Breakfast Restaurant",
+      "languageCode": "en-US"
+    },
+    "photos": [
+      {
+        "flagContentUri": "https://www.google.com/local/imagery/report/?cb_client=maps_api_places.places_api&image_key=!1e10!2sCIHM0ogKEICAgMDQ0Lfubg&hl=en-US",
+        "authorAttributions": [
+          {
+            "displayName": "Alaleh - FoodyTO",
+            "photoUri": "https://lh3.googleusercontent.com/a-/ALV-UjWVEfHfJMFN2ZvtuomGiiFlKlFmQ-YD5GQlOXtxg4V8yyZ1BsB4=s100-p-k-no-mo",
+            "uri": "https://maps.google.com/maps/contrib/103869732971444044816"
+          }
+        ],
+        "googleMapsUri": "https://www.google.com/maps/place//data=!3m4!1e2!3m2!1sCIHM0ogKEICAgMDQ0Lfubg!2e10!4m2!3m1!1s0x882b35004b0b194b:0x9b611d3b381cbd33",
+        "widthPx": 4800,
+        "heightPx": 3600,
+        "name": "places/ChIJSxkLSwA1K4gRM70cODsdYZs/photos/AWn5SU40wkEnUzTHHPTHtnbuEJhIPoWOFDhV1srYmH47ZldJp9A9Tj2F0jJS-2tk-twMXhsY0xooEpncZKohrUQz7k1gsAZtmbQFhwZ8Yo90FtmWaLQbAcMRcPevRIv3uKQ3pAWVkXN918lw2R-jOP1zAsRHmG8Qv-D1AxAIHfmAGvTUEcuNdH_aZhq8AzM3-pQ4aw178zLiLz3WFC2jl1N8QeSOFrzba5KKgYrgEuac8xRucgNm8pdl4dgvdSeyh61V-QauJdJFlmo4c6EL-W5rL6D2B7-SXkm0HL2Mi5c__eqJk56lC1jlCNG8E_Lm32JTGBco74xNL47NCKtxpftUIS72LMDpR8cnYw6SZv1LK-ZxqIDqQ-oG7m4P34cuvKxacHWTEZz-PbFaMfBco_R1HAyQsRAuckcnmaU-vXk0vaR_Ew"
+      },
+      {
+        "flagContentUri": "https://www.google.com/local/imagery/report/?cb_client=maps_api_places.places_api&image_key=!1e10!2sAF1QipN2uZBEstS1r2Gmwr9BRkA9Fy1ybHeIxqRy8v99&hl=en-US",
+        "authorAttributions": [
+          {
+            "displayName": "Cafe 85",
+            "photoUri": "https://lh3.googleusercontent.com/a-/ALV-UjXYQHhsrPbpEtJtTCUHkoRCHvqq-PLwaUaV9B7zzQKtfO8_IRs=s100-p-k-no-mo",
+            "uri": "https://maps.google.com/maps/contrib/105486545076227512965"
+          }
+        ],
+        "googleMapsUri": "https://www.google.com/maps/place//data=!3m4!1e2!3m2!1sAF1QipN2uZBEstS1r2Gmwr9BRkA9Fy1ybHeIxqRy8v99!2e10!4m2!3m1!1s0x882b35004b0b194b:0x9b611d3b381cbd33",
+        "widthPx": 4032,
+        "heightPx": 3024,
+        "name": "places/ChIJSxkLSwA1K4gRM70cODsdYZs/photos/AWn5SU6TJRAe-SS-wHKk6t3Uq7WdhAhCmzYHueiMe-Vgv8_UDmIgJswkobcUDRalw71jH5lxqDKudtv05L_IMmyTxPWzOqrAhOKfowuM2Sav3-YfxbGCvPSVktmybFrMOPQLMxSt8lwdJsRIa05mmgFrln3rZ3vfYTZUKCAr0WJgqfx2Lv0Fq993kdnerlTnOf31an086TUiy-CC7o0iZHM9Brf68N4nYjI9BjPYxshxCj4AFWWQZpCPfMjXHWuo3mVasKveineIeTEpxhZ6Gjavm56JYT1MjkmQYJDKs9bTUdboIQ"
+      },
+      {
+        "flagContentUri": "https://www.google.com/local/imagery/report/?cb_client=maps_api_places.places_api&image_key=!1e10!2sAF1QipNIcWj5d1RawDznBPxrtdnY4dekkf5seS9el4mF&hl=en-US",
+        "authorAttributions": [
+          {
+            "displayName": "Cafe 85",
+            "photoUri": "https://lh3.googleusercontent.com/a-/ALV-UjXYQHhsrPbpEtJtTCUHkoRCHvqq-PLwaUaV9B7zzQKtfO8_IRs=s100-p-k-no-mo",
+            "uri": "https://maps.google.com/maps/contrib/105486545076227512965"
+          }
+        ],
+        "googleMapsUri": "https://www.google.com/maps/place//data=!3m4!1e2!3m2!1sAF1QipNIcWj5d1RawDznBPxrtdnY4dekkf5seS9el4mF!2e10!4m2!3m1!1s0x882b35004b0b194b:0x9b611d3b381cbd33",
+        "widthPx": 4800,
+        "heightPx": 3200,
+        "name": "places/ChIJSxkLSwA1K4gRM70cODsdYZs/photos/AWn5SU4iNvnM61CwNry7-uDxFg9xn6dGkszdtUiHQwFrVJlAbhkrLQkqgdk7EE6JQ-QyQw77o-dz7bqUo162Rayp85AdVLOCqm3xG_-iVJEimqTO10YPeh7--m9IompIYEpuRH4ndLZmBR32036jbNfOXBnHVOCS3iCaUWM6l4F_Aictivw35gO4i77IVAUszS5nOaVn0BoW11EU4ShJAXP4u4ygJ8s72sPM2bOA57nd5SvQfaMFKB44Wng-Ij6bQCCkTIrIh3QLjrsvigq2KDhSEva-nIuJZThlYewhrHFGAtNWng"
+      },
+      {
+        "flagContentUri": "https://www.google.com/local/imagery/report/?cb_client=maps_api_places.places_api&image_key=!1e10!2sCIABIhDh4_m8SbyJYSS8iJKqeJpJ&hl=en-US",
+        "authorAttributions": [
+          {
+            "displayName": "Cindy Kang",
+            "photoUri": "https://lh3.googleusercontent.com/a-/ALV-UjXBye-QaWOubXDzk8yQWq8wPfluNd-rfOYy8JELm-UIwDkO8HA=s100-p-k-no-mo",
+            "uri": "https://maps.google.com/maps/contrib/103013859450253077098"
+          }
+        ],
+        "googleMapsUri": "https://www.google.com/maps/place//data=!3m4!1e2!3m2!1sCIABIhDh4_m8SbyJYSS8iJKqeJpJ!2e10!4m2!3m1!1s0x882b35004b0b194b:0x9b611d3b381cbd33",
+        "widthPx": 4284,
+        "heightPx": 4284,
+        "name": "places/ChIJSxkLSwA1K4gRM70cODsdYZs/photos/AWn5SU67TGYPtBxd5SRmbeVW10sDqyOMgm5g-MgxkzVqjtSoYzpOD96efFr4PlbJZ6hCJHjru9k5ixzTG0WuojSURzumAPUC655tcNtvLaenXCHpWpdQcXM6fJ8ROOG3xsX56QCA0qrBJfT5YLtTq0SjqTUBPT6TvRuZo5jnujk0ufeuY5C5GL6Q__ZNxxPKFYDwul0afMY87YIzR4wGkSt0C6g6-ykTS3UV0l8_Ui2QHBEgZkoJi6cNiYu6vCQLyHxLixlCfyywED1l9EaLt5bXtly-Qcm1MNXm3pFPB7v-oaYJnrH45NTgn0MDaWCnHaKPxrVwOv6d5-m9su8mdTJ6oGUBLnOji5Ov73gCPjx1qsHjsdX9Zc1ekQDfjtdye7TQ8jSI9NT8IsI6PRU4qX-jxkj3lwsxCZHo6m8cl34whjNe2NKaR34vOPSuSGJlMw"
+      },
+      {
+        "flagContentUri": "https://www.google.com/local/imagery/report/?cb_client=maps_api_places.places_api&image_key=!1e10!2sAF1QipN6Eo4ipwuZJzvqv4GKWNYmVrRGQJXBWtS65Bxw&hl=en-US",
+        "authorAttributions": [
+          {
+            "displayName": "Cafe 85",
+            "photoUri": "https://lh3.googleusercontent.com/a-/ALV-UjXYQHhsrPbpEtJtTCUHkoRCHvqq-PLwaUaV9B7zzQKtfO8_IRs=s100-p-k-no-mo",
+            "uri": "https://maps.google.com/maps/contrib/105486545076227512965"
+          }
+        ],
+        "googleMapsUri": "https://www.google.com/maps/place//data=!3m4!1e2!3m2!1sAF1QipN6Eo4ipwuZJzvqv4GKWNYmVrRGQJXBWtS65Bxw!2e10!4m2!3m1!1s0x882b35004b0b194b:0x9b611d3b381cbd33",
+        "widthPx": 1920,
+        "heightPx": 1280,
+        "name": "places/ChIJSxkLSwA1K4gRM70cODsdYZs/photos/AWn5SU4sZcE2FlXjjM0vf0tfNjibWmRMkiQ8xoIfGB5LyvJhBcWaolyGRqbyTeC1wRLsmGZ26n4E2cGSdt1Aldp_4D9VYQQl8O81bYCAa9bEvQroRH7DshWq0wQZrd6JsbjA-HJ_9I30pf60nyjgYtTG5pe7sr8LMqJ_66WlnxcepjMs-By3YeNt65a1f-6J4BB1mXP5Nygto7S5zjsI2KydsgRl1oM6Hk3HccRT89A9UIMRyEGgwIRvxHpZU0SCxY1foa3iGtJCVJXomPrNGi8KOfVRUZUqUl5f-oujlE0sDQiWSA"
+      },
+      {
+        "flagContentUri": "https://www.google.com/local/imagery/report/?cb_client=maps_api_places.places_api&image_key=!1e10!2sAF1QipNYajKtLzY0hd07DUK8YZjLbzPWDLtAXSvreGt0&hl=en-US",
+        "authorAttributions": [
+          {
+            "displayName": "Cafe 85",
+            "photoUri": "https://lh3.googleusercontent.com/a-/ALV-UjXYQHhsrPbpEtJtTCUHkoRCHvqq-PLwaUaV9B7zzQKtfO8_IRs=s100-p-k-no-mo",
+            "uri": "https://maps.google.com/maps/contrib/105486545076227512965"
+          }
+        ],
+        "googleMapsUri": "https://www.google.com/maps/place//data=!3m4!1e2!3m2!1sAF1QipNYajKtLzY0hd07DUK8YZjLbzPWDLtAXSvreGt0!2e10!4m2!3m1!1s0x882b35004b0b194b:0x9b611d3b381cbd33",
+        "widthPx": 3024,
+        "heightPx": 3024,
+        "name": "places/ChIJSxkLSwA1K4gRM70cODsdYZs/photos/AWn5SU5lVAhwre7LPDCYNPnF8ceCmSh-SD0FjLIg0Uk_SRrtlWIadakdeK-o17pcEMhoUoGqD0WSLbNkqvVmmZpAKUfN-jS3yaeJXtD36IxBF2SP_QCECdY8ro7WXhrI1tQtctbZZ5aGn4qNgYU2jQNO4yr48ucW9uWdfBH-aR542ECc0anATiAZumV1jfkgAwxSHoD4XQ-Lsj8U_AwOnb8rgHvvmhc-urP8zZ_sNHbgIbscpo2tB4zKpb7EaUjABSgsyuE92issVY6icGsTLYwoIwInBhULQX-OonkX9C4alpN5Mw"
+      },
+      {
+        "flagContentUri": "https://www.google.com/local/imagery/report/?cb_client=maps_api_places.places_api&image_key=!1e10!2sCIABIhCw2-k-gTVrs-kpE2nP5JiV&hl=en-US",
+        "authorAttributions": [
+          {
+            "displayName": "Jade Neilly",
+            "photoUri": "https://lh3.googleusercontent.com/a-/ALV-UjWBo3VFN7_sVI7SU3IF6Qm78IaD3p8haDZ-8JptDGRd5z-hKhje=s100-p-k-no-mo",
+            "uri": "https://maps.google.com/maps/contrib/114686562456767436943"
+          }
+        ],
+        "googleMapsUri": "https://www.google.com/maps/place//data=!3m4!1e2!3m2!1sCIABIhCw2-k-gTVrs-kpE2nP5JiV!2e10!4m2!3m1!1s0x882b35004b0b194b:0x9b611d3b381cbd33",
+        "widthPx": 2792,
+        "heightPx": 2792,
+        "name": "places/ChIJSxkLSwA1K4gRM70cODsdYZs/photos/AWn5SU4yxRSKPa9hbUjutMleYoIk7-RarLEMhZL8bIaZEBk-OhCoR17PEx8w32V8Qn_F4pZ3iOJJFQB3WOKtUwNd4U6p9ZEo6r4CYR7zViH0Ua4wM_0aXkXfLIbntoTtvz1R954Krb_6tzV9DLf7zggWT9yJlsmC5X0znezW0v88TdIM9BMru_ev2pK4kV1RR-rteznzPpbR_TA83DvJYVeLOWGAw9bDYn2w2LQsizEPcyhdM_aV5bFVKliMWBOUyxrHrf1wtofpzAD6nWQ9Ob6qSGpzCGnixLz7Dr-FvRICuv8PJTI7_y4PZbWMk66oRtkpyixGKIXbELkHfTb8jKtKmGQPO96bmluiA1DmUebK7bKBOr01NLI0krEbQgtzc8qJEDQ64phficRlmorQ-a0BUxmepENc3vIgCDrCSQvx5DI2v5Yhz1Myf62wML65aw"
+      },
+      {
+        "flagContentUri": "https://www.google.com/local/imagery/report/?cb_client=maps_api_places.places_api&image_key=!1e10!2sCIABIhAIzxriyBAf-gnMHOrrFe6h&hl=en-US",
+        "authorAttributions": [
+          {
+            "displayName": "Samai ruiz",
+            "photoUri": "https://lh3.googleusercontent.com/a-/ALV-UjUNG2BwKbkM4mmYkTqxU7BXbzug9NCOdNEroXm2LtWNwcZ6bx9c=s100-p-k-no-mo",
+            "uri": "https://maps.google.com/maps/contrib/105931997833197602515"
+          }
+        ],
+        "googleMapsUri": "https://www.google.com/maps/place//data=!3m4!1e2!3m2!1sCIABIhAIzxriyBAf-gnMHOrrFe6h!2e10!4m2!3m1!1s0x882b35004b0b194b:0x9b611d3b381cbd33",
+        "widthPx": 2166,
+        "heightPx": 2811,
+        "name": "places/ChIJSxkLSwA1K4gRM70cODsdYZs/photos/AWn5SU7U_MZVLUrhqWppuNFMD-ZqoNgNZ_Q4gnC2caqE0bmIzdcuL7TU6syegGAFXTgTAMkrPiCQoJdHqg3Wa8gydmXsGB6jzgAW9kUfm_bxoebURYx4aiAjyuBZv_zqPzTn_JRg1LlpYZs5SAathTDABKyHMaZkzMKyd4VjKxEGRZvP-gqDqUeHKWaoDHtNFckpF3uDmEU-sEM1NagMtdbWrl-jL9dIJJTB3qnylNtPz1KRwSAIgJDYRJel6sjtJwvWjC8WdxOMwal2PEus6S8O7_f7tEFHHMEJ67he6jHK8R546_QoQ2qHuG0c3E9ZjHiCPQRKyHXYvk07EwzPv8hYee6EHZ1NvrdM2IKUNC-trB-3FW91s5nLxiv3bgJPNOvuXtJNQT46DiVQOXJvrkN3WUnj97yyfAcg3pq-f9B0XXPcvvhAkFFAbjM8lXZThiDb"
+      },
+      {
+        "flagContentUri": "https://www.google.com/local/imagery/report/?cb_client=maps_api_places.places_api&image_key=!1e10!2sAF1QipMWoh8VCavodyvhx909J4Q-OzGiF14SmL62do_B&hl=en-US",
+        "authorAttributions": [
+          {
+            "displayName": "Cafe 85",
+            "photoUri": "https://lh3.googleusercontent.com/a-/ALV-UjXYQHhsrPbpEtJtTCUHkoRCHvqq-PLwaUaV9B7zzQKtfO8_IRs=s100-p-k-no-mo",
+            "uri": "https://maps.google.com/maps/contrib/105486545076227512965"
+          }
+        ],
+        "googleMapsUri": "https://www.google.com/maps/place//data=!3m4!1e2!3m2!1sAF1QipMWoh8VCavodyvhx909J4Q-OzGiF14SmL62do_B!2e10!4m2!3m1!1s0x882b35004b0b194b:0x9b611d3b381cbd33",
+        "widthPx": 3024,
+        "heightPx": 4032,
+        "name": "places/ChIJSxkLSwA1K4gRM70cODsdYZs/photos/AWn5SU6j5q-y96u7Rk5y3z7hSEr5C_Xgt5Cyf2NqTV5yxQW5NtmcLjyvsrcf4Sgk4P00_cJZQ3g_66TTKpI8Ok_p2Zs5sbd8TJmrkZHbJrn51--GQDffu1PNMPwKi3F8UFZZEvAN43nGuX8k227QG2QFflLmWkGRMkzdNK07c6_xseNhlwUkLt8AdrFn1NVd0fTqkE1H15A2b3HnwYZe69Fd3fK8S8qKtht6vkEmVf59mqp-X_P-mqNQE4oJy2j-dDldqlCzi8ALF2syH66K-qL7LFxlORHGTylcvtesAKBOon9mJg"
+      },
+      {
+        "flagContentUri": "https://www.google.com/local/imagery/report/?cb_client=maps_api_places.places_api&image_key=!1e10!2sAF1QipMR7RndyW2Lj8p747vcgXw9AiXkVpfucXnAysst&hl=en-US",
+        "authorAttributions": [
+          {
+            "displayName": "Cafe 85",
+            "photoUri": "https://lh3.googleusercontent.com/a-/ALV-UjXYQHhsrPbpEtJtTCUHkoRCHvqq-PLwaUaV9B7zzQKtfO8_IRs=s100-p-k-no-mo",
+            "uri": "https://maps.google.com/maps/contrib/105486545076227512965"
+          }
+        ],
+        "googleMapsUri": "https://www.google.com/maps/place//data=!3m4!1e2!3m2!1sAF1QipMR7RndyW2Lj8p747vcgXw9AiXkVpfucXnAysst!2e10!4m2!3m1!1s0x882b35004b0b194b:0x9b611d3b381cbd33",
+        "widthPx": 1280,
+        "heightPx": 1280,
+        "name": "places/ChIJSxkLSwA1K4gRM70cODsdYZs/photos/AWn5SU66h4SqNfDQqDe5SxLU0APjC6mhVPXEebxLhWVhZ7OC530hI-uGsicGnlOKqgDSd7Zc1VN3xngPByAjS_hn3hTetY3MJaJBKnTKWzXPGUSK8TfVELfD6v7JBwTVgNGzqV7i6O0-x225xuolsQzbXn7DNpOU3tK8agswesES5O3UtDE5zOxj-O4WlduWZ1DIfgfVpdEdaunFbhnlxYyRYSL9p44R3BFkgaHWbU7s7J-1R-1JwHuriZM15LLVTYk3kXdILUs1JVQUEYZAaqedpDBa22kWzvjUiR06v07ZBzEPaA"
+      }
+    ],
+    "regularOpeningHours": {
+      "openNow": true,
+      "periods": [
+        {
+          "close": {
+            "hour": 17,
+            "day": 0,
+            "minute": 0
+          },
+          "open": {
+            "hour": 8,
+            "day": 0,
+            "minute": 0
+          }
+        },
+        {
+          "close": {
+            "hour": 16,
+            "day": 1,
+            "minute": 0
+          },
+          "open": {
+            "hour": 7,
+            "day": 1,
+            "minute": 0
+          }
+        },
+        {
+          "close": {
+            "hour": 16,
+            "day": 2,
+            "minute": 0
+          },
+          "open": {
+            "hour": 7,
+            "day": 2,
+            "minute": 0
+          }
+        },
+        {
+          "close": {
+            "hour": 16,
+            "day": 3,
+            "minute": 0
+          },
+          "open": {
+            "hour": 7,
+            "day": 3,
+            "minute": 0
+          }
+        },
+        {
+          "close": {
+            "hour": 16,
+            "day": 4,
+            "minute": 0
+          },
+          "open": {
+            "hour": 7,
+            "day": 4,
+            "minute": 0
+          }
+        },
+        {
+          "close": {
+            "hour": 16,
+            "day": 5,
+            "minute": 0
+          },
+          "open": {
+            "hour": 7,
+            "day": 5,
+            "minute": 0
+          }
+        },
+        {
+          "close": {
+            "hour": 17,
+            "day": 6,
+            "minute": 0
+          },
+          "open": {
+            "hour": 8,
+            "day": 6,
+            "minute": 0
+          }
+        }
+      ],
+      "nextCloseTime": "2025-11-16T22:00:00Z",
+      "weekdayDescriptions": [
+        "Monday: 7:00\u202fAM\u2009\u2013\u20094:00\u202fPM",
+        "Tuesday: 7:00\u202fAM\u2009\u2013\u20094:00\u202fPM",
+        "Wednesday: 7:00\u202fAM\u2009\u2013\u20094:00\u202fPM",
+        "Thursday: 7:00\u202fAM\u2009\u2013\u20094:00\u202fPM",
+        "Friday: 7:00\u202fAM\u2009\u2013\u20094:00\u202fPM",
+        "Saturday: 8:00\u202fAM\u2009\u2013\u20095:00\u202fPM",
+        "Sunday: 8:00\u202fAM\u2009\u2013\u20095:00\u202fPM"
+      ]
+    },
+    "websiteUri": "http://www.cafe85.ca/",
+    "formattedAddress": "695 Bay St., Toronto, ON M5G 0C3, Canada",
+    "primaryType": "breakfast_restaurant",
+    "name": "places/ChIJSxkLSwA1K4gRM70cODsdYZs",
+    "userRatingCount": 0,
+    "location": {
+      "latitude": 43.6583532,
+      "longitude": -79.3846281
+    },
+    "nationalPhoneNumber": "(416) 591-0022",
+    "priceRange": {
+      "startPrice": {
+        "units": "20",
+        "currencyCode": "CAD"
+      },
+      "endPrice": {
+        "units": "30",
+        "currencyCode": "CAD"
+      }
+    }
+  }
+]
