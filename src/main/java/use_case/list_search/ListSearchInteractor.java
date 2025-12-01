@@ -43,6 +43,6 @@ public class ListSearchInteractor implements ListSearchInputBoundary {  // <--- 
   }
 
   private double ratingToReviewRatio(Restaurant r) {
-    return r.getRating() / (r.getRatingCount() + 1);
+    return r.getRating() * Math.log10(r.getRatingCount() + 10);
   }
 }
