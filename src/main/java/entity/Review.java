@@ -39,13 +39,13 @@ public class Review {
    * @param restaurantId id of the restaurant this review is associated to
    * @param content      id of the content of this review
    */
-  public Review(String reviewId, String authorId, String restaurantId, String creationDate,
-      String content) {
+  public Review(String reviewId, String authorId, String restaurantId, String content, String creationDate) {
     this.reviewId = checkNonEmpty(reviewId, "reviewId");
     this.authorId = checkNonEmpty(authorId, "authorId");
     this.restaurantId = checkNonEmpty(restaurantId, "restaurantId");
     this.content = checkNonEmpty(content, "review content");
     this.creationDate = checkNonEmpty(creationDate, "creationDate");
+
     this.likes = 0;
   }
 

@@ -54,7 +54,7 @@ public class AddReviewInteractor implements AddReviewInputBoundary {
     }
 
     try {
-      jsonReviewDataAccessObject.addReview(reviewId, userId, restaurantId, date, content);
+      jsonReviewDataAccessObject.addReview(reviewId, userId, restaurantId, content, date);
       addReviewPresenter.prepareSuccessView("Review added!");   // no output data needed
 
     } catch (IOException e) {
