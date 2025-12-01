@@ -133,7 +133,6 @@ public class TranslationView extends JPanel implements PropertyChangeListener {
     if (reviews != null && !reviews.isEmpty()) {
       java.util.List<String> originals = new java.util.ArrayList<>();
       for (Review r : reviews) {
-        // adjust if your getter name is different
         originals.add(r.getContent());
       }
       translationPanel.setOriginalContents(originals);

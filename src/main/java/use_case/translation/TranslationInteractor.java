@@ -6,8 +6,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Interactor for the translation use case. Takes reviews + target language, calls
- * TranslationService, and passes a TranslationOutputData to the output boundary.
+ * Interactor for the translation use case.
+ * Takes reviews + target language, calls TranslationService,
+ * and passes a TranslationOutputData to the output boundary.
  */
 public class TranslationInteractor implements TranslationInputBoundary {
 
@@ -15,7 +16,7 @@ public class TranslationInteractor implements TranslationInputBoundary {
   private final TranslationOutputBoundary outputBoundary;
 
   public TranslationInteractor(TranslationService translationService,
-      TranslationOutputBoundary outputBoundary) {
+                               TranslationOutputBoundary outputBoundary) {
     this.translationService = translationService;
     this.outputBoundary = outputBoundary;
   }
@@ -25,54 +26,52 @@ public class TranslationInteractor implements TranslationInputBoundary {
     List<Review> reviews = inputData.getReviews();
     String targetLanguage = inputData.getTargetLanguage();
 
-    // Basic validation
+    // Validation
     if (reviews == null || reviews.isEmpty()) {
-      TranslationOutputData outputData = new TranslationOutputData(
-          Collections.emptyList(),
-          targetLanguage,
-          true,
-          "No reviews to translate."
-      );
-      outputBoundary.present(outputData);
+      outputBoundary.present(new TranslationOutputData(
+              Collections.emptyList(),
+              targetLanguage,
+              true,
+              "No reviews to translate."
+      ));
       return;
     }
 
     try {
-      // extract raw text from reviews
+      // Extract review contents
       List<String> texts = reviews.stream()
-          .map(Review::getContent)
-          .collect(Collectors.toList());
+              .map(Review::getContent)
+              .collect(Collectors.toList());
 
-      // call the translation service
+      // Translate using TranslationService
       List<TranslationService.TranslatedText> translated =
-          translationService.translateTexts(texts, targetLanguage);
+              translationService.translateTexts(texts, targetLanguage);
 
-      // translated strings
+      // Collect translated strings
       List<String> translatedContents = translated.stream()
-          .map(TranslationService.TranslatedText::translated)
-          .collect(Collectors.toList());
+              .map(TranslationService.TranslatedText::translated)
+              .collect(Collectors.toList());
 
-      // output data
-      TranslationOutputData outputData = new TranslationOutputData(
-          translatedContents,
-          targetLanguage,
-          false,
-          null
-      );
-      outputBoundary.present(outputData);
+      // Build and send output
+      outputBoundary.present(new TranslationOutputData(
+              translatedContents,
+              targetLanguage,
+              false,
+              null
+      ));
 
     } catch (Exception e) {
+      // Handle errors
       String msg = (e.getMessage() == null || e.getMessage().isBlank())
-          ? "An error occurred during translation."
-          : e.getMessage();
+              ? "An error occurred during translation."
+              : e.getMessage();
 
-      TranslationOutputData outputData = new TranslationOutputData(
-          null,
-          targetLanguage,
-          true,
-          msg
-      );
-      outputBoundary.present(outputData);
+      outputBoundary.present(new TranslationOutputData(
+              null,
+              targetLanguage,
+              true,
+              msg
+      ));
     }
   }
 }

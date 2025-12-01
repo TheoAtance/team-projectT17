@@ -423,7 +423,7 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
     String content = reviewState.getContent();
 
     // Make sure the constructor order matches your Review class
-    Review review = new Review(reviewId, authorId, restaurantId, content, creationDate);
+    Review review = new Review(reviewId, authorId, restaurantId, creationDate, content);
     java.util.List<Review> reviews = java.util.Collections.singletonList(review);
 
     // Create TranslationView bound to THIS popup's view model / controller
@@ -439,6 +439,7 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
     frame.pack();
     frame.setLocationRelativeTo(null);
     frame.setVisible(true);
+    frame.setAlwaysOnTop(true);
   }
 
 
