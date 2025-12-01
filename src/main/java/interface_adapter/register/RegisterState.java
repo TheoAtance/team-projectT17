@@ -4,106 +4,107 @@ package interface_adapter.register;
  * The state object for the Register View.
  */
 public class RegisterState {
-    private String email = "";
-    private String nickname = "";
-    private String password = "";
-    private String repeatPassword = "";
 
-    private String generalError = null;
-    private String emailError = null;
-    private String nicknameError = null;
-    private String passwordError = null;
-    private String repeatPasswordError = null;
+  private String email = "";
+  private String nickname = "";
+  private String password = "";
+  private String repeatPassword = "";
 
-    // Copy constructor
-    public RegisterState(RegisterState copy) {
-        this.email = copy.email;
-        this.nickname = copy.nickname;
-        this.password = copy.password;
-        this.repeatPassword = copy.repeatPassword;
-        this.generalError = copy.generalError;
-        this.emailError = copy.emailError;
-        this.nicknameError = copy.nicknameError;
-        this.passwordError = copy.passwordError;
-        this.repeatPasswordError = copy.repeatPasswordError;
-    }
+  private String generalError = null;
+  private String emailError = null;
+  private String nicknameError = null;
+  private String passwordError = null;
+  private String repeatPasswordError = null;
 
-    public RegisterState() {
-    }
+  // Copy constructor
+  public RegisterState(RegisterState copy) {
+    this.email = copy.email;
+    this.nickname = copy.nickname;
+    this.password = copy.password;
+    this.repeatPassword = copy.repeatPassword;
+    this.generalError = copy.generalError;
+    this.emailError = copy.emailError;
+    this.nicknameError = copy.nicknameError;
+    this.passwordError = copy.passwordError;
+    this.repeatPasswordError = copy.repeatPasswordError;
+  }
 
-    // --- Getters ---
+  public RegisterState() {
+  }
 
-    public String getEmail() {
-        return email;
-    }
+  // --- Getters ---
 
-    public String getNickname() {
-        return nickname;
-    }
+  public String getEmail() {
+    return email;
+  }
 
-    public String getPassword() {
-        return password;
-    }
+  public void setEmail(String email) {
+    this.email = email;
+  }
 
-    public String getRepeatPassword() {
-        return repeatPassword;
-    }
+  public String getNickname() {
+    return nickname;
+  }
 
-    public String getGeneralError() {
-        return generalError;
-    }
+  public void setNickname(String nickname) {
+    this.nickname = nickname;
+  }
 
-    public String getEmailError() {
-        return emailError;
-    }
+  public String getPassword() {
+    return password;
+  }
 
-    public String getNicknameError() {
-        return nicknameError;
-    }
+  public void setPassword(String password) {
+    this.password = password;
+  }
 
-    public String getPasswordError() {
-        return passwordError;
-    }
+  public String getRepeatPassword() {
+    return repeatPassword;
+  }
 
-    public String getRepeatPasswordError() {
-        return repeatPasswordError;
-    }
+  public void setRepeatPassword(String repeatPassword) {
+    this.repeatPassword = repeatPassword;
+  }
 
-    // --- Setters ---
+  public String getGeneralError() {
+    return generalError;
+  }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+  // --- Setters ---
 
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
-    }
+  public void setGeneralError(String generalError) {
+    this.generalError = generalError;
+  }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+  public String getEmailError() {
+    return emailError;
+  }
 
-    public void setRepeatPassword(String repeatPassword) {
-        this.repeatPassword = repeatPassword;
-    }
+  public void setEmailError(String emailError) {
+    this.emailError = emailError;
+  }
 
-    public void setGeneralError(String generalError) {
-        this.generalError = generalError;
-    }
+  public String getNicknameError() {
+    return nicknameError;
+  }
 
-    public void setEmailError(String emailError) {
-        this.emailError = emailError;
-    }
+  public void setNicknameError(String nicknameError) {
+    this.nicknameError = nicknameError;
+  }
 
-    public void setNicknameError(String nicknameError) {
-        this.nicknameError = nicknameError;
-    }
+  public String getPasswordError() {
+    return passwordError;
+  }
 
-    public void setPasswordError(String passwordError) {
-        this.passwordError = passwordError;
-    }
+  public void setPasswordError(String passwordError) {
+    this.passwordError = passwordError;
+  }
 
-    public void setRepeatPasswordError(String repeatPasswordError) {
-        this.repeatPasswordError = repeatPasswordError;
-    }
+  public String getRepeatPasswordError() {
+    return repeatPasswordError;
+  }
+
+  public void setRepeatPasswordError(String repeatPasswordError) {
+    this.repeatPasswordError = repeatPasswordError;
+  }
 }

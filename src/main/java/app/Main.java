@@ -1,12 +1,8 @@
 package app;
 
 import data_access.FirebaseService;
-import interface_adapter.ViewManagerModel;
-import view.ViewManager;
-
-import javax.swing.*;
-import java.awt.*;
 import java.io.IOException;
+import javax.swing.JFrame;
 
 /**
  * The Main class for the Restaurant Review Application.
@@ -21,7 +17,6 @@ public class Main {
 
         System.setProperty("sun.java2d.opengl", "true");
 
-
         // Build the application
         AppBuilder appBuilder = new AppBuilder();
         JFrame application = appBuilder
@@ -32,12 +27,10 @@ public class Main {
                 .addFilterView()
                 .addRestaurantUseCase()
                 .addFavoritesUseCase()
-                .addAddFavoriteToRestaurantView()  // NEW - Add this line after addFavoritesUseCase()
+                .addAddFavoriteToRestaurantView()
                 .addAddReviewUseCase()
                 .addDisplayReviewUseCase()
                 .build();
-
-
 
         // Display the application
         application.pack();

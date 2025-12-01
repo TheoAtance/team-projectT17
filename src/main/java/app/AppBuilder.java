@@ -13,11 +13,17 @@ import interface_adapter.favorites.FavoritesPresenter;
 import interface_adapter.favorites.FavoritesViewModel;
 import interface_adapter.favorites.GetFavoritesController;
 import interface_adapter.favorites.RemoveFavoriteController;
+import interface_adapter.favorites.AddFavoriteController;
+import interface_adapter.favorites.AddFavoritePresenter;
+import interface_adapter.favorites.RemoveFavoritePresenter;
 import interface_adapter.filter.FilterController;
 import interface_adapter.filter.FilterPresenter;
 import interface_adapter.filter.FilterViewModel;
 import interface_adapter.google_login.GoogleLoginController;
 import interface_adapter.google_login.GoogleLoginPresenter;
+import interface_adapter.list_search.ListSearchController;
+import interface_adapter.list_search.ListSearchPresenter;
+import interface_adapter.list_search.ListSearchViewModel;
 import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.login.LoginController;
 import interface_adapter.login.LoginPresenter;
@@ -47,10 +53,14 @@ import use_case.favorites.get_favorites.GetFavoritesInputBoundary;
 import use_case.favorites.get_favorites.GetFavoritesInteractor;
 import use_case.favorites.remove_favorite.RemoveFavoriteInputBoundary;
 import use_case.favorites.remove_favorite.RemoveFavoriteInteractor;
+import use_case.favorites.add_favorite.AddFavoriteInputBoundary;
+import use_case.favorites.add_favorite.AddFavoriteInteractor;
 import use_case.filter.FilterInputBoundary;
 import use_case.filter.FilterInteractor;
 import use_case.google_login.GoogleLoginInputBoundary;
 import use_case.google_login.GoogleLoginInteractor;
+import use_case.list_search.ListSearchInputBoundary;
+import use_case.list_search.ListSearchInteractor;
 import use_case.logout.LogoutInputBoundary;
 import use_case.logout.LogoutUserInteractor;
 import use_case.random_restaurant.RandomRestaurantInputBoundary;
@@ -58,11 +68,6 @@ import use_case.random_restaurant.RandomRestaurantInteractor;
 import use_case.view_restaurant.ViewRestaurantInputBoundary;
 import use_case.view_restaurant.ViewRestaurantInteractor;
 import use_case.view_restaurant.ViewRestaurantOutputBoundary;
-import interface_adapter.favorites.AddFavoriteController;
-import interface_adapter.favorites.AddFavoritePresenter;
-import use_case.favorites.add_favorite.AddFavoriteInputBoundary;
-import use_case.favorites.add_favorite.AddFavoriteInteractor;
-import interface_adapter.favorites.RemoveFavoritePresenter;
 import view.*;
 
 import javax.swing.*;
@@ -74,16 +79,25 @@ import java.io.IOException;
  * all the components of the application using dependency injection.
  */
 public class AppBuilder {
+    final ViewManagerModel viewManagerModel = new ViewManagerModel();
     private final JPanel cardPanel = new JPanel();
     private final CardLayout cardLayout = new CardLayout();
-    final ViewManagerModel viewManagerModel = new ViewManagerModel();
     final ViewManager viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
 
+    // Add review
+    private final AddReviewViewModel addReviewViewModel = new AddReviewViewModel();
+    // Display Review
+    private final DisplayReviewsViewModel displayReviewsViewModel = new DisplayReviewsViewModel();
+
+    // Shared data access objects
+    private final IAuthGateway authGateway = new FirebaseUserAuth();
+    private final IUserRepo userRepository = new FirestoreUserRepo();
+    private final CurrentUser currentUser = new CurrentUser(authGateway, userRepository);
+    private final GooglePlacesGateway googlePlacesGateway = new GooglePlacesGateway();
 
     // ======== View Models ========
-    //Home page
+    // Home page
     private LoggedInView loggedInView;
-
     // Account
     private LoginViewModel loginViewModel;
     private RegisterViewModel registerViewModel;
@@ -91,32 +105,17 @@ public class AppBuilder {
 
     // Filter
     private FilterViewModel filterViewModel;
-
     // Restaurant info
     private ViewRestaurantViewModel viewRestaurantViewModel;
     private RestaurantView restaurantView;
-
-    //Add review
-    private final AddReviewViewModel addReviewViewModel = new AddReviewViewModel();
-
-    //Display Review
-    private final DisplayReviewsViewModel displayReviewsViewModel = new DisplayReviewsViewModel();
-
-
-    // Shared data access objects
-    private final IAuthGateway authGateway = new FirebaseUserAuth();
-    private final IUserRepo userRepository = new FirestoreUserRepo();
-    private final CurrentUser currentUser = new CurrentUser(authGateway, userRepository);
-
     private JsonRestaurantDataAccessObject restaurantDataAccess;
     private JsonReviewDataAccessObject reviewDataAccess;
-
-    private GooglePlacesGateway googlePlacesGateway = new GooglePlacesGateway();
-
-
     // Shared Google Login Controller
     private GoogleLoginController googleLoginController;
 
+    /**
+     * Creates the App.
+     */
     public AppBuilder() {
         // tell card panel to use cardLayout to manage its layout.
         cardPanel.setLayout(cardLayout);
@@ -139,7 +138,7 @@ public class AppBuilder {
     /**
      * Adds the Login View to the application.
      *
-     * @return
+     * @return log in view.
      */
     public AppBuilder addLoginView() {
         // Create View Model
@@ -190,7 +189,7 @@ public class AppBuilder {
     /**
      * Adds the Register View to the application.
      *
-     * @return
+     * @return register view.
      */
     public AppBuilder addRegisterView() {
         // Create View Model
@@ -241,13 +240,18 @@ public class AppBuilder {
     /**
      * Adds the Logged In View to the application.
      *
-     * @return
+     * @return the logged in view.
      */
+    @SuppressWarnings({"checkstyle:VariableDeclarationUsageDistance", "checkstyle:Indentation"})
     public AppBuilder addLoggedInView() {
+        ListSearchViewModel listSearchViewModel;
         // Create View Model (if not already created)
         if (loggedInViewModel == null) {
             loggedInViewModel = new LoggedInViewModel();
         }
+
+        // Create ListSearchViewModel
+        listSearchViewModel = new ListSearchViewModel();
 
         // Create Logout Presenter
         LogoutPresenter logoutPresenter = new LogoutPresenter(
@@ -266,11 +270,33 @@ public class AppBuilder {
         // Create Logout Controller
         LogoutController logoutController = new LogoutController(logoutInteractor);
 
+        // Create HeartClickListener (placeholder - actual listener created in view)
+        RestaurantPanel.HeartClickListener heartListener = (restaurantId, newState) ->
+                System.out.println("Heart toggled for: " + restaurantId + " → " + newState);
+
         // Create View
         loggedInView = new LoggedInView(loggedInViewModel);
         loggedInView.setLogoutController(logoutController);
         loggedInView.setViewManagerModel(viewManagerModel);
         loggedInView.setViewRestaurantViewModel(viewRestaurantViewModel);
+
+        // Set list search dependencies using setters
+        loggedInView.setListSearchViewModel(listSearchViewModel);
+        loggedInView.setHeartListener(heartListener);
+        loggedInView.setFilterViewName(FilterView.VIEW_NAME);
+
+        // Set restaurant data access and image access for loading images
+        loggedInView.setRestaurantDataAccess(restaurantDataAccess);
+        loggedInView.setImageDataAccess(googlePlacesGateway);
+
+        // Create ListSearch components
+        ListSearchPresenter listSearchPresenter = new ListSearchPresenter(listSearchViewModel);
+        ListSearchInputBoundary listSearchInteractor = new ListSearchInteractor(restaurantDataAccess,
+                listSearchPresenter);
+        ListSearchController listSearchController = new ListSearchController(listSearchInteractor);
+
+        loggedInView.setSearchController(listSearchController);
+        listSearchController.search("");
 
         // Add to card panel
         cardPanel.add(loggedInView, loggedInView.getViewName());
@@ -281,11 +307,13 @@ public class AppBuilder {
     /**
      * Adds the Filter View to the application.
      *
-     * @return
+     * @return filter view.
      */
     public AppBuilder addFilterView() {
         // Create View Model
-        filterViewModel = new FilterViewModel();
+        if (filterViewModel == null) {
+            filterViewModel = new FilterViewModel();
+        }
 
         // Create Presenter
         FilterPresenter filterPresenter = new FilterPresenter(filterViewModel);
@@ -310,19 +338,22 @@ public class AppBuilder {
         return this;
     }
 
-    public AppBuilder addRestaurantView(){
-
+    /**
+     * Creates the Restaurant View.
+     */
+    public AppBuilder addRestaurantView() {
         viewRestaurantViewModel = new ViewRestaurantViewModel();
         restaurantView = new RestaurantView(viewRestaurantViewModel);
         cardPanel.add(restaurantView, restaurantView.getViewName());
 
-
         return this;
     }
 
-
-
-    public AppBuilder addRestaurantUseCase(){
+    /**
+     * Creates the Restaurant.
+     */
+    @SuppressWarnings("checkstyle:VariableDeclarationUsageDistance")
+    public AppBuilder addRestaurantUseCase() {
         final ViewRestaurantOutputBoundary viewRestaurantOutputBoundary =
                 new ViewRestaurantPresenter(viewManagerModel, viewRestaurantViewModel, googlePlacesGateway);
 
@@ -332,8 +363,10 @@ public class AppBuilder {
         final RandomRestaurantInputBoundary randomRestaurantInteractor =
                 new RandomRestaurantInteractor(restaurantDataAccess, viewRestaurantOutputBoundary);
 
-        ViewRestaurantController viewRestaurantController = new ViewRestaurantController(viewRestaurantInteractor);
-        RandomRestaurantController randomRestaurantController = new RandomRestaurantController(randomRestaurantInteractor);
+        ViewRestaurantController viewRestaurantController = new ViewRestaurantController(
+                viewRestaurantInteractor);
+        RandomRestaurantController randomRestaurantController = new RandomRestaurantController(
+                randomRestaurantInteractor);
 
         restaurantView.setViewRestaurantController(viewRestaurantController);
         restaurantView.setLoggedInViewModel(loggedInViewModel);
@@ -347,8 +380,10 @@ public class AppBuilder {
         return this;
     }
 
-
-    public AppBuilder addAddReviewUseCase(){
+    /**
+     * Creates the Review.
+     */
+    public AppBuilder addAddReviewUseCase() {
         final AddReviewOutputBoundary addReviewOutputBoundary =
                 new AddReviewPresenter(viewManagerModel, addReviewViewModel);
 
@@ -361,14 +396,18 @@ public class AppBuilder {
         return this;
     }
 
-    public AppBuilder addDisplayReviewUseCase(){
+    /**
+     * Creates the Display.
+     */
+    public AppBuilder addDisplayReviewUseCase() {
         final DisplayReviewsOutputBoundary DisplayReviewPresenter =
                 new DisplayReviewsPresenter(displayReviewsViewModel);
 
         final DisplayReviewsInputBoundary displayReviewsInteractor =
                 new DisplayReviewsInteractor(reviewDataAccess, DisplayReviewPresenter, userRepository);
 
-        DisplayReviewsController displayReviewsController = new DisplayReviewsController(displayReviewsInteractor);
+        DisplayReviewsController displayReviewsController = new DisplayReviewsController(
+                displayReviewsInteractor);
         restaurantView.setDisplayReviewController(displayReviewsController);
 
         return this;
@@ -429,7 +468,7 @@ public class AppBuilder {
         favoritesView.setGetFavoritesController(getFavoritesController);
         favoritesView.setRemoveFavoriteController(removeFavoriteController);
 
-        // NEW - Set navigation dependencies so clicking restaurants works
+        // Set navigation dependencies so clicking restaurants works
         if (viewRestaurantViewModel != null && restaurantView != null) {
             favoritesView.setViewRestaurantController(restaurantView.getViewRestaurantController());
             favoritesView.setViewManagerModel(viewManagerModel);
@@ -443,13 +482,67 @@ public class AppBuilder {
         if (loggedInView != null) {
             loggedInView.setFavoritesViewModel(favoritesViewModel);
             loggedInView.setGetFavoritesController(getFavoritesController);
+            loggedInView.setAddFavoriteController(new AddFavoriteController(
+                    new AddFavoriteInteractor((UserDataAccessInterface) userRepository,
+                            new AddFavoritePresenter(favoritesViewModel))
+            ));
+            loggedInView.setRemoveFavoriteController(removeFavoriteController);
+            loggedInView.setUserDataAccess((UserDataAccessInterface) userRepository);
+            // Note: restaurantDataAccess and imageDataAccess already set in addLoggedInView()
         }
 
         return this;
     }
 
+    /**
+     * Adds Add/Remove Favorite functionality to RestaurantView.
+     *
+     * @return this AppBuilder for method chaining
+     */
+    public AppBuilder addAddFavoriteToRestaurantView() {
+        if (restaurantView == null) {
+            throw new IllegalStateException("Restaurant view must be created first");
+        }
 
-    public JFrame build() throws IOException {
+        // Create shared view model
+        FavoritesViewModel favoritesViewModel = new FavoritesViewModel();
+
+        // Create AddFavorite presenter
+        AddFavoritePresenter addFavoritePresenter = new AddFavoritePresenter(favoritesViewModel);
+
+        // Create AddFavorite interactor
+        AddFavoriteInputBoundary addFavoriteInteractor = new AddFavoriteInteractor(
+                (UserDataAccessInterface) userRepository,
+                addFavoritePresenter
+        );
+
+        // Create AddFavorite controller
+        AddFavoriteController addFavoriteController = new AddFavoriteController(addFavoriteInteractor);
+
+        // Create RemoveFavorite presenter
+        RemoveFavoritePresenter removeFavoritePresenter = new RemoveFavoritePresenter(favoritesViewModel);
+
+        // Create RemoveFavorite interactor
+        RemoveFavoriteInputBoundary removeFavoriteInteractor = new RemoveFavoriteInteractor(
+                (UserDataAccessInterface) userRepository,
+                removeFavoritePresenter
+        );
+
+        // Create RemoveFavorite controller
+        RemoveFavoriteController removeFavoriteController = new RemoveFavoriteController(removeFavoriteInteractor);
+
+        // Set controllers and data access on restaurant view
+        restaurantView.setAddFavoriteController(addFavoriteController);
+        restaurantView.setRemoveFavoriteController(removeFavoriteController);
+        restaurantView.setUserDataAccess((UserDataAccessInterface) userRepository);
+
+        return this;
+    }
+
+    /**
+     * Creates the frame.
+     */
+    public JFrame build() {
         final JFrame application = new JFrame("UofT Eats - Restaurant Review App");
         application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
@@ -459,7 +552,6 @@ public class AppBuilder {
 
         viewManagerModel.setState(loginViewModel.getViewName());
         viewManagerModel.firePropertyChange();
-
 
         return application;
     }
@@ -496,44 +588,5 @@ public class AppBuilder {
 
         // Create Google Login Controller
         googleLoginController = new GoogleLoginController(googleLoginInteractor);
-    }
-    public AppBuilder addAddFavoriteToRestaurantView() {
-        if (restaurantView == null) {
-            throw new IllegalStateException("Restaurant view must be created first");
-        }
-
-        // Create shared view model
-        FavoritesViewModel favoritesViewModel = new FavoritesViewModel();
-
-        // Create AddFavorite presenter
-        AddFavoritePresenter addFavoritePresenter = new AddFavoritePresenter(favoritesViewModel);
-
-        // Create AddFavorite interactor
-        AddFavoriteInputBoundary addFavoriteInteractor = new AddFavoriteInteractor(
-                (UserDataAccessInterface) userRepository,
-                addFavoritePresenter
-        );
-
-        // Create AddFavorite controller
-        AddFavoriteController addFavoriteController = new AddFavoriteController(addFavoriteInteractor);
-
-        // Create RemoveFavorite presenter
-        RemoveFavoritePresenter removeFavoritePresenter = new RemoveFavoritePresenter(favoritesViewModel);
-
-        // Create RemoveFavorite interactor
-        RemoveFavoriteInputBoundary removeFavoriteInteractor = new RemoveFavoriteInteractor(
-                (UserDataAccessInterface) userRepository,
-                removeFavoritePresenter
-        );
-
-        // Create RemoveFavorite controller
-        RemoveFavoriteController removeFavoriteController = new RemoveFavoriteController(removeFavoriteInteractor);
-
-        // Set controllers and data access on restaurant view
-        restaurantView.setAddFavoriteController(addFavoriteController);
-        restaurantView.setRemoveFavoriteController(removeFavoriteController);
-        restaurantView.setUserDataAccess((UserDataAccessInterface) userRepository); // NEW LINE
-
-        return this;
     }
 }

@@ -25,6 +25,7 @@ public class FavoritesView extends JPanel implements PropertyChangeListener {
     private final FavoritesViewModel favoritesViewModel;
 
     private JPanel restaurantsContainer;
+    private JScrollPane scrollPane;
     private JLabel titleLabel;
     private JLabel userLabel;
 
@@ -80,28 +81,72 @@ public class FavoritesView extends JPanel implements PropertyChangeListener {
 
         add(headerPanel, BorderLayout.NORTH);
 
-        // Create a custom panel that respects viewport width for wrapping
+        // Create a custom panel that calculates proper wrapped height for scrolling
         restaurantsContainer = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 20)) {
             @Override
             public Dimension getPreferredSize() {
-                Dimension d = super.getPreferredSize();
-                Container parent = getParent();
-                if (parent instanceof JViewport) {
-                    d.width = parent.getWidth();
-                }
-                return d;
+                return getWrappedPreferredSize(this);
             }
         };
         restaurantsContainer.setBackground(new Color(249, 250, 251));
         restaurantsContainer.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        final JScrollPane scrollPane = new JScrollPane(restaurantsContainer);
+        scrollPane = new JScrollPane(restaurantsContainer);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.setBorder(null);
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
+        // Force the panel to resize when viewport changes
+        scrollPane.getViewport().addChangeListener(e -> {
+            restaurantsContainer.revalidate();
+        });
+
         add(scrollPane, BorderLayout.CENTER);
+    }
+
+    /**
+     * Calculates the preferred size for a FlowLayout panel that wraps properly in a scroll pane.
+     */
+    private Dimension getWrappedPreferredSize(JPanel panel) {
+        int width = panel.getParent() != null ? panel.getParent().getWidth() : panel.getWidth();
+        if (width == 0) {
+            width = 800; // Default width
+        }
+
+        LayoutManager layout = panel.getLayout();
+        if (!(layout instanceof FlowLayout)) {
+            return panel.getPreferredSize();
+        }
+
+        FlowLayout flowLayout = (FlowLayout) layout;
+        int hgap = flowLayout.getHgap();
+        int vgap = flowLayout.getVgap();
+
+        Insets insets = panel.getInsets();
+        int maxWidth = width - insets.left - insets.right;
+
+        int x = 0;
+        int y = insets.top + vgap;
+        int rowHeight = 0;
+
+        for (Component comp : panel.getComponents()) {
+            Dimension d = comp.getPreferredSize();
+
+            if (x + d.width > maxWidth && x > 0) {
+                // Wrap to next row
+                x = 0;
+                y += rowHeight + vgap;
+                rowHeight = 0;
+            }
+
+            x += d.width + hgap;
+            rowHeight = Math.max(rowHeight, d.height);
+        }
+
+        y += rowHeight + insets.bottom + vgap;
+
+        return new Dimension(width, y);
     }
 
     /**
@@ -154,7 +199,11 @@ public class FavoritesView extends JPanel implements PropertyChangeListener {
             showEmptyState();
         } else {
             titleLabel.setText("Favorite Restaurants (" + state.getRestaurants().size() + ")");
-            // Keep the FlowLayout we already set
+
+            // Reset to FlowLayout in case it was changed for empty state
+            if (!(restaurantsContainer.getLayout() instanceof FlowLayout)) {
+                restaurantsContainer.setLayout(new FlowLayout(FlowLayout.LEFT, 20, 20));
+            }
             restaurantsContainer.setBackground(new Color(249, 250, 251));
 
             for (FavoritesState.RestaurantDisplayData restaurantData : state.getRestaurants()) {
@@ -165,6 +214,8 @@ public class FavoritesView extends JPanel implements PropertyChangeListener {
 
         restaurantsContainer.revalidate();
         restaurantsContainer.repaint();
+        scrollPane.revalidate();
+        scrollPane.repaint();
     }
 
     private RestaurantPanel createRestaurantPanel(FavoritesState.RestaurantDisplayData restaurantData) {

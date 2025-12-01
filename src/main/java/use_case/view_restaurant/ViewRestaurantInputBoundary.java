@@ -7,9 +7,10 @@ import java.io.IOException;
  */
 public interface ViewRestaurantInputBoundary {
 
-    /**
-     * Executes the view restaurant use case
-     * @param viewRestaurantInputData input DTO containing input data
-     */
-    void execute(ViewRestaurantInputData viewRestaurantInputData) throws IOException;
+  /**
+   * Executes the view restaurant use case
+   *
+   * @param viewRestaurantInputData input DTO containing input data
+   */
+  void execute(ViewRestaurantInputData viewRestaurantInputData) throws IOException;
 }

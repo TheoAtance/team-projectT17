@@ -7,10 +7,10 @@ import interface_adapter.ViewModel;
  */
 public class LoggedInViewModel extends ViewModel<LoggedInState> {
 
-    public static final String TITLE_LABEL = "Welcome";
+  public static final String TITLE_LABEL = "Welcome";
 
-    public LoggedInViewModel() {
-        super("logged in");
-        setState(new LoggedInState());
-    }
+  public LoggedInViewModel() {
+    super("logged in");
+    setState(new LoggedInState());
+  }
 }

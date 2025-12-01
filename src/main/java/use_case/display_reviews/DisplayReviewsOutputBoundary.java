@@ -1,4 +1,5 @@
 package use_case.display_reviews;
+
 import java.util.List;
 
 /**
@@ -6,14 +7,14 @@ import java.util.List;
  */
 public interface DisplayReviewsOutputBoundary {
 
-    /**
-     * Prepare the success view for the display reviews use case
-     */
-    void prepareSuccessView(List<DisplayReviewsOutputData> displayReviewsOutputDataList);
+  /**
+   * Prepare the success view for the display reviews use case
+   */
+  void prepareSuccessView(List<DisplayReviewsOutputData> displayReviewsOutputDataList);
 
 
-    /**
-     * Prepare the fao; view for the display reviews use case
-     */
-    void prepareFailView(String errorMessage);
+  /**
+   * Prepare the fao; view for the display reviews use case
+   */
+  void prepareFailView(String errorMessage);
 }

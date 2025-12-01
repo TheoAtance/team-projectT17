@@ -22,7 +22,7 @@ public class JsonRestaurantDataAccessObject implements
         RandomRestaurantDataAccessInterface {
 
     private final Map<String, Restaurant> restaurantById = new HashMap<>();
-    private final Map<String, String> placesIdToCid = new HashMap<>(); // NEW: Maps places/ChIJ... to CID
+    private final Map<String, String> placesIdToCid = new HashMap<>();
 
     /**
      * Construct DAO for saving to and reading from a local json file
@@ -146,6 +146,15 @@ public class JsonRestaurantDataAccessObject implements
                 .distinct()
                 .limit(5)
                 .toArray(String[]::new);
+    }
+
+    /**
+     * Get all restaurants in data JSON.
+     * @return list of restaurant objects.
+     */
+    @Override
+    public List<Restaurant> getAllRestaurants() {
+        return new ArrayList<>(restaurantById.values());
     }
 
     /**

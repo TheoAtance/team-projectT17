@@ -4,33 +4,31 @@ import entity.User;
 import use_case.IAuthGateway;
 import use_case.IUserRepo;
 
-import java.util.Optional;
-
 public class CurrentUser {
-    private User currentUser = null;
 
-    private final IAuthGateway userAuth;
-    private final IUserRepo userRepo;
+  private final IAuthGateway userAuth;
+  private final IUserRepo userRepo;
+  private User currentUser = null;
 
-    public CurrentUser(IAuthGateway userAuth, IUserRepo userRepo) {
-        this.userAuth = userAuth;
-        this.userRepo = userRepo;
-    }
-    
-    public User getCurrentUser(){
-        String currentUid = userAuth.getCurrentUserUid();
+  public CurrentUser(IAuthGateway userAuth, IUserRepo userRepo) {
+    this.userAuth = userAuth;
+    this.userRepo = userRepo;
+  }
 
-        if (currentUser != null){
-            return currentUser;
-        }
+  public User getCurrentUser() {
+    String currentUid = userAuth.getCurrentUserUid();
 
-        return userRepo.getUserByUid(currentUid);
+    if (currentUser != null) {
+      return currentUser;
     }
 
-    /**
-     * Method to clear current user when logging out
-     */
-    public void clearCache() {
-        this.currentUser = null;
-    }
+    return userRepo.getUserByUid(currentUid);
+  }
+
+  /**
+   * Method to clear current user when logging out.
+   */
+  public void clearCache() {
+    this.currentUser = null;
+  }
 }

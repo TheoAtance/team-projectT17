@@ -1,27 +1,31 @@
 package view;
+
+import entity.Review;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.add_review.AddReviewController;
 import interface_adapter.add_review.AddReviewViewModel;
 import interface_adapter.display_reviews.DisplayReviewsController;
+import interface_adapter.display_reviews.DisplayReviewsState;
 import interface_adapter.display_reviews.DisplayReviewsStateList;
 import interface_adapter.display_reviews.DisplayReviewsViewModel;
+import interface_adapter.favorites.AddFavoriteController;
+import interface_adapter.favorites.RemoveFavoriteController;
 import interface_adapter.logged_in.LoggedInViewModel;
+import interface_adapter.translation.TranslationController;
+import interface_adapter.translation.TranslationPresenter;
+import interface_adapter.translation.TranslationViewModel;
 import interface_adapter.view_restaurant.ViewRestaurantController;
 import interface_adapter.view_restaurant.ViewRestaurantState;
 import interface_adapter.view_restaurant.ViewRestaurantViewModel;
-import interface_adapter.favorites.AddFavoriteController;
-import interface_adapter.favorites.RemoveFavoriteController;
 import data_access.UserDataAccessInterface;
 import entity.User;
-import view.panel_makers.PillIconTextPanel;
-import view.panel_makers.RestaurantTitlePanel;
-import view.panel_makers.ReviewPanel;
-import view.panel_makers.RoundedPanel;
-
-import interface_adapter.display_reviews.DisplayReviewsState;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -31,63 +35,72 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.ArrayList;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.WindowConstants;
+import use_case.translation.DeeplTranslationService;
+import use_case.translation.TranslationInputBoundary;
+import use_case.translation.TranslationInteractor;
+import use_case.translation.TranslationService;
+import view.panel_makers.PillIconTextPanel;
+import view.panel_makers.RestaurantTitlePanel;
+import view.panel_makers.ReviewPanel;
+import view.panel_makers.RoundedPanel;
 
+public class RestaurantView extends JPanel implements ActionListener, PropertyChangeListener {
 
-public class RestaurantView extends JPanel implements ActionListener, PropertyChangeListener{
     private final String viewName = "restaurant info";
-    private ViewRestaurantViewModel viewRestaurantViewModel;
+    private final RestaurantTitlePanel titlePanel;
+    private final JPanel imageAndInfoPanel = new JPanel();
+    private final JPanel leftPanel = new JPanel();
+    private final JPanel rightPanel = new JPanel();
+    private final JPanel mainPanel = new JPanel();
+    private final PillIconTextPanel address = new PillIconTextPanel("\uD83D\uDCCD", "test");
+    private final PillIconTextPanel phone = new PillIconTextPanel("\uD83D\uDCDE", "test");
+    private final PillIconTextPanel submitReview = new PillIconTextPanel("Submit");
+    private final JPanel hoursInfo = new JPanel();
+    private final JLabel title = new JLabel("\uD83D\uDD52 Opening Hours:");
+    private final JLabel addReviewTitle = new JLabel("Leave a review!");
+    private final ArrayList<String> openingHours = new ArrayList<>();
+    private final JScrollPane leftScroll;
+    private final JScrollPane rightScroll;
+    private final JScrollPane reviewBox;
+    private final JTextArea multiLineBox = new JTextArea(7, 35);
+    private final JPanel reviewsContainer = new JPanel();
+    private final ViewRestaurantViewModel viewRestaurantViewModel;
+    private final JPanel infoPanel = new JPanel();
+    private final JPanel addReviewPanel = new JPanel();
+    private final RoundedPanel hoursCard = new RoundedPanel(30);
     private ViewRestaurantController viewRestaurantController;
     private AddReviewViewModel addReviewViewModel;
     private AddReviewController addReviewController;
+    private BufferedImage image;
+    private JLabel imageLabel = new JLabel();
+    private ViewManagerModel viewManagerModel;
+    private LoggedInViewModel loggedInViewModel;
+    private DisplayReviewsViewModel displayReviewsViewModel = new DisplayReviewsViewModel();
+    private DisplayReviewsController displayReviewsController;
 
     // Favorite controllers
     private AddFavoriteController addFavoriteController;
     private RemoveFavoriteController removeFavoriteController;
     private UserDataAccessInterface userDataAccess;
 
-    private final RestaurantTitlePanel titlePanel;
-
-    private final JPanel imageAndInfoPanel = new JPanel();
-    private JPanel infoPanel = new JPanel();
-    private BufferedImage image;
-    private JLabel imageLabel = new JLabel();
-    private JPanel addReviewPanel = new JPanel();
-
     // Favorite button
     private JButton favoriteButton;
     private boolean isFavorite = false;
 
-    private final JPanel leftPanel = new JPanel();
-    private final JPanel rightPanel = new JPanel();
-    private final JPanel mainPanel = new JPanel();
 
-    private final PillIconTextPanel address = new PillIconTextPanel("\uD83D\uDCCD","test");
-    private final PillIconTextPanel phone = new PillIconTextPanel("\uD83D\uDCDE","test");
-    private final PillIconTextPanel submitReview = new PillIconTextPanel("Submit");
-
-    private RoundedPanel hoursCard = new RoundedPanel(30);
-    private final JPanel hoursInfo = new JPanel();
-
-    private final JLabel title = new JLabel("\uD83D\uDD52 Opening Hours:");
-    private final JLabel addReviewTitle = new JLabel("Leave a review!");
-
-    private final ArrayList<String> openingHours = new ArrayList<>();
-
-    private final JScrollPane leftScroll;
-    private final JScrollPane rightScroll;
-
-    private final JScrollPane reviewBox;
-    private final JTextArea multiLineBox = new JTextArea(7, 35);
-
-    private final JPanel reviewsContainer = new JPanel();
-
-    private ViewManagerModel viewManagerModel;
-    private LoggedInViewModel loggedInViewModel;
-    private DisplayReviewsViewModel displayReviewsViewModel = new DisplayReviewsViewModel();
-    private DisplayReviewsController displayReviewsController;
-
-
-    public RestaurantView(ViewRestaurantViewModel viewRestaurantViewModel){
+    public RestaurantView(ViewRestaurantViewModel viewRestaurantViewModel) {
         this.viewRestaurantViewModel = viewRestaurantViewModel;
         ViewRestaurantState state = viewRestaurantViewModel.getState();
         DisplayReviewsStateList displayReviewStates = displayReviewsViewModel.getState();
@@ -105,7 +118,8 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
 
         addReviewTitle.setFont(addReviewTitle.getFont().deriveFont(Font.BOLD, 20f));
 
-        titlePanel = new RestaurantTitlePanel(state.getName(), state.getType(), state.getRating(), state.getRatingCount());
+        titlePanel = new RestaurantTitlePanel(state.getName(), state.getType(), state.getRating(),
+                state.getRatingCount());
 
         // Create favorite button and add to title panel
         createFavoriteButton();
@@ -118,21 +132,25 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
         imageAndInfoPanel.add(Box.createVerticalGlue());
 
         // 1. Create the text area
-        multiLineBox.setLineWrap(true);
-        multiLineBox.setWrapStyleWord(true);
+        // 5 rows high, 30 columns wide
+        multiLineBox.setLineWrap(true);               // Wraps text to the next line
+        multiLineBox.setWrapStyleWord(true);          // Wraps at whole words
 
         // 2. Wrap the text area in a JScrollPane to add scroll bars
         reviewBox = new JScrollPane(multiLineBox);
         reviewBox.setBorder(null);
+
         reviewBox.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         submitReview.setCursor(new Cursor(Cursor.HAND_CURSOR));
         Box buttonContainer = Box.createHorizontalBox();
-        buttonContainer.setAlignmentX(Component.LEFT_ALIGNMENT);
-        buttonContainer.add(Box.createHorizontalGlue());
-        buttonContainer.add(submitReview);
-        buttonContainer.add(Box.createHorizontalGlue());
+        buttonContainer.setAlignmentX(
+                Component.LEFT_ALIGNMENT); // <--- MUST BE LEFT to match the Title!
+        buttonContainer.add(Box.createHorizontalGlue());         // Pushes button from left
+        buttonContainer.add(submitReview);                       // The actual button
+        buttonContainer.add(Box.createHorizontalGlue());         // Pushes button from right
 
+        //addReviewTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
         addReviewPanel.add(Box.createVerticalStrut(12));
         addReviewPanel.add(addReviewTitle);
         addReviewPanel.add(Box.createVerticalStrut(12));
@@ -141,7 +159,7 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
         addReviewPanel.add(buttonContainer);
         addReviewPanel.add(Box.createVerticalStrut(16));
 
-        addReviewPanel.setBorder(BorderFactory.createEmptyBorder( 0, 20, 0, 20));
+        addReviewPanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 20));
 
         // add everything into a scrollable container
         leftScroll = new JScrollPane(imageAndInfoPanel);
@@ -265,6 +283,9 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
     }
 
     private RoundedPanel createHoursPanel() {
+        // ========= make a rounded card to display restaurant operation hours (should be extracted into a panel maker
+        // to increase readability, but I got lazy so maybe later... :) =========
+
         hoursCard.setLayout(new BoxLayout(hoursCard, BoxLayout.Y_AXIS));
         hoursCard.setBackground(Color.WHITE);
         title.setFont(title.getFont().deriveFont(Font.BOLD, 16f));
@@ -272,7 +293,7 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
         hoursInfo.setOpaque(false);
         hoursInfo.setLayout(new BoxLayout(hoursInfo, BoxLayout.Y_AXIS));
 
-        for(String d : openingHours){
+        for (String d : openingHours) {
             JLabel dayLabel = new JLabel(d);
             dayLabel.setFont(dayLabel.getFont().deriveFont(Font.BOLD, 14f));
             dayLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -293,14 +314,16 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
     }
 
     private JLabel createImageLabel(ViewRestaurantState state) {
-        if(state.getPhotos() != null && !state.getPhotos().isEmpty()) {
+        // get the image and save it in a label
+
+        if (state.getPhotos() != null && !state.getPhotos().isEmpty()) {
             ImageIcon shortestIcon = new ImageIcon(state.getPhotos().get(0));
 
             for (BufferedImage image : state.getPhotos()) {
                 Image scaled = image.getScaledInstance(800, -1, Image.SCALE_SMOOTH);
-                ImageIcon curIcon  = new ImageIcon(scaled);
+                ImageIcon curIcon = new ImageIcon(scaled);
 
-                if (curIcon.getIconHeight() < shortestIcon.getIconHeight()){
+                if (curIcon.getIconHeight() < shortestIcon.getIconHeight()) {
                     shortestIcon = curIcon;
                 }
 
@@ -320,27 +343,33 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
         return imageLabel;
     }
 
-    private void addReviewListener(){
+
+    private void addReviewListener() {
         submitReview.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+
                 String reviewText = multiLineBox.getText();
 
                 try {
+
                     addReviewController.execute(viewRestaurantViewModel.getState().getId(), reviewText);
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
                 }
 
                 multiLineBox.setText("");
+
+                // Example: viewRestaurantController.executeAddReview(reviewText);
             }
         });
     }
 
-    private void addExitListener(){
+    private void addExitListener() {
         titlePanel.getExitPill().addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+
                 if (viewManagerModel != null) {
                     viewManagerModel.setState(loggedInViewModel.getViewName());
                     viewManagerModel.firePropertyChange();
@@ -353,6 +382,7 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
 
     @Override
     public void actionPerformed(ActionEvent evt) {
+
     }
 
     @Override
@@ -362,6 +392,7 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
         addReviewListener();
         addExitListener();
 
+        // Optionally filter by property name if you use multiple
         if ("restaurant info".equals(evt.getPropertyName()) && evt.getPropertyName() != null) {
             ViewRestaurantState state = viewRestaurantViewModel.getState();
 
@@ -376,6 +407,7 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
             titlePanel.setType(state.getType());
 
             // update image
+
             imageLabel = createImageLabel(state);
 
             // update address and phone number
@@ -396,6 +428,7 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
             }
 
             hoursCard.setMaximumSize(new Dimension(350, 350));
+
             title.setText("\uD83D\uDD52 Opening Hours:");
         }
 
@@ -404,10 +437,17 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
             reviewsContainer.removeAll();
 
             for (DisplayReviewsState reviewState : state.getDisplayReviewsStateList()) {
+
                 ReviewPanel reviewPanel = new ReviewPanel(
                         reviewState.getAuthorDisplayName(),
                         reviewState.getCreationDate(),
                         reviewState.getContent()
+                );
+
+                // NEW: when user clicks "Translate" on this card,
+                // open the TranslationView window for this single review.
+                reviewPanel.addTranslateButtonListener(e ->
+                        openTranslationWindowFor(reviewState)
                 );
 
                 reviewsContainer.add(reviewPanel);
@@ -417,6 +457,7 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
                         new Dimension(Integer.MAX_VALUE, preferredSize.height)
                 );
             }
+
         }
 
         if ("review status".equals(evt.getPropertyName()) && evt.getPropertyName() != null) {
@@ -443,45 +484,98 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
         repaint();
     }
 
+    private void openTranslationWindowFor(DisplayReviewsState reviewState) {
+        // Get DeepL API key
+        String key = System.getenv("DEEPL_API_KEY");
+        if (key == null || key.isBlank()) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "DEEPL_API_KEY is not set.",
+                    "Translation unavailable",
+                    JOptionPane.ERROR_MESSAGE
+            );
+            return;
+        }
+
+        // Build an INDEPENDENT translation stack for THIS window only
+        ViewManagerModel popupViewManager = new ViewManagerModel();   // local, not the app's
+        TranslationViewModel popupViewModel = new TranslationViewModel();
+        TranslationPresenter presenter =
+                new TranslationPresenter(popupViewManager, popupViewModel);
+        TranslationService translationService =
+                new DeeplTranslationService(key, false);
+        TranslationInputBoundary interactor =
+                new TranslationInteractor(translationService, presenter);
+        TranslationController popupController =
+                new TranslationController(interactor);
+
+        // Build a Review entity from the display state
+        String restaurantId = viewRestaurantViewModel.getState().getId();
+        String reviewId = "inline-" + System.currentTimeMillis(); // temporary id
+
+        String authorId = reviewState.getAuthorDisplayName();
+        String creationDate = reviewState.getCreationDate();
+        String content = reviewState.getContent();
+
+        // Make sure the constructor order matches your Review class
+        Review review = new Review(reviewId, authorId, restaurantId, content, creationDate);
+        java.util.List<Review> reviews = java.util.Collections.singletonList(review);
+
+        // Create TranslationView bound to THIS popup's view model / controller
+        TranslationView translationView =
+                new TranslationView(popupViewModel, popupViewManager, null);
+        translationView.setTranslationController(popupController);
+        translationView.setCurrentReviews(reviews);   // pre-fill "Original" area
+
+        // Pop up a separate window containing this TranslationView
+        JFrame frame = new JFrame("Translated review");
+        frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        frame.setContentPane(translationView);
+        frame.pack();
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+    }
+
+
     public String getViewName() {
         return viewName;
+    }
+
+    public ViewRestaurantController getViewRestaurantController() {
+        return viewRestaurantController;
     }
 
     public void setViewRestaurantController(ViewRestaurantController viewRestaurantController) {
         this.viewRestaurantController = viewRestaurantController;
     }
 
-    public ViewRestaurantController getViewRestaurantController(){
-        return viewRestaurantController;
-    }
-
-    public void setAddReviewController(AddReviewController addReviewController){
-        this.addReviewController = addReviewController;
-    }
-
-    public AddReviewController getAddReviewController(){
+    public AddReviewController getAddReviewController() {
         return addReviewController;
+    }
+
+    public void setAddReviewController(AddReviewController addReviewController) {
+        this.addReviewController = addReviewController;
     }
 
     public void setViewManagerModel(ViewManagerModel viewManagerModel) {
         this.viewManagerModel = viewManagerModel;
     }
 
-    public void setAddReviewViewModel(AddReviewViewModel addReviewViewModel){
+    public void setAddReviewViewModel(AddReviewViewModel addReviewViewModel) {
         this.addReviewViewModel = addReviewViewModel;
         this.addReviewViewModel.addPropertyChangeListener(this);
     }
 
-    public void setLoggedInViewModel(LoggedInViewModel loggedInViewModel){
+    public void setLoggedInViewModel(LoggedInViewModel loggedInViewModel) {
         this.loggedInViewModel = loggedInViewModel;
-    }
-
-    public void setDisplayReviewController(DisplayReviewsController displayReviewsController) {
-        this.displayReviewsController = displayReviewsController;
     }
 
     public DisplayReviewsController getDisplayReviewController() {
         return displayReviewsController;
+    }
+
+    public void setDisplayReviewController(DisplayReviewsController displayReviewsController) {
+        this.displayReviewsController = displayReviewsController;
     }
 
     public void setDisplayReviewViewModel(DisplayReviewsViewModel displayReviewsViewModel) {
@@ -489,7 +583,7 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
         this.displayReviewsViewModel.addPropertyChangeListener(this);
     }
 
-    // NEW SETTERS for favorite functionality
+    // Favorites setters
     public void setAddFavoriteController(AddFavoriteController addFavoriteController) {
         this.addFavoriteController = addFavoriteController;
     }
