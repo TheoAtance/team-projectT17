@@ -37,11 +37,8 @@ public class LoginPresenter implements CustomLoginOutputBoundary {
     loginState.setLoginError(null);
     this.loginViewModel.setState(loginState);
 
-    // Switch to logged-in view
-    // this.viewManagerModel.setState(loggedInViewModel.getViewName());
 
-    //for testing
-    this.viewManagerModel.setState("restaurant info");
+    this.viewManagerModel.setState(loggedInViewModel.getViewName());
     this.viewManagerModel.firePropertyChange();
   }
 
