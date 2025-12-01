@@ -57,9 +57,11 @@ As a user, I want to save my favorite restaurants into a list, so I can access t
 ### Justin
 As a user I want to translate any given review into a language I'm more familiar with, so I can interact with the 
 diverse student body at UofT.
+### Zihao Wang
+As a user I hope the app can recommend restaurants based on my preferences.
 ## APIs
 UofT-Eats uses the [Google Places API](https://developers.google.com/maps/documentation/places/web-service/overview) for 
-data on the restaurants and the [DeepL API](https://www.deepl.com/pro-api) for help translating the reviews.
+data on the restaurants and the [DeepL API](https://www.deepl.com/pro-api) for help translating the reviews and [Openai API](https://openai.com/api/) for recommendations.
 ## Screenshots
 ### Log In
 ![Log In](src/main/resources/images/log_in_screen.png)
