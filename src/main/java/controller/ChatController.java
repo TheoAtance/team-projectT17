@@ -23,6 +23,7 @@ public class ChatController {
     }
 
 
+
     public List<Restaurant> handleMessage(String userMessage) throws Exception {
         // 1. GPT 解析用户需求
         QuerySpec spec = parse.handle(userMessage);
