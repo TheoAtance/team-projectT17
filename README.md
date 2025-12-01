@@ -38,6 +38,29 @@ $env:DEEPL_API_KEY = "your-deepl-auth-key-here"
    ```bash
    export DEEPL_API_KEY="your-deepl-auth-key-here"
 
+###3 OpenAI API setup
+
+Our AI recommendation feature uses the OpenAI Chat Completions API
+.
+To enable it, you need an OpenAI API key and must expose it as an environment variable called OPENAI_API_KEY.
+
+1. Obtain an OpenAI API key
+
+Go to the OpenAI website: https://platform.openai.com/
+
+Sign up or log in with your OpenAI account.
+
+On the left sidebar, open API keys (under "User" or "Organization").
+
+Click Create new secret key.
+
+Copy your API key.
+It will look like a long string beginning with sk-.
+
+2. Set the OPENAI_API_KEY environment variable
+
+Set the environment variable so the application can read it at runtime.
+
 <br>
 <br>
 
