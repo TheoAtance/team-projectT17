@@ -4,9 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import javax.swing.BorderFactory;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 public class RestaurantTitlePanel extends JPanel {
 
@@ -14,6 +12,7 @@ public class RestaurantTitlePanel extends JPanel {
   private final PillIconTextPanel ratingPill;
   private final PillIconTextPanel typePill;
   private final PillIconTextPanel exitPill;
+  private JPanel leftWrapper;
 
   public RestaurantTitlePanel(String name, String type, double rating, int ratingCount) {
     setLayout(new BorderLayout());
@@ -33,7 +32,7 @@ public class RestaurantTitlePanel extends JPanel {
 
     // add an invisible wrapper panel that aligns the pill so that it hugs the right wall
     JPanel rightWrapper = new JPanel(new FlowLayout(FlowLayout.RIGHT, 16, 8));
-    JPanel leftWrapper = new JPanel(new FlowLayout(FlowLayout.LEFT, 16, 8));
+    leftWrapper = new JPanel(new FlowLayout(FlowLayout.LEFT, 16, 8));
 
     leftWrapper.setOpaque(false);
     rightWrapper.setOpaque(false);
@@ -72,4 +71,9 @@ public class RestaurantTitlePanel extends JPanel {
   public PillIconTextPanel getExitPill() {
     return exitPill;
   }
+
+  public void addLeftButton(JButton newButton){
+    leftWrapper.add(newButton);
+  }
 }
+

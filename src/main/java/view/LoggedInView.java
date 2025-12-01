@@ -50,6 +50,8 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
     private final JButton filterViewButton;
     private final JButton randomRestaurantButton;
     private final JButton favoritesButton;
+    private final JButton searchButton;
+    private String searchHolder = "";
     private final JTextField searchField;
     private final JPanel restaurantGridPanel;
     private final JScrollPane restaurantScrollPane;
@@ -174,26 +176,42 @@ public class LoggedInView extends JPanel implements PropertyChangeListener {
             }
         });
 
+        searchButton = new JButton("\uD83D\uDD0D");
+        searchButton.setAlignmentX(Component.RIGHT_ALIGNMENT);
+        searchButton.addActionListener(evt -> {
+          if(searchHolder != null && searchController != null) {
+            searchController.search(searchHolder);
+          }
+          else {
+            JOptionPane.showMessageDialog(this, "Search bar is empty.");
+          }
+        });
+
         // Search panel
         JPanel searchPanel = new JPanel();
         searchPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
         searchPanel.setBackground(Color.WHITE);
 
-        JLabel searchLabel = new JLabel("Search:");
-        searchLabel.setFont(new Font("Arial", Font.PLAIN, 14));
-        searchPanel.add(searchLabel);
-
         searchField = new JTextField();
         searchField.setPreferredSize(new Dimension(400, 28));
         searchPanel.add(searchField);
+        searchPanel.add(searchButton, BorderLayout.EAST);
 
         searchField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
-            public void insertUpdate(DocumentEvent e) { triggerSearch(); }
+            public void insertUpdate(DocumentEvent e) {
+              searchHolder = searchField.getText();
+
+            }
             @Override
-            public void removeUpdate(DocumentEvent e) { triggerSearch(); }
+            public void removeUpdate(DocumentEvent e) {
+              searchHolder = searchField.getText();
+            }
+
             @Override
-            public void changedUpdate(DocumentEvent e) { triggerSearch(); }
+            public void changedUpdate(DocumentEvent e) {
+              searchHolder = searchField.getText();
+            }
 
             private void triggerSearch() {
                 if (searchController != null) {

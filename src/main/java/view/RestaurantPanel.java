@@ -16,7 +16,6 @@ public class RestaurantPanel extends JPanel {
     private static final int IMAGE_HEIGHT = 140;
     private static final int CORNER_RADIUS = 16;
     private static final int HEART_SIZE = 30;
-
     private final RestaurantDisplayData displayData;
     private BufferedImage restaurantImage;
     private boolean isFavorite = false;
@@ -45,12 +44,29 @@ public class RestaurantPanel extends JPanel {
             this.discountValue = discountValue;
         }
 
-        public String getId() { return id; }
-        public String getName() { return name; }
-        public String getType() { return type; }
-        public double getRating() { return rating; }
-        public boolean hasDiscount() { return hasDiscount; }
-        public double getDiscountValue() { return discountValue; }
+        public String getId() {
+            return id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public double getRating() {
+            return rating;
+        }
+
+        public boolean hasDiscount() {
+            return hasDiscount;
+        }
+
+        public double getDiscountValue() {
+            return discountValue;
+        }
     }
 
     public interface HeartClickListener {
@@ -138,7 +154,7 @@ public class RestaurantPanel extends JPanel {
         }
 
         if (displayData.hasDiscount()) {
-            final String discountText = (int)(displayData.getDiscountValue() * 100) + "% off";
+            final String discountText = (int) (displayData.getDiscountValue() * 100) + "% off";
             drawBadge(g2, discountText, 15, badgeY, new Color(236, 72, 153));
         }
 
@@ -238,7 +254,7 @@ public class RestaurantPanel extends JPanel {
             g2.fillOval(x, y, HEART_SIZE, HEART_SIZE);
 
             g2.setColor(Color.WHITE);
-            drawSimpleHeart(g2, x + HEART_SIZE/2, y + HEART_SIZE/2, HEART_SIZE * 0.4);
+            drawSimpleHeart(g2, x + HEART_SIZE / 2, y + HEART_SIZE / 2, HEART_SIZE * 0.4);
         } else {
             g2.setColor(Color.WHITE);
             g2.fillOval(x, y, HEART_SIZE, HEART_SIZE);
@@ -248,7 +264,7 @@ public class RestaurantPanel extends JPanel {
             g2.drawOval(x, y, HEART_SIZE, HEART_SIZE);
 
             g2.setColor(new Color(236, 72, 153));
-            drawSimpleHeart(g2, x + HEART_SIZE/2, y + HEART_SIZE/2, HEART_SIZE * 0.4);
+            drawSimpleHeart(g2, x + HEART_SIZE / 2, y + HEART_SIZE / 2, HEART_SIZE * 0.4);
         }
     }
 

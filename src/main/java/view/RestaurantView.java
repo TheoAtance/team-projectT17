@@ -1,6 +1,8 @@
 package view;
 
+import data_access.UserDataAccessInterface;
 import entity.Review;
+import entity.User;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.add_review.AddReviewController;
 import interface_adapter.add_review.AddReviewViewModel;
@@ -17,15 +19,16 @@ import interface_adapter.translation.TranslationViewModel;
 import interface_adapter.view_restaurant.ViewRestaurantController;
 import interface_adapter.view_restaurant.ViewRestaurantState;
 import interface_adapter.view_restaurant.ViewRestaurantViewModel;
-import data_access.UserDataAccessInterface;
-import entity.User;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Image;
+import use_case.translation.DeeplTranslationService;
+import use_case.translation.TranslationInputBoundary;
+import use_case.translation.TranslationInteractor;
+import use_case.translation.TranslationService;
+import view.panel_makers.PillIconTextPanel;
+import view.panel_makers.RestaurantTitlePanel;
+import view.panel_makers.ReviewPanel;
+import view.panel_makers.RoundedPanel;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -35,28 +38,10 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.ArrayList;
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.WindowConstants;
-import use_case.translation.DeeplTranslationService;
-import use_case.translation.TranslationInputBoundary;
-import use_case.translation.TranslationInteractor;
-import use_case.translation.TranslationService;
-import view.panel_makers.PillIconTextPanel;
-import view.panel_makers.RestaurantTitlePanel;
-import view.panel_makers.ReviewPanel;
-import view.panel_makers.RoundedPanel;
+
 
 public class RestaurantView extends JPanel implements ActionListener, PropertyChangeListener {
+
 
     private final String viewName = "restaurant info";
     private final RestaurantTitlePanel titlePanel;
@@ -118,12 +103,11 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
 
         addReviewTitle.setFont(addReviewTitle.getFont().deriveFont(Font.BOLD, 20f));
 
-        titlePanel = new RestaurantTitlePanel(state.getName(), state.getType(), state.getRating(),
-                state.getRatingCount());
+        titlePanel = new RestaurantTitlePanel(state.getName(), state.getType(), state.getRating(), state.getRatingCount());
 
         // Create favorite button and add to title panel
         createFavoriteButton();
-        titlePanel.add(favoriteButton);
+        titlePanel.addLeftButton(favoriteButton);
 
         // align content to the left
         imageAndInfoPanel.add(createImageLabel(state));
@@ -144,8 +128,7 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
 
         submitReview.setCursor(new Cursor(Cursor.HAND_CURSOR));
         Box buttonContainer = Box.createHorizontalBox();
-        buttonContainer.setAlignmentX(
-                Component.LEFT_ALIGNMENT); // <--- MUST BE LEFT to match the Title!
+        buttonContainer.setAlignmentX(Component.LEFT_ALIGNMENT); // <--- MUST BE LEFT to match the Title!
         buttonContainer.add(Box.createHorizontalGlue());         // Pushes button from left
         buttonContainer.add(submitReview);                       // The actual button
         buttonContainer.add(Box.createHorizontalGlue());         // Pushes button from right
@@ -195,10 +178,7 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
     private void toggleFavorite() {
         // Check if user is logged in
         if (loggedInViewModel == null || loggedInViewModel.getState().getUid().isEmpty()) {
-            JOptionPane.showMessageDialog(this,
-                    "Please log in to add favorites",
-                    "Login Required",
-                    JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Please log in to add favorites", "Login Required", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
@@ -307,8 +287,7 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
         hoursCard.add(Box.createVerticalStrut(10));
         hoursCard.add(hoursInfo);
 
-        hoursCard.setBorder(
-                BorderFactory.createEmptyBorder(12, 18, 16, 18));
+        hoursCard.setBorder(BorderFactory.createEmptyBorder(12, 18, 16, 18));
 
         return hoursCard;
     }
@@ -388,7 +367,6 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         System.out.println("RestaurantView.propertyChange fired: " + evt.getPropertyName());
-
         addReviewListener();
         addExitListener();
 
@@ -438,24 +416,16 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
 
             for (DisplayReviewsState reviewState : state.getDisplayReviewsStateList()) {
 
-                ReviewPanel reviewPanel = new ReviewPanel(
-                        reviewState.getAuthorDisplayName(),
-                        reviewState.getCreationDate(),
-                        reviewState.getContent()
-                );
+                ReviewPanel reviewPanel = new ReviewPanel(reviewState.getAuthorDisplayName(), reviewState.getCreationDate(), reviewState.getContent());
 
                 // NEW: when user clicks "Translate" on this card,
                 // open the TranslationView window for this single review.
-                reviewPanel.addTranslateButtonListener(e ->
-                        openTranslationWindowFor(reviewState)
-                );
+                reviewPanel.addTranslateButtonListener(e -> openTranslationWindowFor(reviewState));
 
                 reviewsContainer.add(reviewPanel);
 
                 Dimension preferredSize = reviewPanel.getPreferredSize();
-                reviewPanel.setMaximumSize(
-                        new Dimension(Integer.MAX_VALUE, preferredSize.height)
-                );
+                reviewPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, preferredSize.height));
             }
 
         }
@@ -488,26 +458,17 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
         // Get DeepL API key
         String key = System.getenv("DEEPL_API_KEY");
         if (key == null || key.isBlank()) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "DEEPL_API_KEY is not set.",
-                    "Translation unavailable",
-                    JOptionPane.ERROR_MESSAGE
-            );
+            JOptionPane.showMessageDialog(this, "DEEPL_API_KEY is not set.", "Translation unavailable", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
         // Build an INDEPENDENT translation stack for THIS window only
         ViewManagerModel popupViewManager = new ViewManagerModel();   // local, not the app's
         TranslationViewModel popupViewModel = new TranslationViewModel();
-        TranslationPresenter presenter =
-                new TranslationPresenter(popupViewManager, popupViewModel);
-        TranslationService translationService =
-                new DeeplTranslationService(key, false);
-        TranslationInputBoundary interactor =
-                new TranslationInteractor(translationService, presenter);
-        TranslationController popupController =
-                new TranslationController(interactor);
+        TranslationPresenter presenter = new TranslationPresenter(popupViewManager, popupViewModel);
+        TranslationService translationService = new DeeplTranslationService(key, false);
+        TranslationInputBoundary interactor = new TranslationInteractor(translationService, presenter);
+        TranslationController popupController = new TranslationController(interactor);
 
         // Build a Review entity from the display state
         String restaurantId = viewRestaurantViewModel.getState().getId();
@@ -522,8 +483,7 @@ public class RestaurantView extends JPanel implements ActionListener, PropertyCh
         java.util.List<Review> reviews = java.util.Collections.singletonList(review);
 
         // Create TranslationView bound to THIS popup's view model / controller
-        TranslationView translationView =
-                new TranslationView(popupViewModel, popupViewManager, null);
+        TranslationView translationView = new TranslationView(popupViewModel, popupViewManager, null);
         translationView.setTranslationController(popupController);
         translationView.setCurrentReviews(reviews);   // pre-fill "Original" area
 
