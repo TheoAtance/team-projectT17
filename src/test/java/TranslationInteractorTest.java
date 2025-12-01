@@ -195,6 +195,36 @@ class TranslationInteractorTest {
         assertEquals("Boom!", out.getErrorMessage());
     }
 
+    @Test
+    void serviceThrowsWithoutMessage_usesGenericErrorMessage() throws Exception {
+        // Fake service that throws an Exception with NO message
+        TranslationService failingService = new TranslationService() {
+            @Override
+            public List<TranslatedText> translateTexts(List<String> texts, String targetLanguage)
+                    throws Exception {
+                throw new Exception();  // no message
+            }
+        };
+
+        RecordingPresenter presenter = new RecordingPresenter();
+        TranslationInteractor interactor = new TranslationInteractor(failingService, presenter);
+
+        Review review = new Review(
+                "id2", "author2", "rest2", "Other content", "2025-01-02", 0);
+
+        TranslationInputData input =
+                new TranslationInputData(List.of(review), "EN");
+
+        interactor.execute(input);
+
+        TranslationOutputData out = presenter.lastOutput;
+        assertNotNull(out);
+        assertTrue(out.isError());
+        assertEquals("EN", out.getTargetLanguage());
+        assertEquals("An error occurred during translation.", out.getErrorMessage());
+    }
+
+
 
     /* ------------ Unit tests (no API calls) ------------ */
 
