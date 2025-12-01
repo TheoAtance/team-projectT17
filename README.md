@@ -5,43 +5,6 @@ through Google, browse different restaurants around campus, quickly filter for w
 restaurants, and create a personal list of favourites. Our program also offers accessibility options such as translation 
 for students less familiar with English so they can still enjoy the app.
 
----------------------------------------------------------------------------------------
-
-## <mark>IMPORTANT: Setting Up Firebase Admin SDK<mark>
-
-In order for the register/login flows to work when running the program locally on an IDE (such as IntelliJ), 
-we require an additional file containing the Firebase service account key relating to the Firebase Project we set up online.
-**Importantly, this service account key corresponds to the Google account you use to join our Firebase Project, so whoever**
-**wants to run our app will likely need their own unique copy. We kindly invite interested parties to provide us**
-**with a gmail address they don't mind sharing so that we may add them to our Firebase Project**
-**<mark>(point of contact: kenshin.newkfonheytow@mail.utoronto.ca)<mark>**
-
-Once you are added to the Firebase Project, follow these steps to obtain and configure your Firebase service account key:
-
-1. Go to the **Firebase Console**  
-   https://console.firebase.google.com/
-
-2. Select your project: **uoft-eats-bd368**
-
-3. Click the **⚙️ (Settings icon)** next to *Project Overview*  
-   → Choose **Project settings**
-
-4. Navigate to the **Service accounts** tab
-
-5. Under **Firebase Admin SDK**, make sure the language is set to **Java**
-
-6. Click **Generate new private key**
-
-7. Confirm by clicking **Generate key** in the popup
-
-8. A JSON file will download automatically  
-   Rename this file to:  
-   **`service-account-key.json`**
-
-9. Move the JSON file to your project’s **root directory** (same level as .idea, src)
-
----------------------------------------------------------------------------------------
-
 ## DeepL API setup
 
 Our translation feature uses the [DeepL API](https://www.deepl.com/pro-api).  
