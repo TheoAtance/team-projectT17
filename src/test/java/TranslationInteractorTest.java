@@ -166,7 +166,37 @@ class TranslationInteractorTest {
     System.out.println("=====================");
   }
 
-  /* ------------ Unit tests (no API calls) ------------ */
+    @Test
+    void serviceThrows_reportsErrorThroughPresenter() throws Exception {
+        // Fake service that always throws
+        TranslationService failingService = new TranslationService() {
+            @Override
+            public List<TranslatedText> translateTexts(List<String> texts, String targetLanguage)
+                    throws Exception {
+                throw new Exception("Boom!");
+            }
+        };
+
+        RecordingPresenter presenter = new RecordingPresenter();
+        TranslationInteractor interactor = new TranslationInteractor(failingService, presenter);
+
+        Review review = new Review(
+                "id1", "author", "rest", "Some content", "2025-01-01", 0);
+
+        TranslationInputData input =
+                new TranslationInputData(List.of(review), "EN");
+
+        interactor.execute(input);
+
+        TranslationOutputData out = presenter.lastOutput;
+        assertNotNull(out);
+        assertTrue(out.isError());
+        assertEquals("EN", out.getTargetLanguage());
+        assertEquals("Boom!", out.getErrorMessage());
+    }
+
+
+    /* ------------ Unit tests (no API calls) ------------ */
 
   /**
    * Presenter that just remembers the last output it was given.
