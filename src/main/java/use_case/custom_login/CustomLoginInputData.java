@@ -5,19 +5,19 @@ package use_case.custom_login;
  */
 public class CustomLoginInputData {
 
-    private final String email;
-    private final String password;
+  private final String email;
+  private final String password;
 
-    public CustomLoginInputData(String email, String password) {
-        this.email = email;
-        this.password = password;
-    }
+  public CustomLoginInputData(String email, String password) {
+    this.email = email;
+    this.password = password;
+  }
 
-    public String getEmail() {
-        return email;
-    }
+  public String getEmail() {
+    return email;
+  }
 
-    public String getPassword() {
-        return password;
-    }
+  public String getPassword() {
+    return password;
+  }
 }

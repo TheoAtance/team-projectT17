@@ -5,31 +5,31 @@ package use_case.custom_register;
  */
 public class RegisterInputData {
 
-    private final String email;
-    private final String password;
-    private final String repeatPassword;
-    private final String nickname;
+  private final String email;
+  private final String password;
+  private final String repeatPassword;
+  private final String nickname;
 
-    public RegisterInputData(String email, String password, String repeatPassword, String nickname) {
-        this.email = email;
-        this.password = password;
-        this.repeatPassword = repeatPassword;
-        this.nickname = nickname;
-    }
+  public RegisterInputData(String email, String password, String repeatPassword, String nickname) {
+    this.email = email;
+    this.password = password;
+    this.repeatPassword = repeatPassword;
+    this.nickname = nickname;
+  }
 
-    public String getEmail() {
-        return email;
-    }
+  public String getEmail() {
+    return email;
+  }
 
-    public String getPassword() {
-        return password;
-    }
+  public String getPassword() {
+    return password;
+  }
 
-    public String getRepeatPassword() {
-        return repeatPassword;
-    }
+  public String getRepeatPassword() {
+    return repeatPassword;
+  }
 
-    public String getNickname() {
-        return nickname;
-    }
+  public String getNickname() {
+    return nickname;
+  }
 }

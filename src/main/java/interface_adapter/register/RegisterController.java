@@ -9,34 +9,34 @@ import use_case.custom_register.RegisterInputData;
  */
 public class RegisterController {
 
-    private final RegisterInputBoundary customRegisterUseCaseInteractor;
-    private final ViewManagerModel viewManagerModel;
-    private final String loginViewName;
+  private final RegisterInputBoundary customRegisterUseCaseInteractor;
+  private final ViewManagerModel viewManagerModel;
+  private final String loginViewName;
 
-    public RegisterController(
-            RegisterInputBoundary customRegisterUserInteractor,
-            ViewManagerModel viewManagerModel,
-            String loginViewName) {
-        this.customRegisterUseCaseInteractor = customRegisterUserInteractor;
-        this.viewManagerModel = viewManagerModel;
-        this.loginViewName = loginViewName;
-    }
+  public RegisterController(
+      RegisterInputBoundary customRegisterUserInteractor,
+      ViewManagerModel viewManagerModel,
+      String loginViewName) {
+    this.customRegisterUseCaseInteractor = customRegisterUserInteractor;
+    this.viewManagerModel = viewManagerModel;
+    this.loginViewName = loginViewName;
+  }
 
-    /**
-     * Switches from Register view to Login view.
-     */
-    public void switchToLoginView() {
-        viewManagerModel.setState(loginViewName);
-        viewManagerModel.firePropertyChange();
-    }
+  /**
+   * Switches from Register view to Login view.
+   */
+  public void switchToLoginView() {
+    viewManagerModel.setState(loginViewName);
+    viewManagerModel.firePropertyChange();
+  }
 
-    public void execute(String email, String nickname, String password, String repeatPassword) {
-        RegisterInputData registerInputData = new RegisterInputData(
-                email,
-                password,
-                repeatPassword,
-                nickname
-        );
-        customRegisterUseCaseInteractor.execute(registerInputData);
-    }
+  public void execute(String email, String nickname, String password, String repeatPassword) {
+    RegisterInputData registerInputData = new RegisterInputData(
+        email,
+        password,
+        repeatPassword,
+        nickname
+    );
+    customRegisterUseCaseInteractor.execute(registerInputData);
+  }
 }

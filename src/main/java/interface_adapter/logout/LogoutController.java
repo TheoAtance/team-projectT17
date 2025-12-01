@@ -7,16 +7,16 @@ import use_case.logout.LogoutInputBoundary;
  */
 public class LogoutController {
 
-    private final LogoutInputBoundary logoutInteractor;
+  private final LogoutInputBoundary logoutInteractor;
 
-    public LogoutController(LogoutInputBoundary logoutInteractor) {
-        this.logoutInteractor = logoutInteractor;
-    }
+  public LogoutController(LogoutInputBoundary logoutInteractor) {
+    this.logoutInteractor = logoutInteractor;
+  }
 
-    /**
-     * Executes the logout process.
-     */
-    public void execute() {
-        logoutInteractor.execute();
-    }
+  /**
+   * Executes the logout process.
+   */
+  public void execute() {
+    logoutInteractor.execute();
+  }
 }

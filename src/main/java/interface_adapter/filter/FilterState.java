@@ -7,31 +7,32 @@ import java.util.List;
  * State for the Filter View.
  */
 public class FilterState {
-    private List<String> restaurantNames = new ArrayList<>();
-    private String currentFilterType = "";
-    private String errorMessage = "";
 
-    public List<String> getRestaurantNames() {
-        return restaurantNames;
-    }
+  private List<String> restaurantNames = new ArrayList<>();
+  private String currentFilterType = "";
+  private String errorMessage = "";
 
-    public void setRestaurantNames(List<String> restaurantNames) {
-        this.restaurantNames = restaurantNames;
-    }
+  public List<String> getRestaurantNames() {
+    return restaurantNames;
+  }
 
-    public String getCurrentFilterType() {
-        return currentFilterType;
-    }
+  public void setRestaurantNames(List<String> restaurantNames) {
+    this.restaurantNames = restaurantNames;
+  }
 
-    public void setCurrentFilterType(String currentFilterType) {
-        this.currentFilterType = currentFilterType;
-    }
+  public String getCurrentFilterType() {
+    return currentFilterType;
+  }
 
-    public String getErrorMessage() {
-        return errorMessage;
-    }
+  public void setCurrentFilterType(String currentFilterType) {
+    this.currentFilterType = currentFilterType;
+  }
 
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
-    }
+  public String getErrorMessage() {
+    return errorMessage;
+  }
+
+  public void setErrorMessage(String errorMessage) {
+    this.errorMessage = errorMessage;
+  }
 }

@@ -4,9 +4,10 @@ import entity.Restaurant;
 
 public interface RandomRestaurantDataAccessInterface {
 
-    /**
-     * Get a random restaurant object from database
-     * @return a random restaurant object from database
-     */
-    Restaurant getRandom();
+  /**
+   * Get a random restaurant object from database
+   *
+   * @return a random restaurant object from database
+   */
+  Restaurant getRandom();
 }
