@@ -105,6 +105,7 @@ public class AppBuilder {
 
     // Filter
     private FilterViewModel filterViewModel;
+    private FilterView filterView;
     // Restaurant info
     private ViewRestaurantViewModel viewRestaurantViewModel;
     private RestaurantView restaurantView;
@@ -328,9 +329,16 @@ public class AppBuilder {
         FilterController filterController = new FilterController(filterInteractor);
 
         // Create View
-        FilterView filterView = new FilterView(filterViewModel);
+        filterView = new FilterView(filterViewModel);
         filterView.setFilterController(filterController);
         filterView.setViewManagerModel(viewManagerModel);
+
+        // Set up image and restaurant data access for displaying images
+        filterView.setImageDataAccess(googlePlacesGateway);
+        filterView.setRestaurantDataAccess(restaurantDataAccess);
+
+        // Set up navigation to RestaurantView
+        filterView.setViewRestaurantViewModel(viewRestaurantViewModel);
 
         // Add to card panel
         cardPanel.add(filterView, filterView.getViewName());
@@ -376,6 +384,11 @@ public class AppBuilder {
 
         loggedInView.setViewRestaurantController(viewRestaurantController);
         loggedInView.setRandomRestaurantController(randomRestaurantController);
+
+        // Wire up FilterView with viewRestaurantController
+        if (filterView != null) {
+            filterView.setViewRestaurantController(viewRestaurantController);
+        }
 
         return this;
     }

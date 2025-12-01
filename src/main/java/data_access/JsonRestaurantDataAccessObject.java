@@ -23,6 +23,7 @@ public class JsonRestaurantDataAccessObject implements
 
     private final Map<String, Restaurant> restaurantById = new HashMap<>();
     private final Map<String, String> placesIdToCid = new HashMap<>();
+    private final Map<String, String> nameToCid = new HashMap<>();  // NEW: name -> CID mapping
 
     /**
      * Construct DAO for saving to and reading from a local json file
@@ -57,10 +58,14 @@ public class JsonRestaurantDataAccessObject implements
 
                 Restaurant restaurant = restaurantFactory.create(curObj);
                 restaurantById.put(cid, restaurant);
+
+                // NEW: Also map by name for easy lookup
+                nameToCid.put(restaurant.getName(), cid);
             }
 
             System.out.println("DEBUG JsonRestaurantDAO: Loaded " + restaurantById.size() + " restaurants");
             System.out.println("DEBUG JsonRestaurantDAO: Created " + placesIdToCid.size() + " Places ID mappings");
+            System.out.println("DEBUG JsonRestaurantDAO: Created " + nameToCid.size() + " name mappings");
         } catch (IOException e) {
             throw new IOException(e);
         }
@@ -102,23 +107,40 @@ public class JsonRestaurantDataAccessObject implements
     }
 
     /**
-     * Converts a Google Places ID to CID if needed.
+     * Converts a Google Places ID or restaurant name to CID if needed.
      * If the ID is already a CID, returns it as-is.
-     * @param id Either a CID or a Google Places ID (places/ChIJ...)
+     * @param id Either a CID, Google Places ID (places/ChIJ...), or restaurant name
      * @return The corresponding CID
      */
     private String normalizeId(String id) {
+        if (id == null) {
+            return null;
+        }
+
         // If it's a Google Places ID format, convert to CID
-        if (id != null && id.startsWith("places/")) {
+        if (id.startsWith("places/")) {
             String cid = placesIdToCid.get(id);
             if (cid != null) {
-                System.out.println("DEBUG JsonRestaurantDAO: Converted " + id + " -> " + cid);
+                System.out.println("DEBUG JsonRestaurantDAO: Converted Places ID " + id + " -> " + cid);
                 return cid;
             }
             System.err.println("WARNING JsonRestaurantDAO: No CID mapping found for " + id);
             return id; // Return as-is if no mapping found
         }
-        // Already a CID
+
+        // Check if it's already a CID (exists in restaurantById)
+        if (restaurantById.containsKey(id)) {
+            return id;
+        }
+
+        // NEW: Check if it's a restaurant name
+        String cidFromName = nameToCid.get(id);
+        if (cidFromName != null) {
+            System.out.println("DEBUG JsonRestaurantDAO: Converted name '" + id + "' -> " + cidFromName);
+            return cidFromName;
+        }
+
+        // Return as-is if nothing matched
         return id;
     }
 
@@ -158,8 +180,8 @@ public class JsonRestaurantDataAccessObject implements
     }
 
     /**
-     * Get restaurant with given id (supports both CID and Google Places ID)
-     * @param id CID or Google Places ID of the restaurant to look up
+     * Get restaurant with given id (supports CID, Google Places ID, and restaurant name)
+     * @param id CID, Google Places ID, or restaurant name to look up
      * @return restaurant that corresponds to given ID
      */
     @Override
@@ -180,5 +202,14 @@ public class JsonRestaurantDataAccessObject implements
         Random rand = new Random();
         int randomIndex = rand.nextInt(restaurants.size());
         return restaurants.get(randomIndex);
+    }
+
+    /**
+     * Get the CID for a restaurant name.
+     * @param name the restaurant name
+     * @return the CID or null if not found
+     */
+    public String getCidByName(String name) {
+        return nameToCid.get(name);
     }
 }

@@ -1,21 +1,17 @@
 package app;
 
 import data_access.FirebaseService;
-import java.io.IOException;
-import javax.swing.JFrame;
+
+import javax.swing.*;
 
 /**
  * The Main class for the Restaurant Review Application.
  * This is the entry point that initializes Firebase and launches the UI.
  */
 public class Main {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         // Initialize Firebase
-        System.out.println("Initializing Firebase...");
         FirebaseService firebaseService = FirebaseService.getInstance();
-        System.out.println("Firebase initialized successfully.");
-
-        System.setProperty("sun.java2d.opengl", "true");
 
         // Build the application
         AppBuilder appBuilder = new AppBuilder();
@@ -36,7 +32,5 @@ public class Main {
         application.pack();
         application.setLocationRelativeTo(null); // Center on screen
         application.setVisible(true);
-
-        System.out.println("Application launched successfully!");
     }
 }
