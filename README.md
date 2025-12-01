@@ -16,7 +16,8 @@ In order for the register/login flows to work when running the program locally o
 we require an additional file containing the Firebase service account key relating to the Firebase Project we set up online.
 **Importantly, this service account key corresponds to the Google account you use to join our Firebase Project, so whoever**
 **wants to run our app will likely need their own unique copy. We kindly invite interested parties to provide us**
-**with a gmail address they don't mind sharing so that we may add them to our Firebase Project.**
+**with a gmail address they don't mind sharing so that we may add them to our Firebase Project**
+**<mark>(point of contact: kenshin.newkfonheytow@mail.utoronto.ca)<mark>**
 
 Once you are added to the Firebase Project, follow these steps to obtain and configure your Firebase service account key:
 
@@ -40,6 +41,6 @@ Once you are added to the Firebase Project, follow these steps to obtain and con
    Rename this file to:  
    **`service-account-key.json`**
 
-9. Move the JSON file to your project’s **root directory**
+9. Move the JSON file to your project’s **root directory** (same level as .idea, src)
 
 ---------------------------------------------------------------------------------------
