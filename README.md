@@ -4,7 +4,6 @@ Welcome to UofT-Eats, a restaurant review guide catered to University of Toronto
 through Google, browse different restaurants around campus, quickly filter for what they are feeling, review other 
 restaurants, and create a personal list of favourites. Our program also offers accessibility options such as translation 
 for students less familiar with English so they can still enjoy the app.
-
 ## DeepL API setup
 
 Our translation feature uses the [DeepL API](https://www.deepl.com/pro-api).  
@@ -37,67 +36,6 @@ $env:DEEPL_API_KEY = "your-deepl-auth-key-here"
 
    ```bash
    export DEEPL_API_KEY="your-deepl-auth-key-here"
-
-<br>
-<br>
-
-
-# Google Places API Setup
-
-NOTE: The program will run without the token. However, a missing token will result in images not loading. This is purely for image loading.
-
-This guide explains how to obtain a Google Places API key and configure it as an environment variable in IntelliJ IDEA for your project.
-
-## Prerequisites
-* A Google Cloud Platform (GCP) account.
-* IntelliJ IDEA installed.
-
----
-
-## Part 1: Getting a Google Places API Token
-
-1.  **Log in to Google Cloud Console**
-    * Go to the [Google Cloud Console](https://console.cloud.google.com/).
-
-2.  **Create or Select a Project**
-    * Click the project dropdown at the top of the page.
-    * Click **"New Project"** to create a fresh one, or select an existing project.
-
-3.  **Enable the Places API**
-    * In the left sidebar, go to **APIs & Services** > **Library**.
-    * Search for **"Places API"**.
-    * Click on the result (ensure it is the specific "Places API" or "Places API (New)" depending on your library version) and click **Enable**.
-    * *Note: You may be prompted to enable billing. A billing account is required to use the Google Maps Platform, even for the free tier.*
-
-4.  **Create Credentials (API Key)**
-    * In the left sidebar, go to **APIs & Services** > **Credentials**.
-    * Click **+ CREATE CREDENTIALS** at the top and select **API key**.
-    * Your new API key will appear in a pop-up window.
-    * **Copy this key**; you will need it for the next step.
-
----
-
-## Part 2: Setting the Environment Variable in IntelliJ
-
-To keep your API key secure, we inject it into the application as an environment variable named `PLACES_API_TOKEN` rather than hardcoding it.
-
-1.  **Open Run Configurations**
-    * In IntelliJ, go to the top toolbar.
-    * Click the dropdown menu next to the **Run** (▶) and **Debug** (🐞) icons (it usually displays the name of your Main class).
-    * Select **Edit Configurations...**
-
-2.  **Select Your Application**
-    * In the left sidebar of the "Run/Debug Configurations" window, select your main application configuration (usually listed under **Application**).
-
-3.  **Add the Environment Variable**
-    * Locate the field labeled **Environment variables**.
-    * Click the small document icon 📄 on the far right of that field.
-    * In the new window, click the **+** (plus) button to add a new variable.
-    * **Name:** `PLACES_API_TOKEN`
-    * **Value:** Paste the API key you copied from the Google Cloud Console.
-    * Click **OK** to close the environment variables window.
-
-
 ## User Stories
 ### Kenshin
 As a user, I want to register an account using a username and password or a Google account, so that my 
