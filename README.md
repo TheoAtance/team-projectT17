@@ -36,6 +36,121 @@ $env:DEEPL_API_KEY = "your-deepl-auth-key-here"
 
    ```bash
    export DEEPL_API_KEY="your-deepl-auth-key-here"
+
+###3 OpenAI API setup
+
+Our AI recommendation feature uses the OpenAI Chat Completions API
+.
+To enable it, you need an OpenAI API key and must expose it as an environment variable called OPENAI_API_KEY.
+
+1. Obtain an OpenAI API key
+
+Go to the OpenAI website: https://platform.openai.com/
+
+Sign up or log in with your OpenAI account.
+
+On the left sidebar, open API keys (under "User" or "Organization").
+
+Click Create new secret key.
+
+Copy your API key.
+It will look like a long string beginning with sk-.
+
+2. Set the OPENAI_API_KEY environment variable
+
+OPENAI_API_KEY="your-openai-key-here"
+
+<br>
+<br>
+
+## Firebase Admin SDK Setup
+
+In order for the register/login flows to work when running the program locally on an IDE (such as IntelliJ), 
+we require an additional file containing the Firebase service account key relating to the Firebase Project we set up online.
+This service account key corresponds to the Google account you use to join our Firebase Project, so whoever
+wants to run our app will likely need their own unique copy. We kindly invite interested parties to provide us
+with a gmail address they don't mind sharing so that we may add them to our Firebase Project.
+
+Once you are added to the Firebase Project, follow these steps to obtain and configure your Firebase service account key:
+
+1. Go to the **Firebase Console**  
+   https://console.firebase.google.com/
+
+2. Select your project: **uoft-eats-bd368**
+
+3. Click the **⚙️ (Settings icon)** next to *Project Overview*  
+   → Choose **Project settings**
+
+4. Navigate to the **Service accounts** tab
+
+5. Under **Firebase Admin SDK**, make sure the language is set to **Java**
+
+6. Click **Generate new private key**
+
+7. Confirm by clicking **Generate key** in the popup
+
+8. A JSON file will download automatically  
+   Rename this file to:  
+   **`service-account-key.json`**
+
+9. Move the JSON file to your project’s **root directory** (same level as .idea, src)
+
+# Google Places API Setup
+
+NOTE: The program will run without the token. However, a missing token will result in images not loading. This is purely for image loading.
+
+This guide explains how to obtain a Google Places API key and configure it as an environment variable in IntelliJ IDEA for your project.
+
+## Prerequisites
+* A Google Cloud Platform (GCP) account.
+* IntelliJ IDEA installed.
+
+---
+
+## Part 1: Getting a Google Places API Token
+
+1.  **Log in to Google Cloud Console**
+    * Go to the [Google Cloud Console](https://console.cloud.google.com/).
+
+2.  **Create or Select a Project**
+    * Click the project dropdown at the top of the page.
+    * Click **"New Project"** to create a fresh one, or select an existing project.
+
+3.  **Enable the Places API**
+    * In the left sidebar, go to **APIs & Services** > **Library**.
+    * Search for **"Places API"**.
+    * Click on the result (ensure it is the specific "Places API" or "Places API (New)" depending on your library version) and click **Enable**.
+    * *Note: You may be prompted to enable billing. A billing account is required to use the Google Maps Platform, even for the free tier.*
+
+4.  **Create Credentials (API Key)**
+    * In the left sidebar, go to **APIs & Services** > **Credentials**.
+    * Click **+ CREATE CREDENTIALS** at the top and select **API key**.
+    * Your new API key will appear in a pop-up window.
+    * **Copy this key**; you will need it for the next step.
+
+---
+
+## Part 2: Setting the Environment Variable in IntelliJ
+
+To keep your API key secure, we inject it into the application as an environment variable named `PLACES_API_TOKEN` rather than hardcoding it.
+
+1.  **Open Run Configurations**
+    * In IntelliJ, go to the top toolbar.
+    * Click the dropdown menu next to the **Run** (▶) and **Debug** (🐞) icons (it usually displays the name of your Main class).
+    * Select **Edit Configurations...**
+
+2.  **Select Your Application**
+    * In the left sidebar of the "Run/Debug Configurations" window, select your main application configuration (usually listed under **Application**).
+
+3.  **Add the Environment Variable**
+    * Locate the field labeled **Environment variables**.
+    * Click the small document icon 📄 on the far right of that field.
+    * In the new window, click the **+** (plus) button to add a new variable.
+    * **Name:** `PLACES_API_TOKEN`
+    * **Value:** Paste the API key you copied from the Google Cloud Console.
+    * Click **OK** to close the environment variables window.
+
+
 ## User Stories
 ### Kenshin
 As a user, I want to register an account using a username and password or a Google account, so that my 
