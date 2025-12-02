@@ -59,7 +59,7 @@ It will look like a long string beginning with sk-.
 
 2. Set the OPENAI_API_KEY environment variable
 
-Set the environment variable so the application can read it at runtime.
+OPENAI_API_KEY="your-openai-key-here"
 
 <br>
 <br>
