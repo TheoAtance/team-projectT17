@@ -4,7 +4,6 @@ Welcome to UofT-Eats, a restaurant review guide catered to University of Toronto
 through Google, browse different restaurants around campus, quickly filter for what they are feeling, review other 
 restaurants, and create a personal list of favourites. Our program also offers accessibility options such as translation 
 for students less familiar with English so they can still enjoy the app.
-
 ## DeepL API setup
 
 Our translation feature uses the [DeepL API](https://www.deepl.com/pro-api).  

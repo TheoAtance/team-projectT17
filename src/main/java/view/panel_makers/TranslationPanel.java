@@ -178,7 +178,11 @@ public class TranslationPanel extends JPanel {
     translateButton.setForeground(Color.WHITE);
     translateButton.setFocusPainted(false);
     translateButton.setBorder(BorderFactory.createEmptyBorder(6, 14, 6, 14));
+    translateButton.setOpaque(true);             // ensures color shows
+    translateButton.setBorderPainted(false);     // removes gray border
     translateButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+    translateButton.setMinimumSize(new Dimension(100, 30)); // avoids squishing
+
 
     targetLabel = new JLabel("Target language:");
     targetLabel.setFont(targetLabel.getFont().deriveFont(Font.BOLD, 12f));

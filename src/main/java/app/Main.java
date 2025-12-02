@@ -32,5 +32,6 @@ public class Main {
         application.pack();
         application.setLocationRelativeTo(null); // Center on screen
         application.setVisible(true);
+
     }
 }
