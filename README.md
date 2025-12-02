@@ -58,7 +58,7 @@ It will look like a long string beginning with sk-.
 
 2. Set the OPENAI_API_KEY environment variable
 
-OPENAI_API_KEY="your-openai-key-here"
+OPENAI_API_KEY="your-openai-key-here"(sometimes the free api key wont work)
 
 <br>
 <br>
