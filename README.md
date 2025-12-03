@@ -45,7 +45,7 @@ To enable it, you need an OpenAI API key and must expose it as an environment va
 
 1. Obtain an OpenAI API key
 
-Go to the OpenAI website: https://platform.openai.com/
+Go to the OpenAI website: [(https://platform.openai.com/api-keys)]
 
 Sign up or log in with your OpenAI account.
 
