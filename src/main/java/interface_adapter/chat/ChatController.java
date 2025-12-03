@@ -1,37 +1,39 @@
 // src/main/java/interface_adapter/chat/ChatController.java
 package interface_adapter.chat;
 
-import service.ChatGPTService;
-import javax.swing.*;
-import java.io.IOException;
+import use_case.chat.ChatInputBoundary;
+import use_case.chat.ChatInputData;
 
+/**
+ * Controller for the AI chat feature.
+ * It receives UI events and calls the ChatInputBoundary.
+ */
 public class ChatController {
-    private final ChatGPTService chatGPTService;
+
+    private final ChatInputBoundary chatInputBoundary;
     private final ChatViewModel chatViewModel;
 
-    public ChatController(ChatGPTService service, ChatViewModel viewModel) {
-        this.chatGPTService = service;
-        this.chatViewModel = viewModel;
+    public ChatController(ChatInputBoundary chatInputBoundary,
+                          ChatViewModel chatViewModel) {
+        this.chatInputBoundary = chatInputBoundary;
+        this.chatViewModel = chatViewModel;
     }
 
+    /**
+     * Called when the user presses "Send" in the UI.
+     */
     public void sendQuery(String query) {
-        // Update state to show "Searching..."
+        // Update state immediately to show "Searching..."
         ChatState state = chatViewModel.getState();
         state.setUserInput(query);
         state.setResponse("Searching for recommended restaurants...");
         chatViewModel.setState(state);
         chatViewModel.firePropertyChange();
 
-        // Execute API call in new thread to avoid UI blocking
+        // Run the use case in a background thread so the UI does not freeze.
         new Thread(() -> {
-            try {
-                String response = chatGPTService.getRestaurantRecommendation(query);
-                state.setResponse(response);
-            } catch (Exception e) {
-                state.setResponse("Failed to get recommendations: " + e.getMessage());
-            }
-            chatViewModel.setState(state);
-            chatViewModel.firePropertyChange();
+            ChatInputData inputData = new ChatInputData(query);
+            chatInputBoundary.execute(inputData);
         }).start();
     }
 }
