@@ -1,7 +1,11 @@
 // src/main/java/interface_adapter/chat/ChatState.java
 package interface_adapter.chat;
 
+/**
+ * View state for the AI chat panel.
+ */
 public class ChatState {
+
     private String userInput = "";
     private String response = "";
 

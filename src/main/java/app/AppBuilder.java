@@ -8,6 +8,7 @@ import interface_adapter.add_review.AddReviewPresenter;
 import interface_adapter.add_review.AddReviewViewModel;
 import interface_adapter.chat.ChatController;
 import interface_adapter.chat.ChatViewModel;
+import interface_adapter.chat.ChatPresenter;
 import interface_adapter.display_reviews.DisplayReviewsController;
 import interface_adapter.display_reviews.DisplayReviewsPresenter;
 import interface_adapter.display_reviews.DisplayReviewsViewModel;
@@ -45,6 +46,10 @@ import use_case.IUserRepo;
 import use_case.add_review.AddReviewInputBoundary;
 import use_case.add_review.AddReviewInteractor;
 import use_case.add_review.AddReviewOutputBoundary;
+import use_case.chat.ChatInputBoundary;
+import use_case.chat.ChatInteractor;
+import use_case.chat.ChatGPTClient;
+import use_case.chat.ChatOutputBoundary;
 import use_case.custom_login.CustomLoginInputBoundary;
 import use_case.custom_login.CustomLoginUserInteractor;
 import use_case.custom_register.RegisterInputBoundary;
@@ -278,9 +283,15 @@ public class AppBuilder {
         RestaurantPanel.HeartClickListener heartListener = (restaurantId, newState) ->
                 System.out.println("Heart toggled for: " + restaurantId + " → " + newState);
 
-        ChatGPTService chatGPTService = new ChatGPTService();
         ChatViewModel chatViewModel = new ChatViewModel();
-        ChatController chatController = new ChatController(chatGPTService, chatViewModel);
+
+        ChatPresenter chatPresenter = new ChatPresenter(chatViewModel);
+
+        ChatGPTClient chatGPTClient = new ChatGPTService();
+
+        ChatInputBoundary chatInteractor = new ChatInteractor(chatGPTClient, chatPresenter);
+
+        ChatController chatController = new ChatController(chatInteractor, chatViewModel);
 
 
 
