@@ -1,69 +1,86 @@
-
-
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import use_case.chat.ChatGPTClient;
-import use_case.chat.ChatInputBoundary;
 import use_case.chat.ChatInputData;
 import use_case.chat.ChatInteractor;
 import use_case.chat.ChatOutputBoundary;
 import use_case.chat.ChatOutputData;
 
-/**
- * Simple unit test for ChatInteractor.
- * Uses fake ChatGPTClient and fake Presenter so we don't call real API.
- */
-public class ChatInteractorTest {
+class ChatInteractorTest {
 
     /**
-     * A fake implementation of ChatGPTClient that just records the query
-     * and returns a fixed fake response.
+     * Fake implementation of ChatGPTClient that returns a predictable string.
      */
-    private static class FakeChatGPTClient implements ChatGPTClient {
-        String lastQuery;
-
+    private static class SuccessClient implements ChatGPTClient {
         @Override
         public String getRestaurantRecommendation(String userQuery) {
-            this.lastQuery = userQuery;
-            // return a predictable string for assertions
-            return "FAKE_RESPONSE for: " + userQuery;
+            return "RESPONSE_FOR_" + userQuery;
         }
     }
 
     /**
-     * A fake presenter that just remembers the last output data it received.
+     * Fake implementation of ChatGPTClient that throws an exception
+     * to trigger the catch block in the interactor.
      */
-    private static class FakeChatPresenter implements ChatOutputBoundary {
+    private static class FailingClient implements ChatGPTClient {
+        @Override
+        public String getRestaurantRecommendation(String userQuery) {
+            throw new RuntimeException("boom!");
+        }
+    }
+
+    /**
+     * Fake presenter that records the last ChatOutputData it received.
+     */
+    private static class RecordingPresenter implements ChatOutputBoundary {
         ChatOutputData lastData;
-        boolean called = false;
 
         @Override
         public void present(ChatOutputData data) {
-            this.called = true;
             this.lastData = data;
         }
     }
 
     @Test
-    public void testExecute_callsClientAndPresenter() {
+    void execute_success_callsClientAndPresenter() {
         // Arrange
-        FakeChatGPTClient fakeClient = new FakeChatGPTClient();
-        FakeChatPresenter fakePresenter = new FakeChatPresenter();
-        ChatInputBoundary interactor = new ChatInteractor(fakeClient, fakePresenter);
+        ChatGPTClient client = new SuccessClient();
+        RecordingPresenter presenter = new RecordingPresenter();
+        ChatInteractor interactor = new ChatInteractor(client, presenter);
 
-        ChatInputData inputData = new ChatInputData("cheap spicy food near UofT");
+        ChatInputData inputData = new ChatInputData("spicy food");
 
+        // Act
         interactor.execute(inputData);
 
-        assertEquals("cheap spicy food near UofT", fakeClient.lastQuery);
-
-        assertTrue(fakePresenter.called);
-        assertNotNull(fakePresenter.lastData);
-        assertEquals(
-                "FAKE_RESPONSE for: cheap spicy food near UofT",
-                fakePresenter.lastData.getResponseText()
+        // Assert
+        Assertions.assertNotNull(presenter.lastData);
+        Assertions.assertTrue(presenter.lastData.isSuccess());
+        Assertions.assertEquals(
+                "RESPONSE_FOR_spicy food",
+                presenter.lastData.getResponseText()
         );
+        Assertions.assertNull(presenter.lastData.getErrorMessage());
+    }
+
+    @Test
+    void execute_failure_handlesExceptionFromClient() {
+        // Arrange
+        ChatGPTClient client = new FailingClient();
+        RecordingPresenter presenter = new RecordingPresenter();
+        ChatInteractor interactor = new ChatInteractor(client, presenter);
+
+        ChatInputData inputData = new ChatInputData("whatever");
+
+        // Act
+        interactor.execute(inputData);
+
+        // Assert
+        Assertions.assertNotNull(presenter.lastData);
+        Assertions.assertFalse(presenter.lastData.isSuccess());
+        Assertions.assertEquals("", presenter.lastData.getResponseText());
+        Assertions.assertEquals("boom!", presenter.lastData.getErrorMessage());
     }
 }
+
